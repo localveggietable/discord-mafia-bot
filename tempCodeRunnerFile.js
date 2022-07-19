@@ -1,0 +1,1 @@
+nv.DISCORD_TOKEN);
