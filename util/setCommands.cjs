@@ -1,0 +1,1 @@
+//Get all the commands, and export them in an array/object.
