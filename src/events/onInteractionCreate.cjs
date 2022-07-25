@@ -2,7 +2,8 @@ const { InteractionType } = require("discord-api-types/v10");
 
 module.exports = async function(client){
     client.on("interactionCreate", async (interaction) => {
-        if (!(interaction.type == InteractionType.ApplicationCommand)) return;
+        
+        if (!interaction.isChatInputCommand()) return;
 
         await interaction.deferReply();
 
@@ -12,16 +13,17 @@ module.exports = async function(client){
 
         for (let option in options){
             switch (option.type){
-                case "USER":
-                    params.push(option.user);
+                case "SUB_COMMAND":
                     break;
-                
+                case "USER":
+                    params.push(interaction.guild.members.cache.get(option.user.id));
+                    break;
                 default:
                     params.push(option.value);
                     break;
             }
         }
 
-        scriptToRun(interaction.member, params);
+        scriptToRun(client, interaction, params);
     });
 }

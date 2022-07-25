@@ -1,13 +1,10 @@
 require("dotenv").config();
 const {REST} = require("@discordjs/rest");
-const {Routes, ClientVoiceManager} = require("discord.js");
+const {Routes} = require("discord-api-types/v10");
 const glob = require("fast-glob");
-const {promisify} = require("util");
 const [guildID, clientID, botToken] = [process.env.GUILD_ID, process.env.CLIENT_ID, process.env.DISCORD_TOKEN];
 
 
-const asyncGlob = promisify(glob);
-const rest = new REST({ version: '10' }).setToken(botToken);
 
 /*
 Deploys all the commands to the guild. Imports and listens for the events defined in ./events.
@@ -19,16 +16,14 @@ Deploys all the commands to the guild. Imports and listens for the events define
 module.exports = async function(client){
 
     var commands = [];
-    const [commandsFiles, eventFiles] = await Promise.all(asyncGlob(`${__dirname}/commands/**/*.cjs`), asyncGlob(`${__dirname}/events/**/*.cjs`));
-
+    const [eventFiles, commandsFiles] = await Promise.all([glob(`${__dirname}/events/**/*.cjs`), glob(`${__dirname}/commands/**/*.cjs`)]);
     /* Sets up all the event listeners (interactionCreate, etc.) */
-    for (const file in eventFiles){
+    for (const file of eventFiles){
         (require(file))(client);
     }
 
     /* Saves commands inside bot.commands, updates commands array to push commands into the guild cache */
-
-    for (const file in commandsFiles){
+    for (const file of commandsFiles){
         try{
             const getCommand = require(file);
 
@@ -42,17 +37,18 @@ module.exports = async function(client){
             return;
         }
     }
-
     /*
     Saves the commands in the development guild's cache, as recommended via the Discord.js documentation.
     */
     (async () => {
         try {
             console.log('Started refreshing application (/) commands.');
-    
+            
+            const rest = new REST({ version: '10' }).setToken(botToken);
+
             await rest.put(
             Routes.applicationGuildCommands(clientID, guildID),
-                { body: commands },
+            { body: commands },
             );
     
             console.log('Successfully reloaded application (/) commands.');
@@ -60,7 +56,4 @@ module.exports = async function(client){
             console.error(error);
         }
     })();
-
-
-
 }

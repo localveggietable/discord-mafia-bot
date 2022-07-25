@@ -1,15 +1,24 @@
 require("dotenv").config();
 const {Client, Collection} = require("discord.js");
-const listeners = require("./util/setCommands.cjs");
 
 
 const bot = new Client({ intents: 32767 });
 bot.commands = new Collection();
 
-bot.on("ready", function(client){
-    console.log(`${client.user.tag} is connected!`);
-    client.channels.cache.find(channel => channel.name == "geneal").send;
-});
+
+/*
+bot.games:  <int, <int, object>>, where object looks like
+{
+    ongoing: boolean,
+    started: boolean,
+    players: array[Players]
+
+
+
+}
+
+*/
+bot.games = new Collection(); 
 
 /*bot.on("interactionCreate", async function(interaction){
     if (!interaction.isChatInputCommand()) return;
@@ -22,3 +31,5 @@ bot.on("ready", function(client){
 */
 
 bot.login(process.env.DISCORD_TOKEN);
+
+(require("./src/handler.cjs"))(bot);
