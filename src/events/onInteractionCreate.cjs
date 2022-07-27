@@ -1,5 +1,3 @@
-const { InteractionType } = require("discord-api-types/v10");
-
 module.exports = async function(client){
     client.on("interactionCreate", async (interaction) => {
         

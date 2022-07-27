@@ -1,6 +1,5 @@
 const {SlashCommandBuilder} = require("@discordjs/builders");
 const {inlineCode} = require("discord.js");
-const Player = require("../gameclasses/Player.cjs");
 const addPlayerToGame = require("../util/addPlayerToGame.cjs");
 
 module.exports = {
@@ -26,5 +25,9 @@ async function joinGame(client, interaction, params){
         return await interaction.followUp(`You've already joined this game!`);
     }
 
-    addPlayerToGame(client, interaction.guildID, channelNumber, new Player(interaction.member.id));
+    addPlayerToGame(client, interaction.guildID, channelNumber, interaction.member.id);
+    if(client.games.get(interaction.guildID).get(channelNumber).players.length == 15){
+        await interaction.reply(`Enough players have joined! The game will start automatically in 15 seconds. To start the game now, enter the command ${inlineCode("/startNow")}.`);
+        client.emit("startGame", interaction.guildID, channelNumber);
+    }
 }

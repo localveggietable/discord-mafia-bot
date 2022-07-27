@@ -1,6 +1,4 @@
 const {SlashCommandBuilder} = require("@discordjs/builders");
-const {inlineCode} = require("discord.js");
-const Player = require("../gameclasses/Player.cjs");
 const removePlayerFromGame = require("../util/removePlayerFromGame.cjs");
 
 module.exports = {

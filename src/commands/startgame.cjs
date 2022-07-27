@@ -1,7 +1,6 @@
 const {SlashCommandBuilder} = require("@discordjs/builders");
 const {setupGuild} = require("../util/setupGuild.cjs");
 const {addPlayerToGame} = require("../util/addPlayerToGame.cjs");
-const Player = require("../gameclasses/Player.cjs");
 
 
 module.exports = {
@@ -32,5 +31,5 @@ async function startGame(client, interaction, params){
     client.games.get(interaction.guildID).get(channelNumber).ongoing = true;
 
     if (!params[0]) return;
-    addPlayerToGame(client, interaction.guildID, channelNumber, new Player(interaction.member.id));
+    addPlayerToGame(client, interaction.guildID, channelNumber, interaction.member.id);
 }

@@ -12,8 +12,8 @@ bot.games:  <int, <int, object>>, where object looks like
     ongoing: boolean,
     started: boolean,
     players: array[Players]
-
-
+    ingameroles: array[gameplayer]
+    day: int
 
 }
 

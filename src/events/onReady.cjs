@@ -1,5 +1,5 @@
 module.exports = async function(client){
-    client.on("ready", () => 
+    client.on("ready", async () => 
         {
             console.log(`${client.user.tag} is up and running!`);
             try {
