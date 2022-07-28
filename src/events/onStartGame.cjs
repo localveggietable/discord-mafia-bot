@@ -1,5 +1,4 @@
-import shuffleArray from "../util/shuffleArray.js";
-
+const {shuffleArray} = require( "../util/shuffleArray.cjs");
 const {WitchGamePlayer} = require("../gameclasses/WitchGamePlayer.cjs");
 const {ExeGamePlayer} = require("../gameclasses/ExeGamePlayer.cjs");
 const {MafiaGamePlayer} = require("../gameclasses/MafiaGamePlayer.cjs");
@@ -7,11 +6,10 @@ const {TownGamePlayer} = require("../gameclasses/TownGamePlayer.cjs");
 
 module.exports = async function(client){
     client.on("startGame", async function(guildID, channelID){
-        client.games.get(guildID).get(channelID).started = true;
-        let time = 15;
-        const outputChannel = channelID ? client.channels.cache.find((channel) => {
+        let time = 16;
+        const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
-        }) : client.channels.cache.find((channel) => {return channel.name == "tos-channel"});
+        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
 
         //Algo for assigning roles:
         //
@@ -86,9 +84,10 @@ module.exports = async function(client){
         client.games.get(guildID).get(channelID).inGameRoles = players;
 
         let interval = setInterval(() => {
-            outputChannel.send(time--);
+            outputChannel.send(--time);
             if (!time){
-                client.emit("gameDaytime", true); //The parameter determines whether or not it is the first night.
+                client.games.get(guildID).get(channelID).started = true;
+                client.emit("gameDaytime", true, guildID, channelID); //The parameter determines whether or not it is the first night.
                 clearInterval(interval);
             }
         }, 1000);

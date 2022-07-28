@@ -1,5 +1,6 @@
 class GamePlayer{
     constructor(id, role){
+        this.alive = true;
         this.will = "";
         this.id = id;
         this.role = role;
@@ -14,7 +15,7 @@ class GamePlayer{
     }
 
     rewriteWill(msg){
-        
+
     }
 }
 

@@ -19,4 +19,4 @@ async function removePlayerFromGame(client, guildID, channelID, playerID){
 }
 
 
-module.exports = removePlayerFromGame;
+module.exports.removePlayerFromGame = removePlayerFromGame;

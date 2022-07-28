@@ -19,4 +19,4 @@ async function addPlayerToGame(client, guildID, channelID, playerID){
 }
 
 
-module.exports = addPlayerToGame;
+module.exports.addPlayerToGame = addPlayerToGame;

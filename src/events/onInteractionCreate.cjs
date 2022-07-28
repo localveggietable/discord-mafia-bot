@@ -1,7 +1,7 @@
 module.exports = async function(client){
     client.on("interactionCreate", async (interaction) => {
         
-        if (!interaction.isChatInputCommand()) return;
+        if (!interaction.isCommand()) return;
 
         await interaction.deferReply();
 

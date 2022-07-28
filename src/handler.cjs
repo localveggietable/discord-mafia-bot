@@ -22,6 +22,7 @@ module.exports = async function(client){
         (require(file))(client);
     }
 
+
     /* Saves commands inside bot.commands, updates commands array to push commands into the guild cache */
     for (const file of commandsFiles){
         try{
@@ -37,6 +38,7 @@ module.exports = async function(client){
             return;
         }
     }
+
     /*
     Saves the commands in the development guild's cache, as recommended via the Discord.js documentation.
     */
