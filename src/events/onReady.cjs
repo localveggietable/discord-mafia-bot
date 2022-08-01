@@ -1,4 +1,4 @@
-module.exports = async function(client){
+module.exports = function(client){
     client.on("ready", async () => 
         {
             console.log(`${client.user.tag} is up and running!`);

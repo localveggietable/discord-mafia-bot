@@ -6,7 +6,7 @@ const {Collection} = require("discord.js");
     Adds a guild to client.games
 */
 
-module.exports.setupGuild = async function setupGuild(client, guildID){
+module.exports.setupGuild = function setupGuild(client, guildID){
     var gamesDataCollection = new Collection();
     var defaultChannelObj = {
         ongoing: false,

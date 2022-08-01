@@ -1,4 +1,4 @@
-module.exports = async function(client){
+module.exports = function(client){
     client.on("interactionCreate", async (interaction) => {
         
         if (!interaction.isCommand()) return;
@@ -21,7 +21,7 @@ module.exports = async function(client){
                     break;
             }
         }
-
+        interaction.member = interaction.guild.members.cache.get(interaction.user.id);
         scriptToRun(client, interaction, params);
     });
 }

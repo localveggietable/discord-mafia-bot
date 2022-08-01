@@ -4,8 +4,29 @@ const {ExeGamePlayer} = require("../gameclasses/ExeGamePlayer.cjs");
 const {MafiaGamePlayer} = require("../gameclasses/MafiaGamePlayer.cjs");
 const {TownGamePlayer} = require("../gameclasses/TownGamePlayer.cjs");
 
-module.exports = async function(client){
+module.exports = function(client){
     client.on("startGame", async function(guildID, channelID){
+        //Create roles.
+
+        if (!(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"))){
+            client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"));
+        }
+
+        await Promise.all([
+        client.guilds.cache.get(guildID).roles.create({
+            name: "Alive Town Member",
+            color: "ORANGE"
+        }), 
+        client.guilds.cache.get(guildID).roles.create({
+            name: "Dead Town Member",
+            color: "BLUE"
+        })]);
+
+        const aliveRole = client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member");
+        await client.games.get(guildID).get(channelID).players.map((playerID) => client.guilds.cache.get(guildID).members.cache.get(playerID)).forEach(member => member.roles.add(aliveRole).catch(console.error));
+
+        //
+
         let time = 16;
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID

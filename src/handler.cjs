@@ -7,7 +7,7 @@ const [guildID, clientID, botToken] = [process.env.GUILD_ID, process.env.CLIENT_
 
 
 /*
-Deploys all the commands to the guild. Imports and listens for the events defined in ./events.
+Creates roles. Deploys all the commands to the guild. Imports and listens for the events defined in ./events.
 
     @param Client bot
 
