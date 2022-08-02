@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.cjs",
     "dev": "nodemon index.cjs",
-    "setup-commands": "node src/deploy-commands.cjs",
+    "log": "git log --all --decorate > project.log",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

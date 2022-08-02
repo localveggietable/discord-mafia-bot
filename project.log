@@ -1,0 +1,57 @@
+commit 2efdb3c71e51a1ddc330360b1c8b5899982f3501 (HEAD -> main, origin/main)
+Author: localveggietable <j338ma@uwaterloo.ca>
+Date:   Mon Aug 1 13:24:32 2022 -0400
+
+    added voting and lynching logic
+
+commit 627e0dfebbe301396273c5272d8bf03e93610163
+Merge: 56ee9a8 fafbacd
+Author: localveggietable <j338ma@uwaterloo.ca>
+Date:   Thu Jul 28 19:57:26 2022 -0400
+
+    Merge branch 'main' of https://github.com/localveggietable/discord-tos-bot into main
+
+commit 56ee9a8bcfc3fccaa67da11ce1f1a0a3c159ab24
+Author: localveggietable <j338ma@uwaterloo.ca>
+Date:   Thu Jul 28 19:56:06 2022 -0400
+
+    added ongamedaytime listener
+
+commit fafbacdc25333d09f6aa3e6305829fd54886ef6d
+Merge: 1693893 8e96688
+Author: localveggietable <97502170+localveggietable@users.noreply.github.com>
+Date:   Thu Jul 28 19:34:00 2022 -0400
+
+    Merge pull request #1 from anch13/test
+    
+    whatever
+
+commit 8e96688ddf616b37355f9a0a1ac762b8ee36fa48
+Author: Angel Chen <angelchen396@gmail.com>
+Date:   Thu Jul 28 19:31:48 2022 -0400
+
+    whatever
+
+commit 1693893e52511934dc622b52a895d9af2489b3f7
+Author: localveggietable <j338ma@uwaterloo.ca>
+Date:   Wed Jul 27 17:26:02 2022 -0400
+
+    added startgame functionality, not tested
+
+commit 92db72ef36f51a97458c677935034825bd3013c9
+Author: localveggietable <j338ma@uwaterloo.ca>
+Date:   Sun Jul 24 22:46:41 2022 -0400
+
+    started working on basic game functionality and modelling state
+
+commit c1d82ed1609b93961bcbed7eef861766967d19ae
+Author: localveggietable <j338ma@uwaterloo.ca>
+Date:   Fri Jul 22 22:29:10 2022 -0400
+
+    Created basic handler; cleaned up project format
+
+commit 904b5d148b0cab01f9367ee9841ed1f8da2015d5
+Author: localveggietable <j338ma@uwaterloo.ca>
+Date:   Tue Jul 19 04:38:36 2022 -0400
+
+    inital commit

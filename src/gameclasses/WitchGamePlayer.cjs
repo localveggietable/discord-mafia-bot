@@ -5,3 +5,5 @@ class WitchGamePlayer extends GamePlayer{
         super(id, "Witch");
     }
 }
+
+module.exports = WitchGamePlayer;

@@ -14,7 +14,6 @@ module.exports = {
     ,
     execute: async function(client, interaction, params){
 
-
         if (!(client.guilds.cache.get(interaction.guildId).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"))){
             return interaction.followUp("You currently have either/both \"Alive Town Member\" or \"Dead Town Member\" defined as a server role. Delete the role(s) or change their name(s) to continue.");
         }

@@ -59,7 +59,7 @@ module.exports = function(client){
                 collector.stop();
                 playerIsLynched = true;
                 client.emit("defensePhase", maxVoted.value, --lynches, time, guildID, channelID);
-                for (const row in rows){
+                for (const row of rows){
                     for (let i = 0; i < 5; ++i){
                         row?.components[i].setDisabled(true);
                     }
@@ -77,7 +77,7 @@ module.exports = function(client){
             if (!(time--)){
                 collector.stop();
                 client.emit("gameNighttime", guildID, channelID);
-                for (const row in rows){
+                for (const row of rows){
                     for (let i = 0; i < 5; ++i){
                         row?.components[i].setDisabled(true);
                     }

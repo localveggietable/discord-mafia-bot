@@ -11,7 +11,7 @@ bot.games:  <int, <int, object>>, where object looks like
     ongoing: boolean, (refers to whether the /startgame command was executed)
     started: boolean, (refers to whether the actual game has started)
     players: array[Players]
-    ingameroles: array[gameplayer]
+    inGameRoles: array[gameplayer]
     day: int
 
 }

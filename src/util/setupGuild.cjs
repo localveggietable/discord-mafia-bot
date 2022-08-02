@@ -7,11 +7,14 @@ const {Collection} = require("discord.js");
 */
 
 module.exports.setupGuild = function setupGuild(client, guildID){
-    var gamesDataCollection = new Collection();
-    var defaultChannelObj = {
+    let gamesDataCollection = new Collection();
+    let defaultChannelObj = {
         ongoing: false,
         started: false,
         players: 0,
+        inGameRoles: [],
+        day: 0
+
     };
 
 
