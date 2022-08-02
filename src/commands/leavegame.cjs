@@ -5,7 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("leavegame")
     .setDescription("Leave a game of tos"),
-    execute: function leaveGame(client, interaction, params){
+    async execute(client, interaction, params){
         const channelName = interaction.channel.name;
         if (!(new RegExp("^tos-channel(-[1-9])?$").test(channelName))){
             return interaction.followUp("A game can only be played on a channel with a name matching the format \"tos-channel\" or \"tos-channel-[n]\", where n is a positive integer between 1 and 9.");

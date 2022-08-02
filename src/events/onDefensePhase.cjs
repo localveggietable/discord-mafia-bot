@@ -18,6 +18,9 @@ module.exports = function(client){
         let defenseTime = 20;
         const interval = setInterval(async () => {
             if (!(--defenseTime)){
+                await outputChannel.permissionOverwrites.edit(aliveRole, {
+                    SEND_MESSAGES: true
+                });
                 await Promise.all([outputChannel.send(`It's judgement time! Decide whether or not ${client.users.cache.get(playerID).tag} is guilty.`), outputChannel.permissionOverwrites.edit(aliveRole, {SEND_MESSAGES: true})]);
                 client.emit("votingPhase", playerID, lynchesLeft, timeLeft, guildID, channelID);
                 clearInterval(interval);

@@ -22,6 +22,11 @@ module.exports = function(client){
             }
         }
         interaction.member = interaction.guild.members.cache.get(interaction.user.id);
-        scriptToRun(client, interaction, params);
+        
+        try {
+            await scriptToRun(client, interaction, params);
+        } catch (e){
+            console.log(e);
+        }
     });
 }

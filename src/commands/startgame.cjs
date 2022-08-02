@@ -12,9 +12,9 @@ module.exports = {
             .setDescription("Sets whether or not the user invoking this command automatically joins the game")
             .setRequired(false))
     ,
-    execute: async function(client, interaction, params){
+    async execute(client, interaction, params){
 
-        if (!(client.guilds.cache.get(interaction.guildId).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"))){
+        if (!(interaction.guild.roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"))){
             return interaction.followUp("You currently have either/both \"Alive Town Member\" or \"Dead Town Member\" defined as a server role. Delete the role(s) or change their name(s) to continue.");
         }
         //do a regex match of interaction.channel.name

@@ -1,10 +1,9 @@
-const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require("@discordjs/builders");
-const { MessageButton, MessageActionRow } = require("discord.js");
+const { SlashCommandBuilder } = require("@discordjs/builders");
 
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("tos-ping")
-    .setDescription("Measures the websocket ping..")
+    .setDescription("Measures the websocket ping.")
     ,
     async execute(client, interaction, params){
         await interaction.guild.roles.create({

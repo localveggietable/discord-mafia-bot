@@ -11,14 +11,15 @@ module.exports = function(client){
         const gameCache = client.games.get(guildID).get(channelID);
         const player = gameCache.inGameRoles.find(player => player.id == playerID);
 
-        await outputChannel.send(`The town has decided to lynch you, ${client.users.cache.get(playerID).tag}. May God have mercy upon your soul.`);
-        await delay(2000);
+        await outputChannel.send(`The town has decided to lynch you, ${client.users.cache.get(playerID).tag}. Do you have any last words?`);
+        await delay(7000);
+        await outputChannel.send("May God have mercy upon your soul.");
         await player.handleDeath(client, guildID);
         
         let gameEnd = checkGameEnd(client, guildID, channelID);
         if (gameEnd.gameEnded) client.emit("endGame", gameEnd.winningFactions, guildID, channelID);
 
-        await delay(2000);
+        await delay(1000);
         await outputChannel.send(`It is too late to continue voting.`);
         client.emit("gameNighttime", false, guildID, channelID);
         
