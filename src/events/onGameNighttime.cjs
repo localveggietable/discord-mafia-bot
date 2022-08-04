@@ -1,5 +1,7 @@
 const {promisify} = require("util");
 
+const delay = promisify(setTimeout);
+
 module.exports = function(client){
     client.on("gameNighttime", async (firstNight, guildID, channelID ) => {
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
@@ -32,24 +34,19 @@ module.exports = function(client){
                 
             }
         }
-        setTimeout(() => {
-            client.emit("gameDaytime", false, guildID, channelID);
-        }, 45000)
-        
-        const interval = setInterval(async () => {
-            if (!(--time)){
-                const denyMafiaWritePermissions = [];
-                for (const playerID of aliveMafiaPlayerIDs){
-                    mafiaWritePermissions.push(mafiaChannel.permissionOverwrites.edit(playerID, {
-                        SEND_MESSAGES: false
-                    }));
-                }
 
-                await Promise.all(denyMafiaWritePermissions);
-                
-                client.emit("gameDaytime", false, guildID, channelID)
-                clearInterval(interval);
-            }
-        }, 1000);
+        await delay(45000);
+        
+        let denyMafiaWritePermissions = [];
+        for (const playerID of aliveMafiaPlayerIDs){
+            denyMafiaWritePermissions.push(mafiaChannel.permissionOverwrites.edit(playerID, {
+                SEND_MESSAGES: false
+            }));
+        }
+
+        await Promise.all(denyMafiaWritePermissions);
+
+        return client.emit("gameDaytime", false, guildID, channelID);
+
     });
 }

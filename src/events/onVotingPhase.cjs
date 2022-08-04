@@ -1,5 +1,8 @@
 const { ComponentType, MessageActionRow, MessageButton } = require("discord.js");
 const { countMax } = require("../util/countMax.cjs");
+const { promisify } = require("util");
+
+const delay = promisify(setTimeout);
 
 
 module.exports = function(client){
@@ -8,7 +11,6 @@ module.exports = function(client){
             return channel.name.split("-")[2] == channelID
             }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
         const gameCache = client.games.get(guildID).get(channelID);
-        let time = 20;
 
         const row = [new MessageActionRow()
             .addComponents([
@@ -51,29 +53,29 @@ module.exports = function(client){
             } 
         });
 
-        const interval = setInterval(async () => {
-            if (!(--time)){
-                const { value } = countMax(votes);
-                playerKilled = Array.isArray(value) ? false : (value == 1 ? false : true);
-                const promises = [];
-                for (const [index, element] of votes.entries()){
-                    switch (element){
-                        case 0:
-                            promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} **abstained**.`));
-                            break;
-                        case 1:
-                            promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **not guilty**.`));
-                            break;
-                        case 2:
-                            promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **guilty**`));
-                             break;
-                    }
-                }
-                await Promise.all(promises);
-                if (playerKilled) client.emit("deathPhase", playerID, guildID, channelID);
-                else client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
-                clearInterval(interval);
+        setTimeout(async () => {
+            const {value} = countMax(votes);
+            playerKilled = Array.isArray(value) ? false : (value == 1 ? false : true);
+            const promises = [];
+            for (const [index, element] of votes.entries()){
+            switch (element){
+                case 0:
+                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} **abstained**.`));
+                    break;
+                case 1:
+                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **not guilty**.`));
+                    break;
+                case 2:
+                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **guilty**`));
+                    break; 
+                } 
             }
-        }, 1000);
+            await Promise.all(promises);
+            if (playerKilled) return client.emit("deathPhase", playerID, guildID, channelID);
+            else return client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
+            }, 20000);
+
+       
+
     });
 }

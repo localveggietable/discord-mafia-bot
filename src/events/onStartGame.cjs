@@ -3,7 +3,6 @@ const {WitchGamePlayer} = require("../gameclasses/WitchGamePlayer.cjs");
 const {ExeGamePlayer} = require("../gameclasses/ExeGamePlayer.cjs");
 const {MafiaGamePlayer} = require("../gameclasses/MafiaGamePlayer.cjs");
 const {TownGamePlayer} = require("../gameclasses/TownGamePlayer.cjs");
-const { ChannelType } = require("discord-api-types/v10.js");
 
 module.exports = function(client){
     client.on("startGame", async function(guildID, channelID){
@@ -89,7 +88,7 @@ module.exports = function(client){
         //Create a mafia only channel.
 
         await client.guilds.cache.get(guildID).channels.create(`mafia-${outputChannel.name}`, {
-            type: ChannelType.GuildText,
+            type: "GUILD_TEXT",
             permissionOverwrites: [
                 //For everyone in the server
                 {
@@ -123,12 +122,19 @@ module.exports = function(client){
         }
 
         let interval = setInterval(() => {
-            outputChannel.send(--time);
+            handleSetInterval(outputChannel, gameCache, guildID, channelID, time--);
             if (!time){
-                gameCache.started = true;
-                client.emit("gameDaytime", true, guildID, channelID); //The parameter determines whether or not it is the first night.
                 clearInterval(interval);
             }
         }, 1000);
     });
+}
+
+//this ensures that gameDaytime is emitted only after the channel has been notified.
+async function handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time){
+    await outputChannel.send(time);
+    if (!time){
+        gameCache.started = true;
+        client.emit("gameDaytime", true, guildID, channelID);
+    }
 }

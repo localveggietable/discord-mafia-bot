@@ -1,5 +1,6 @@
 const { ComponentType, MessageActionRow, MessageButton } = require("discord.js");
 const { countMax } = require("../util/countMax.cjs");
+const { promisify } = require("util");
 
 module.exports = function(client){
     client.on("lynchPhase", async (remainingTime = 45, remainingLynches = 3, guildID, channelID ) => {
@@ -41,7 +42,7 @@ module.exports = function(client){
         //collector.stop() as desired. Having two different intervals is imprecise because of event loop nature
         const collector = lynchMessage.createMessageComponentCollector({componentType: ComponentType.Button, time: 30000});
 
-        collector.on("collect", async (interaction) => {
+        collector.on("collect", (interaction) => {
             let playerExists = gameCache.inGameRoles.find((player) => {
                 return player.alive && (player.id == interaction.user.id);
             });
@@ -63,7 +64,7 @@ module.exports = function(client){
                         row?.components[i].setDisabled(true);
                     }
                 }
-                await lynchMessage.edit({content: "You can't vote anymore!", components: rows});
+                lynchMessage.edit({content: "You can't vote anymore!", components: rows});
             }
         });
 
@@ -72,19 +73,26 @@ module.exports = function(client){
             if (!playerIsLynched) outputChannel.send("It is now too late to continue voting");
         });
 
-        const interval = setInterval(async () => {
+        const interval = setInterval(() => {
             if (!(time--)){
-                collector.stop();
-                client.emit("gameNighttime", guildID, channelID);
-                for (const row of rows){
-                    for (let i = 0; i < 5; ++i){
-                        row?.components[i].setDisabled(true);
-                    }
-                }
-                await lynchMessage.edit({content: "You can't vote anymore!", components: rows}); 
+                handleSetInterval(rows, lynchMessage, client, time, collector, guildID, channelID);
                 clearInterval(interval);
             }
         }, 1000);
 
     });      
+}
+
+
+async function handleSetInterval(rows, lynchMessage, client, time, collector, guildID, channelID){
+    if (!time){
+        collector.stop();
+        for (const row of rows){
+            for (let i = 0; i < 5; ++i){
+                row?.components[i].setDisabled(true);
+            }
+        }
+        await lynchMessage.edit({content: "You can't vote anymore!", components: rows});
+        client.emit("gameNighttime", guildID, channelID);
+    }
 }

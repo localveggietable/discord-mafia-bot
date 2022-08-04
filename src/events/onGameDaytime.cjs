@@ -10,15 +10,20 @@ module.exports = function(client){
         gameCache.remainingTime = time;
 
         let interval = setInterval(async () => {
+            --time;
+            handleSetInterval(time, outputChannel, client, guildID, channelID);
             if (!(--time)){ 
-                await outputChannel.send(`The discussion phase ends now!`);
-                gameCache.remainingTime = 0;
-                client.emit("lynchPhase", 45, 3, guildID, channelID);
                 clearInterval(interval);
             }
-            if (!(time % 15)) outputChannel.send(`The discussion phase ends in ${time} seconds.`);
-            gameCache.remainingTime = time;
-
         }, 1000);
     });
+}
+
+async function handleSetInterval(time, outputChannel, client, guildID, channelID){
+    if (!time){
+        await outputChannel.send("The discussion phase ends now!");
+        client.emit("lynchPhase", 45, 3, guildID, channelID);
+    } else if (!(time % 15)){
+        await outputChannel.send(`The discussion phase ends in ${time} seconds`);
+    }
 }

@@ -1,31 +1,44 @@
+import EventEmitter from "events";
+var e = new EventEmitter();
 
-import { EventEmitter } from 'node:events';
-import {promisify} from "util";
+e.on("event1", () => {
+    e.emit("event2");
 
-const delay = promisify(setTimeout);
-
-var e1 = new EventEmitter();
-
-
-e1.on("event1", () => {
-    const interval = setInterval(async ()=>{
-        console.log("evet1");
-        await delay(1000);
-        clearInterval(interval);
-    }, 500);
+    for (let i = 50; i < 100; ++i){
+        console.log(i);
+    }
 });
 
-const interval = setInterval(async ()=>{
-    console.log("evet1");
-    await delay(1000);
-    clearInterval(interval);
-}, 500);
+e.on("event2", ()=> {
+    for (let i = 1; i < 50; ++i){
+        console.log(i);
+    }
+});
 
-setInterval(function() {
-    let curr = new Date;
-    while(new Date() - curr <= 5000);
-    console.log('done');
-}, 4000);
+e.emit("event1");
 
-await delay(10);
-console.log("done");
+var p1 = new Promise(resolve => {
+    for (let i = 0; i < 100; ++i){
+        console.log(i);
+    } 
+
+    resolve("third");
+});
+
+console.log(p1);
+
+var p2 = new Promise(resolve => {
+    console.log("first");
+    setTimeout(() => {
+        console.log("second-to-last")
+        resolve("last");
+    }, 0);
+});
+
+p1.then(value=>{console.log(value)});
+p2.then(value=>{console.log(value)});
+
+
+console.log("second");
+
+

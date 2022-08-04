@@ -12,12 +12,16 @@ module.exports = function(client){
         const player = gameCache.inGameRoles.find(player => player.id == playerID);
 
         await outputChannel.send(`The town has decided to lynch you, ${player.tag}. Do you have any last words?`);
+
         await delay(7000);
-        await outputChannel.send("May God have mercy upon your soul.");
-        await player.handleDeath(client, guildID);
+
+        let deathMessage = outputChannel.send("May God have mercy upon your soul.");
+        let handleDeath = player.handleDeath(client, guildID);
+        await deathMessage;
+        await handleDeath;
         
         let gameEnd = checkGameEnd(client, guildID, channelID);
-        if (gameEnd.gameEnded) client.emit("endGame", gameEnd.winningFactions, guildID, channelID);
+        if (gameEnd.gameEnded) return client.emit("endGame", gameEnd.winningFactions, guildID, channelID);
 
         await delay(1000);
         await outputChannel.send(`It is too late to continue voting.`);

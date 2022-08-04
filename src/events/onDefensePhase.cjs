@@ -15,16 +15,12 @@ module.exports = function(client){
         
         await outputChannel.send(`${client.users.cache.get(playerID).tag} , you are being suspected of being a traitor to the town. What is your defense?`);
 
-        let defenseTime = 20;
-        const interval = setInterval(async () => {
-            if (!(--defenseTime)){
-                await outputChannel.permissionOverwrites.edit(aliveRole, {
-                    SEND_MESSAGES: true
-                });
-                await Promise.all([outputChannel.send(`It's judgement time! Decide whether or not ${client.users.cache.get(playerID).tag} is guilty.`), outputChannel.permissionOverwrites.edit(aliveRole, {SEND_MESSAGES: true})]);
-                client.emit("votingPhase", playerID, lynchesLeft, timeLeft, guildID, channelID);
-                clearInterval(interval);
-            }
-        }, 1000);
+        setTimeout(async () => {
+            await outputChannel.permissionOverwrites.edit(aliveRole, {
+                SEND_MESSAGES: true
+            });
+            await Promise.all([outputChannel.send(`It's judgement time! Decide whether or not ${client.users.cache.get(playerID).tag} is guilty.`), outputChannel.permissionOverwrites.edit(aliveRole, {SEND_MESSAGES: true})]);
+            client.emit("votingPhase", playerID, lynchesLeft, timeLeft, guildID, channelID); 
+        },20000)
     });
 }
