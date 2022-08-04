@@ -3,9 +3,12 @@ const {WitchGamePlayer} = require("../gameclasses/WitchGamePlayer.cjs");
 const {ExeGamePlayer} = require("../gameclasses/ExeGamePlayer.cjs");
 const {MafiaGamePlayer} = require("../gameclasses/MafiaGamePlayer.cjs");
 const {TownGamePlayer} = require("../gameclasses/TownGamePlayer.cjs");
+const { ChannelType } = require("discord-api-types/v10.js");
 
 module.exports = function(client){
     client.on("startGame", async function(guildID, channelID){
+
+        const gameCache = client.games.get(guildID).get(channelID);
         //Create roles.
 
         if (!(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"))){
@@ -23,11 +26,11 @@ module.exports = function(client){
         })]);
 
         const aliveRole = client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member");
-        await client.games.get(guildID).get(channelID).players.map((playerID) => client.guilds.cache.get(guildID).members.cache.get(playerID)).forEach(member => member.roles.add(aliveRole).catch(console.error));
+        await gameCache.players.map((playerID) => client.guilds.cache.get(guildID).members.cache.get(playerID)).forEach(member => member.roles.add(aliveRole).catch(console.error));
 
         //
 
-        let time = 16;
+        let time = 15;
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
@@ -71,43 +74,58 @@ module.exports = function(client){
             rtRoles.splice(rtRoles.indexOf(rtRole3), 1);
         }
 
-        let shufflePlayers = shuffleArray([...client.games.get(guildID).get(channelID).players]);
+        let shufflePlayers = shuffleArray([...gameCache.players]);
+        let mafiaPlayerIDs = shufflePlayers.slice(9, 13);
+        
+        gameCache.inGameRoles = [new TownGamePlayer("Jailor", shufflePlayers[0], client.users.cache.get(shufflePlayers[0]).tag), new TownGamePlayer(tiRole1, shufflePlayers[1], client.users.cache.get(shufflePlayers[1]).tag), 
+        new TownGamePlayer(tiRole2, shufflePlayers[2], client.users.cache.get(shufflePlayers[2]).tag), new TownGamePlayer(tpRole, shufflePlayers[3], client.users.cache.get(shufflePlayers[3]).tag),
+        new TownGamePlayer(tkRole, shufflePlayers[4], client.users.cache.get(shufflePlayers[4]).tag), new TownGamePlayer(tsRole, shufflePlayers[5], client.users.cache.get(shufflePlayers[5]).tag), 
+        new TownGamePlayer(rtRole1, shufflePlayers[6], client.users.cache.get(shufflePlayers[6]).tag), new TownGamePlayer(rtRole2, shufflePlayers[7], client.users.cache.get(shufflePlayers[7]).tag), 
+        new TownGamePlayer(rtRole3, shufflePlayers[8], client.users.cache.get(shufflePlayers[8]).tag), new MafiaGamePlayer("Godfather", shufflePlayers[9], client.users.cache.get(shufflePlayers[9]).tag), 
+        new MafiaGamePlayer("Mafioso", shufflePlayers[10], client.users.cache.get(shufflePlayers[10]).tag), new MafiaGamePlayer(rmRole1, shufflePlayers[11], client.users.cache.get(shufflePlayers[11]).tag),
+        new MafiaGamePlayer(rmRole2, shufflePlayers[12], client.users.cache.get(shufflePlayers[12]).tag), new ExeGamePlayer(shufflePlayers[13], client.users.cache.get(shufflePlayers[13]).tag), 
+        new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag)];
 
-        let players = {
-            [Symbol.iterator]: function(){
-                var self = this;
-                var state = 0;
-                return {
-                    next(){
-                        if (state == 15) return {done: true};
-                        ++state;
-                        return {value: self[state], done: false}
-                    }
-                }
-            },
-            1: new TownGamePlayer("Jailor", shufflePlayers[0]),
-            2: new TownGamePlayer(tiRole1, shufflePlayers[1]),
-            3: new TownGamePlayer(tiRole2, shufflePlayers[2]),
-            4: new TownGamePlayer(tpRole, shufflePlayers[3]),
-            5: new TownGamePlayer(tkRole, shufflePlayers[4]),
-            6: new TownGamePlayer(tsRole, shufflePlayers[5]),
-            7: new TownGamePlayer(rtRole1, shufflePlayers[6]),
-            8: new TownGamePlayer(rtRole2, shufflePlayers[7]),
-            9: new TownGamePlayer(rtRole3, shufflePlayers[8]),
-            10: new MafiaGamePlayer("Godfather", shufflePlayers[9]),
-            11: new MafiaGamePlayer("Mafioso", shufflePlayers[10]),
-            12: new MafiaGamePlayer(rmRole1, shufflePlayers[11]),
-            13: new MafiaGamePlayer(rmRole2, shufflePlayers[12]),
-            14: new ExeGamePlayer(shufflePlayers[13]),
-            15: new WitchGamePlayer(shufflePlayers[14])
+        //Create a mafia only channel.
+
+        await client.guilds.cache.get(guildID).channels.create(`mafia-${outputChannel.name}`, {
+            type: ChannelType.GuildText,
+            permissionOverwrites: [
+                //For everyone in the server
+                {
+                    id: client.guilds.cache.get(guildID).id,
+                    deny: [Permissions.FLAGS.VIEW_CHANNEL]
+                },
+                {
+                    id: mafiaPlayerIDs[0],
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL]
+                },
+                {
+                    id: mafiaPlayerIDs[1],
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL]
+                },
+                {
+                    id: mafiaPlayerIDs[2],
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL]
+                },
+                {
+                    id: mafiaPlayerIDs[3],
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL]
+                },
+            ]
+        });
+
+        //Send players their roles
+
+        let messages = [];
+        for (const player of gameCache.inGameRoles) {
+            messages.push(client.guilds.cache.get(guildID).members.cache.get(player.id)).send(`Welcom to tos! Your role is ${player.role}`);
         }
-
-        client.games.get(guildID).get(channelID).inGameRoles = players;
 
         let interval = setInterval(() => {
             outputChannel.send(--time);
             if (!time){
-                client.games.get(guildID).get(channelID).started = true;
+                gameCache.started = true;
                 client.emit("gameDaytime", true, guildID, channelID); //The parameter determines whether or not it is the first night.
                 clearInterval(interval);
             }

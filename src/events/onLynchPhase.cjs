@@ -1,5 +1,4 @@
 const { ComponentType, MessageActionRow, MessageButton } = require("discord.js");
-const { countAlivePlayers } = require("../util/countAlivePlayers.cjs");
 const { countMax } = require("../util/countMax.cjs");
 
 module.exports = function(client){
@@ -9,8 +8,6 @@ module.exports = function(client){
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
         const gameCache = client.games.get(guildID).get(channelID);
 
-        let alivePlayers = countAlivePlayers(client, guildID, channelID);
-        let votesRequired = Math.floor(alivePlayers.count / 2) + 1;
         let time = remainingTime;
         let lynches = remainingLynches;
 
@@ -23,13 +20,15 @@ module.exports = function(client){
                 .setStyle("PRIMARY"));
         }
 
-        const rows = [new MessageActionRow().addComponents(lynchButtons.slice(0, Math.min(5, alivePlayers)))];
+        let votesRequired = Math.floor(lynchButtons.length / 2) + 1;
+
+        const rows = [new MessageActionRow().addComponents(lynchButtons.slice(0, Math.min(5, lynchButtons.length)))];
         
         if (lynchButtons.length > 5) rows.push(new MessageActionRow()
-            .addComponents(lynchButtons.slice(5, Math.min(10, alivePlayers))));
+            .addComponents(lynchButtons.slice(5, Math.min(10, lynchButtons.length))));
         
         if (lynchButtons.length > 10) rows.push(new MessageActionRow()
-            .addComponents(lynchButtons.slice(10, alivePlayers)));
+            .addComponents(lynchButtons.slice(10, lynchButtons.length)));
 
         const lynchMessage = await outputChannel.send({
             content: `It's time to send someone to trial! A total of ${votesRequired} are needed to do so.`,

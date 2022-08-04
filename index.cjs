@@ -10,7 +10,7 @@ bot.games:  <int, <int, object>>, where object looks like
 {
     ongoing: boolean, (refers to whether the /startgame command was executed)
     started: boolean, (refers to whether the actual game has started)
-    players: array[Players]
+    players: array[user_ids]
     inGameRoles: array[gameplayer]
     day: int
 
@@ -18,18 +18,6 @@ bot.games:  <int, <int, object>>, where object looks like
 
 */
 bot.games = new Collection(); 
-
-
-
-/*bot.on("interactionCreate", async function(interaction){
-    if (!interaction.isChatInputCommand()) return;
-    const commandName = interaction.commandName;
-
-    await interaction.reply(commandName);
-});
-
-
-*/
 
 bot.login(process.env.DISCORD_TOKEN);
 

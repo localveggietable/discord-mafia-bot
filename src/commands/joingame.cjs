@@ -17,7 +17,7 @@ module.exports = {
             return interaction.followUp(`No game has been started yet! To start a game, use the ${inlineCode("/startgame")} command.`);
         }
     
-        if(client.games.get(interaction.guildID).get(channelNumber).players.filter((player) => {player.id == interaction.member.id}).length){
+        if(client.games.get(interaction.guildID).get(channelNumber).players.filter((player) => {player.id == interaction.user.id}).length){
             return interaction.followUp(`You've already joined this game!`);
         }
     

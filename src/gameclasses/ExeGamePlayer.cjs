@@ -1,8 +1,8 @@
 const GamePlayer = require("./GamePlayer.cjs");
 
 class ExeGamePlayer extends GamePlayer{
-    constructor(id){
-        super(id, "Executioner");
+    constructor(id, tag){
+        super("Executioner", id, tag);
         this.won = false;
     }
 

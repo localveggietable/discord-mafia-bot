@@ -11,7 +11,7 @@ module.exports = function(client){
         const gameCache = client.games.get(guildID).get(channelID);
         const player = gameCache.inGameRoles.find(player => player.id == playerID);
 
-        await outputChannel.send(`The town has decided to lynch you, ${client.users.cache.get(playerID).tag}. Do you have any last words?`);
+        await outputChannel.send(`The town has decided to lynch you, ${player.tag}. Do you have any last words?`);
         await delay(7000);
         await outputChannel.send("May God have mercy upon your soul.");
         await player.handleDeath(client, guildID);
