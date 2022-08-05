@@ -37,28 +37,12 @@ class GamePlayer{
         this.id = id;
         this.tag = tag;
         this.role = role;
+        this.publicRole = role;
         //this.faction will be initialized inside child classes.
         this.faction = null; 
-
         //0 indicates no defense, 1 indicates basic defense, 2 indicates powerful defense, 3 indicates immovable defense.
         this.defense = 0;
 
-    }
-
-    whisper(){
-        
-    }
-
-    writeWill(msg){
-
-    }
-
-    rewriteWill(msg){
-
-    }
-
-    resolveNighttimeOptions(){
-        throw new Error("Abstract method resolveNighttimeOptions not defined");
     }
 
     async printWill(outputChannel){

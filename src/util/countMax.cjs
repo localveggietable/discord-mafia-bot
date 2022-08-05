@@ -6,7 +6,6 @@
 
 */
 
-
 module.exports.countMax = function(iterable){
     let exp = {
         count: 0,

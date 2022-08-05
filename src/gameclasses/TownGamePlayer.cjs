@@ -2,37 +2,43 @@ const { MessageButton, MessageActionRow } = require("discord.js");
 const GamePlayer = require("./GamePlayer.cjs");
 
 var actionRoleObject = {
-    Investigator: "Choose who you want to investigate",
-    Lookout: "Choose who you want to watch",
-    Sheriff: "Choose who you want to check",
-    Spy: "Choose who you want to spy on",
-    Jailor: "Choose whether or not to ",
-    Veteran: "To go on alert, use the slash command /veteran",
-    Vigilante: "You spend the night polishing your gun so you cannot shoot anyone. To shoot someone (starting next night), use the slash command /vigilante <player tag>",
-    Bodyguard: "To protect someone, use the slash command /bodyguard <player tag>",
-    Doctor: "To heal someone, use the slash command /doctor <player tag>",
-    Escort: "To distract someone, use the slash command /escort <player tag>",
-    Retributionist: "To use a dead town member's abilities, use the slash command /retributionist <player tag>",
-    Transporter: "To transport two people, use the slash command /transporter <player tag 1> <player tag 2>",
-    Disguiser: "To disguise a mafia member, use the slash command /disguiser <player tag>",
-    Forger: "To forge someone's will, use the slash command /forger <player tag> <string delimited by double quotes (\" \")>",
-    Hypnotist: "To hypnotize someone, use the slash command /hypnotist ",
-    Janitor: "To clean someone, use the slash command /",
-    Ambush: "To ambush someone, use the slash command / ",
-    Godfather: "To kill someone, use the slash command /",
-    Mafioso: "To vote to kill someone, use the slash command /",
-    Blackmailer: "To blackmail someone, use the slash command /",
-    Consigliere: "To investigate someone, use the slash command /",
-    Consort: "To disctract someone, user the slash command /"
+    Investigator: "Choose who you want to investigate:",
+    Lookout: "Choose who you want to watch:",
+    Sheriff: "Choose who you want to check:",
+    Spy: "Choose who you want to spy on:",
+    Jailor: {
+        firstNight: "It is the first night so you cannot execute your target.",
+        default: "Choose whetehr or not to execute:"
+    },
+    Veteran: "Choose whether or not to go on alert:",
+    Vigilante: {
+        firstNight: "You spend the night polishing your gun so you cannot shoot anyone.",
+        default: "Choose who you want to shoot"
+    },
+    Bodyguard: "Choose who you want to protect:",
+    Doctor: "Choose who you want to heal:",
+    Escort: "Choose who you want to distract:",
+    Transporter: "Choose which two people you want to transport:",
 };
 
 class TownGamePlayer extends GamePlayer{
     constructor(role, id, tag){
         super(role, id, tag);
         this.faction = "Town";
+        this.retributionistCanUse = false;
+       // this.retributionistCanUse = ["Jailor", "Veteran", "Mayor", "Medium", "Veteran"].indexOf(this.role) == -1 ? false : true;
+       //do the above in handle death
+        this.bullets = this.role == "Vigilante" ? 3 : 0;
     }
 
     //Returns a reference to the message to be sent to a player at the start of the gameNighttime event.
+    resolveNighttimeOptions(players, firstNight){
+        if (!actionRoleObject[this.role]) return;
+        if (actionRoleObject[this.role].firstNight && firstNight) return this.resolveBinaryNighttimeOptions();
+        if (this.role == "Retributionist") return this.resolveRetributionistNighttimeOptions(players);
+        return this.resolveDefaultNighttimeOptions(players);
+    }
+
     resolveDefaultNighttimeOptions(players){
         let playerButtons = [];
         for (const player of players){
@@ -55,12 +61,53 @@ class TownGamePlayer extends GamePlayer{
         
         if (playerButtons.length > 10) rows.push(new MessageActionRow()
             .addComponents(playerButtons.slice(10, playerButtons.length)));
+
+        return {content: actionRoleObject[this.role], components: rows};
     }
 
-    resolveJailorNighttimeOptions(){
+    resolveBinaryNighttimeOptions(){
+        const row = [new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                .setCustomId(1 + "")
+                .setLabel("Not Guilty")
+                .setStyle("PRIMARY"),
 
+                new MessageButton()
+                .setCustomId(2 + "")
+                .setLabel("Guilty")
+                .setStyle("PRIMARY")
+            )];
+
+        const message = this.role == "Jailor" ? actionRoleObject[this.role].default : actionRoleObject[this.role];
+        
+        return {content: message, components: row};
     }
 
+    resolveRetributionistNighttimeOptions(players){
+        let playerButtons = [];
+        for (const player of players){
+            if (player.retributionistCanUse === false) continue;
+            playerButtons.push(new MessageButton()
+            .setCustomId(player.id + "")
+            .setLabel(`${player.tag} (${player.role})`)
+            .setStyle("PRIMARY")); 
+        }
+         playerButtons.push(new MessageButton()
+            .setCustomId("clear")
+            .setLabel("Clear Selection")
+            .setStyle("SECONDARY"));
+
+        const rows = [new MessageActionRow().addComponents(playerButtons.slice(0, Math.min(5, playerButtons.length)))];
+        
+        if (playerButtons.length > 5) rows.push(new MessageActionRow()
+            .addComponents(playerButtons.slice(5, Math.min(10, playerButtons.length))));
+        
+        if (playerButtons.length > 10) rows.push(new MessageActionRow()
+            .addComponents(playerButtons.slice(10, playerButtons.length)));
+
+        return {content: "Choose which dead town member you want to ressurect:", components: rows};
+    }
 }
 
 module.exports = TownGamePlayer;

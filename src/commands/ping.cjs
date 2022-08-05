@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
+const { MessageActionRow, MessageButton } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -7,7 +8,34 @@ module.exports = {
     ,
     async execute(client, interaction, params){
 
+        let row = new MessageActionRow()
+        .addComponents(
+
+            new MessageButton()
+            .setCustomId(1 + "")
+            .setLabel("Not Guilty")
+            .setStyle("PRIMARY"),
+
+            new MessageButton()
+            .setCustomId(2 + "")
+            .setLabel("Guilty")
+            .setStyle("PRIMARY")
+
+        ); 
+
+
         interaction.followUp({content: `Pong! (${client.ws.ping})`, ephemeral: true});
+        const rows = [row];
+
+        await interaction.channel.send({
+            content: "Vote!",
+            components: [row]
+        });
+
+        await interaction.channel.send({
+            content: "Vote!",
+            components: [row]
+        });
     }
 };
 

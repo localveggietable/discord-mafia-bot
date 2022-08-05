@@ -13,7 +13,6 @@ bot.games:  <int, <int, object>>, where object looks like
     players: array[user_ids]
     inGameRoles: array[gameplayer]
     day: int
-
 }
 
 */

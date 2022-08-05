@@ -1,8 +1,6 @@
-const { ComponentType, MessageActionRow, MessageButton } = require("discord.js");
+const { MessageActionRow, MessageButton } = require("discord.js");
 const { countMax } = require("../util/countMax.cjs");
 const { promisify } = require("util");
-
-const delay = promisify(setTimeout);
 
 
 module.exports = function(client){
@@ -33,7 +31,8 @@ module.exports = function(client){
         });
 
         let votes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], playerKilled;
-        const collector = voteMessage.createMessageComponentCollector({componentType: ComponentType.Button});
+        const collector = voteMessage.createMessageComponentCollector({componentType: "BUTTON"});
+
 
         collector.on("collect", async (interaction) => {
             let playerExists = gameCache.inGameRoles.find((player) => {
