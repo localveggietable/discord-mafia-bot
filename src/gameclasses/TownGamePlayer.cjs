@@ -29,6 +29,21 @@ class TownGamePlayer extends GamePlayer{
        // this.retributionistCanUse = ["Jailor", "Veteran", "Mayor", "Medium", "Veteran"].indexOf(this.role) == -1 ? false : true;
        //do the above in handle death
         this.bullets = this.role == "Vigilante" ? 3 : 0;
+        if (["Retributionist", "Transport", "Veteran"].indexOf(this.role) != -1){
+            this.priority = 1;
+        } else if (this.role == "Escort"){
+            this.priority = 2;
+        } else if (["Bodyguard", "Doctor"].indexOf(this.role) != -1){
+            this.priority = 3;
+        } else if (["Investigator", "Lookout", "Sheriff"].indexOf(this.role) != -1){
+            this.priority = 4;
+        } else if (["Jailor", "Vigilante"].indexOf(this.role) != -1){
+            this.priority = 5;
+        } else if (this.role == "Spy"){
+            this.prority == 6;
+        } else {
+            this.priority = 0;
+        }
     }
 
     //Returns a reference to the message to be sent to a player at the start of the gameNighttime event.

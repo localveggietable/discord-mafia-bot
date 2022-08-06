@@ -13,7 +13,19 @@ class MafiaGamePlayer extends GamePlayer{
     constructor(role, id, tag){
         super(role, id, tag);
         //For disguiser.
-        this.faction = "Mafia"
+        this.faction = "Mafia";
+        if (this.role == "Ambusher"){
+            this.priority = 1;
+        } else if (this.role == "Consort"){
+            this.priority = 2;
+        } else if (["Blackmailer", "Consigliere", "Forger", "Framer", "Hypnotist", "Janitor"].indexOf(this.role)){
+            this.priority = 3;
+        } else if (["Godfather", "Mafioso"].indexOf(this.role)){
+            this.priority = 5;
+        } else {
+            this.priority = 0;
+        }
+
     }
 
     //Returns an array of messages (to send, one at a time, into the mafia channel at the beginning of gameNighttime)

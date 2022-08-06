@@ -26,6 +26,8 @@ class GamePlayer{
         //0 indicates no defense, 1 indicates basic defense, 2 indicates powerful defense, 3 indicates immovable defense.
         this.defense = 0;
 
+        //see https://town-of-salem.fandom.com/wiki/Ability
+
     }
 
     async printWill(outputChannel){

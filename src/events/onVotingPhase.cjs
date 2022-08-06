@@ -1,6 +1,5 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
 const { countMax } = require("../util/countMax.cjs");
-const { promisify } = require("util");
 
 
 module.exports = function(client){

@@ -1,4 +1,3 @@
-const { IntegrationApplication } = require("discord.js");
 const {promisify} = require("util");
 const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.cjs");
 
@@ -15,7 +14,6 @@ module.exports = function(client){
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "mafia-tos-channel"});
 
         const gameCache = client.games.get(guildID).get(channelID);
-        let time = 45;
         let aliveMafiaPlayerIDs = gameCache.inGameRoles.filter(player => player.faction == "Mafia" && player.alive == true).map(player => player.id);
 
         //set permissions of different channels
