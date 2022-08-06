@@ -32,6 +32,12 @@ class TownGamePlayer extends GamePlayer{
     }
 
     //Returns a reference to the message to be sent to a player at the start of the gameNighttime event.
+    /*
+
+    @param {Array<GamePlayer>} players
+    @param {boolean} firstNight
+
+    */
     resolveNighttimeOptions(players, firstNight){
         if (!actionRoleObject[this.role]) return;
         if (actionRoleObject[this.role].firstNight && firstNight) return this.resolveBinaryNighttimeOptions();
@@ -70,12 +76,12 @@ class TownGamePlayer extends GamePlayer{
             .addComponents(
                 new MessageButton()
                 .setCustomId(1 + "")
-                .setLabel("Not Guilty")
+                .setLabel("Do it")
                 .setStyle("PRIMARY"),
 
                 new MessageButton()
                 .setCustomId(2 + "")
-                .setLabel("Guilty")
+                .setLabel("Don't")
                 .setStyle("PRIMARY")
             )];
 

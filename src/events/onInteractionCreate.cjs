@@ -21,7 +21,6 @@ module.exports = function(client){
                     break;
             }
         }
-        interaction.member = interaction.guild.members.cache.get(interaction.user.id);
         
         try {
             await scriptToRun(client, interaction, params);
