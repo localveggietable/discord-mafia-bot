@@ -151,7 +151,7 @@ module.exports = function(client){
 
         for (let player of gameCache.inGameRoles.filter(player => player.alive)){
             for (let [visitedByRole, playerIDs] of targetMap.get(player.id)){
-                if (visitedByRole == "messages") continue;
+                if (visitedByRole == "messages" || !playerIDs) continue;
                 switch (visitedByRole){
                     case "executed":
                         break;
