@@ -1,6 +1,5 @@
-const { Collection } = require("discord.js");
+var a = 2;
 
-var map = new Collection([["hi", 4]]);
+var b = (a) => {console.log(a)};
 
-
-console.log(map.get("hi"));
+b(4);

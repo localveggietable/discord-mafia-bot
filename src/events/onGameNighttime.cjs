@@ -87,13 +87,15 @@ module.exports = function(client){
         mainMafiaCollector.on("collect", (interaction) => {
             let player = mainMafiaRoleActionMessageContent[0].find(player => player.id == interaction.user.id);
             if (!player) return interaction.followUp({content: "You can't click this button!", ephemeral: true});
+            let actionPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Mafia");
             if (interaction.customId == "clear"){
-                player.targets = {first: false, second: false, binary: false, options: false}; 
+                actionPlayer.targets = {first: false, second: false, binary: false, options: false}; 
                 return interaction.followUp("Your selection was cleared."); 
             } 
-            player.targets.first = +interaction.customId;
+            actionPlayer.targets.first = +interaction.customId;
             return interaction.followUp("Your decision has been recorded.");       
         });
+
         for (let [player, msg] of mafiaRoleActionMessageContent){
             let msgRef = await mafiaChannel.send(msg);
             const collector = msgRef.createMessageComponentCollector({componentType: "BUTTON"});

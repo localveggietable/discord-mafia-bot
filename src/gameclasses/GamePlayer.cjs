@@ -23,6 +23,11 @@ class GamePlayer{
             binary: false,
             options: false
         }
+
+        this.limitedUses = {
+            limited: false,
+            uses: 0
+        };
         //0 indicates no defense, 1 indicates basic defense, 2 indicates powerful defense, 3 indicates immovable defense.
         this.defense = 0;
 

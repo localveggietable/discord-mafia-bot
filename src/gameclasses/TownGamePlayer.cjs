@@ -8,7 +8,7 @@ var actionRoleObject = {
     Spy: "Choose who you want to spy on:",
     Jailor: {
         firstNight: "It is the first night so you cannot execute your target.",
-        default: "Choose whetehr or not to execute:"
+        default: "Choose whether or not to execute:"
     },
     Veteran: "Choose whether or not to go on alert:",
     Vigilante: {
@@ -28,7 +28,6 @@ class TownGamePlayer extends GamePlayer{
         this.retributionistCanUse = false;
        // this.retributionistCanUse = ["Jailor", "Veteran", "Mayor", "Medium", "Veteran"].indexOf(this.role) == -1 ? false : true;
        //do the above in handle death
-        this.bullets = this.role == "Vigilante" ? 3 : 0;
         if (["Retributionist", "Transport", "Veteran"].indexOf(this.role) != -1){
             this.priority = 1;
         } else if (this.role == "Escort"){
