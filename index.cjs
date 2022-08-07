@@ -3,6 +3,7 @@ const {Client, Collection} = require("discord.js");
 
 const bot = new Client({ intents: 32767 });
 bot.commands = new Collection();
+bot.gameUsers = new Collection();
 
 
 /*

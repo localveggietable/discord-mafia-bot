@@ -9,12 +9,17 @@ module.exports = function(client){
         const options = interaction.options.data;
         const scriptToRun = client.commands.get(interaction.commandName).execute;
 
-        for (let option in options){
+        for (const option of options){
             switch (option.type){
-                case "SUB_COMMAND":
+                //The subcommand case needs to be tested, as I'm not sure if it should be this or option.options?.data.forEach
+                case "SUB_COMMAND": 
+                    params.push(option.name);
+                    option.options?.forEach(suboption => {
+                        params.push(suboption.type == "USER" ? suboption.user : suboption.value);
+                    });
                     break;
                 case "USER":
-                    params.push(interaction.guild.members.cache.get(option.user.id));
+                    params.push(option.user);
                     break;
                 default:
                     params.push(option.value);

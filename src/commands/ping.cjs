@@ -24,18 +24,9 @@ module.exports = {
         ); 
 
 
-        interaction.followUp({content: `Pong! (${client.ws.ping})`, ephemeral: true});
-        const rows = [row];
+        interaction.followUp({content: `Pong! (${client.ws.ping}), in the guild ${interaction.guild.id}`, ephemeral: true});
 
-        await interaction.channel.send({
-            content: "Vote!",
-            components: [row]
-        });
-
-        await interaction.channel.send({
-            content: "Vote!",
-            components: [row]
-        });
+        
     }
 };
 

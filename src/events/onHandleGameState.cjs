@@ -151,12 +151,14 @@ module.exports = function(client){
     
     
         //Now, we have to resolve the messages that each player will have to see. Also, we will need to handle any lasting state effects (death, blackmailing)
-
+        let newDeaths = [];
         for (let player of gameCache.inGameRoles.filter(player => player.alive)){
             for (let [visitedByRole, playerIDs] of targetMap.get(player.id)){
                 if (visitedByRole == "messages" || !playerIDs) continue;
                 switch (visitedByRole){
                     case "executed":
+                        newDeaths.push(player);
+                        targetMap.get(player.id)
                         break;
                     case "investigator":
                         break;
