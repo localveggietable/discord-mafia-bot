@@ -146,6 +146,9 @@ module.exports = function(client){
             }
         }
 
+
+
+    
     
         //Now, we have to resolve the messages that each player will have to see. Also, we will need to handle any lasting state effects (death, blackmailing)
 
@@ -157,12 +160,49 @@ module.exports = function(client){
                         break;
                     case "investigator":
                         break;
-
-
-
-
-
-
+                    case "lookout":
+                        break;
+                    case "sheriff":
+                        break;
+                    case "spy":
+                        break;
+                    case "vigilante":
+                        break;
+                    case "bodyguard":
+                        break;
+                    case "doctor":
+                        break;
+                    case "escort":
+                        break;
+                    case "transporter":
+                        break;
+                    case "mafioso":
+                        break;
+                    case "godfather":
+                        break;
+                    case "disguiser":
+                        break;
+                    case "forger":
+                        break;
+                    case "framer":
+                        break;
+                    case "hypnotist":
+                        break;
+                   case "janitor":
+                        break;
+                    case "ambusher":
+                        break;
+                    case "blackmailer":
+                        break;
+                    case "consiglier":
+                        break;
+                    case "consort":
+                        break;
+                    case "witch":
+                        break;
+                    case "mafia":
+                        break;
+                        
 
 
                 }
