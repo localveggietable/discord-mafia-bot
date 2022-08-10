@@ -13,6 +13,7 @@ bot.games:  <int, <int, object>>, where object looks like
     started: boolean, (refers to whether the actual game has started)
     players: array[user_ids]
     inGameRoles: array[gameplayer]
+    isDaytime: boolean
     day: int
 }
 

@@ -2,10 +2,10 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("jail")
-        .setDescription("Jail a player")
+        .setName("forge")
+        .setDescription("Forge a player's will")
         .addUserOption(option => 
-            option.setName("player_to_jail")
+            option.setName("player_to_forge")
                 .setDescription("The player to be jailed")
                 .setRequired(true)
         )
@@ -22,16 +22,13 @@ module.exports = {
 
         let player = gameCache.inGameRoles.find(player => player.id == interaction.user.id);
         if (!player.alive || player.role != "Jailor") return interaction.followUp("You're not permitted to use this command!");
-        if (!gameCache.isDaytime) return interaction.followUp("You can only use this command in the day!");
+        if (gameCache.isDaytime) return interaction.followUp("You can only use this command at night!");
         
         let target = gameCache.inGameRoles.find(target => target.id == params[0].id);
         if (!target) return interaction.followUp("That player doesn't exist!");
         if (!target.alive) return interaction.followUp("You can't jail a dead player!");
 
-        let oldTarget = player.first.targets;
-        if (oldTarget) oldTarget.jailed = false;
         player.first.targets = target.id;
-        target.jailed = true;
         return interaction.followUp("Your choice has been recorded. If your target dies by lynching, you will have to repick another target.");
     }
 }

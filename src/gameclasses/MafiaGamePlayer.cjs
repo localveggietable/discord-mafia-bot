@@ -18,14 +18,11 @@ class MafiaGamePlayer extends GamePlayer{
             this.priority = 1;
         } else if (this.role == "Consort"){
             this.priority = 2;
-        } else if (["Blackmailer", "Consigliere", "Forger", "Framer", "Hypnotist", "Janitor"].indexOf(this.role)){
+        } else if (["Blackmailer", "Disguiser", "Consigliere", "Forger", "Framer", "Hypnotist", "Janitor", "Godfather", "Mafioso"].indexOf(this.role)){
             this.priority = 3;
-        } else if (["Godfather", "Mafioso"].indexOf(this.role)){
-            this.priority = 5;
         } else {
             this.priority = 0;
         }
-
     }
 
     //Returns an array of messages (to send, one at a time, into the mafia channel at the beginning of gameNighttime)

@@ -1,4 +1,5 @@
 const {Collection} = require("discord.js");
+const {cloneDeep} = require("lodash");
 /*
     @param {Client} client
     @param {Snowflake} guildID
@@ -13,13 +14,14 @@ module.exports.setupGuild = function setupGuild(client, guildID){
         started: false,
         players: 0,
         inGameRoles: [],
+        isDaytime: true,
         day: 0
 
     };
 
 
     for (let i = 0; i < 10; ++i){
-        gamesDataCollection.set(i, {...defaultChannelObj});
+        gamesDataCollection.set(i, cloneDeep(defaultChannelObj));
     }
 
     client.games.set(guildID, gamesDataCollection);

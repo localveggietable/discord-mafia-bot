@@ -10,6 +10,7 @@ module.exports = function(client){
         const gameCache = client.games.get(guildID).get(channelID);
         //Create roles.
 
+        //Needs to be changed, see TODO
         if (!(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"))){
             client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"));
         }
@@ -114,11 +115,40 @@ module.exports = function(client){
             ]
         });
 
+        await client.guilds.cache.get(guildID).channels.create(`jailor-${outputChannel.name}`, {
+            type: "GUILD_TEXT",
+            permissionOverwrites: [
+                {
+                    id: client.guilds.cache.get(guildID).id,
+                    deny: [Permissions.FLAGS.VIEW_CHANNEL]
+                }
+            ]
+        });
+
+        //Set default permissions.
+
+
+        try {
+                await outputChannel.permissionOverwrites.set([
+                {
+                    id: guildID,
+                    deny: [Permissions.FLAGS.SEND_MESSAGES]
+                },
+                {
+                    id: client.guilds.cache.get(guildID).roles.cache.find(role => role.name == "Alive Town Member").id,
+                    allow: [Permissions.FLAGS.SEND_MESSAGES]
+                }
+            ]);
+        } catch (e) {
+            await outputChannel.send("Someone messed with the channel roles needed to run this game :/ . This game will be aborted.");
+            return client.emit("onEndGameError", guildID, channelID);
+        }
+
         //Send players their roles
 
         let messages = [];
         for (const player of gameCache.inGameRoles) {
-            messages.push(client.guilds.cache.get(guildID).members.cache.get(player.id)).send(`Welcom to tos! Your role is ${player.role}`);
+            messages.push(client.users.cache.get(player.id).send(`Welcome to tos! Your role is ${player.role}`));
         }
 
         let interval = setInterval(() => {

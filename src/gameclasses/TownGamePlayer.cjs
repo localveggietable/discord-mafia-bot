@@ -28,18 +28,14 @@ class TownGamePlayer extends GamePlayer{
         this.retributionistCanUse = false;
        // this.retributionistCanUse = ["Jailor", "Veteran", "Mayor", "Medium", "Veteran"].indexOf(this.role) == -1 ? false : true;
        //do the above in handle death
-        if (["Retributionist", "Transport", "Veteran"].indexOf(this.role) != -1){
+        if (["Retributionist", "Transporter", "Veteran"].includes(this.role)){
             this.priority = 1;
         } else if (this.role == "Escort"){
             this.priority = 2;
-        } else if (["Bodyguard", "Doctor"].indexOf(this.role) != -1){
+        } else if (["Bodyguard", "Doctor", "Investigator", "Lookout", "Sheriff", "Jailor", "Vigilante", "Spy"].includes(this.role)){
             this.priority = 3;
-        } else if (["Investigator", "Lookout", "Sheriff"].indexOf(this.role) != -1){
+        } else if (this.role == "Transporter"){
             this.priority = 4;
-        } else if (["Jailor", "Vigilante"].indexOf(this.role) != -1){
-            this.priority = 5;
-        } else if (this.role == "Spy"){
-            this.prority == 6;
         } else {
             this.priority = 0;
         }
@@ -53,8 +49,9 @@ class TownGamePlayer extends GamePlayer{
 
     */
     resolveNighttimeOptions(players, firstNight){
-        if (!actionRoleObject[this.role]) return;
-        if (actionRoleObject[this.role].firstNight && firstNight) return this.resolveBinaryNighttimeOptions();
+        if (!actionRoleObject[this.role] || (this.role == "Jailor" && !this.targets.first)) return;
+        if (actionRoleObject[this.role].firstNight && firstNight) return this.resolveEmptyNighttimeOptions();
+        if (["Jailor", "Veteran"].includes(this.role)) return this.resolveBinaryNighttimeOptions();
         if (this.role == "Retributionist") return this.resolveRetributionistNighttimeOptions(players);
         return this.resolveDefaultNighttimeOptions(players);
     }
@@ -85,16 +82,21 @@ class TownGamePlayer extends GamePlayer{
         return {content: actionRoleObject[this.role], components: rows};
     }
 
+    resolveEmptyNighttimeOptions(){
+        return {content: actionRoleObject[this.role].firstNight};
+    }
+
     resolveBinaryNighttimeOptions(){
         const row = [new MessageActionRow()
             .addComponents(
+                //should be stored in the binary property of targets 
                 new MessageButton()
                 .setCustomId(1 + "")
                 .setLabel("Do it")
                 .setStyle("PRIMARY"),
 
                 new MessageButton()
-                .setCustomId(2 + "")
+                .setCustomId( 0 + "")
                 .setLabel("Don't")
                 .setStyle("PRIMARY")
             )];

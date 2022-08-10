@@ -11,6 +11,9 @@ module.exports = function(client){
         const gameCache = client.games.get(guildID).get(channelID);
         const player = gameCache.inGameRoles.find(player => player.id == playerID);
 
+        let jailorPlayer = gameCache.find(player => player.role == "Jailor");
+        if (jailorPlayer.alive && jailorPlayer.targets.first == playerID) jailorPlayer.targets.first = false;
+
         await outputChannel.send(`The town has decided to lynch you, ${player.tag}. Do you have any last words?`);
 
         await delay(7000);

@@ -6,6 +6,7 @@ module.exports = function(client){
         let gameCache = client.games.get(guildID).get(channelID);
 
         gameCache.day = firstDay ? 1 : gameCache.day + 1;
+        gameCache.isDaytime = true;
         let time = firstDay ? 15 : 50;
         gameCache.remainingTime = time;
 

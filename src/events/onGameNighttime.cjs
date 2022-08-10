@@ -5,41 +5,76 @@ const delay = promisify(setTimeout);
 
 module.exports = function(client){
     client.on("gameNighttime", async (firstNight, guildID, channelID) => {
+        //useful object references
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
 
         const mafiaChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
-            return channel.name.split("-")[3] == channelID
+            return channel.name.split("-")[3] == channelID && channel.name.split("-")[0] == "mafia";
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "mafia-tos-channel"});
 
-        const gameCache = client.games.get(guildID).get(channelID);
-        let aliveMafiaPlayerIDs = gameCache.inGameRoles.filter(player => player.faction == "Mafia" && player.alive == true).map(player => player.id);
+        const jailorChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
+            return channel.name.split("-")[3] == channelID && channel.name.split("-")[0] == "jailor";
+        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "jailor-tos-channel"}); 
 
-        //set permissions of different channels
-        const mafiaWritePermissions = [];
-        const generalWritePermissions = [];
+        const mediumChannel = null;
+
+        const gameCache = client.games.get(guildID).get(channelID);
+ 
+
+        //Tell the game cache that it is now nighttime.
+        gameCache.isDaytime = false;
+
+        //set permissions of different channels. The first one is jailor channel.
+
+        let jailor = gameCache.inGameRoles.find(player => player.role == "Jailor");
+        let jailedPlayer = (jailor.alive && jailor.targets.first) ? gameCache.inGameRoles.find(player => player.id == jailor.targets.first) : null;
+        
+        if (jailor.alive && jailor.targets.first) {
+            let jailorWritePermissions = [];
+            jailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
+                VIEW_CHANNEL: true,
+                SEND_MESSAGES: true
+            }));
+
+            jailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
+                VIEW_CHANNEL: true,
+                SEND_MESSAGES: true
+            }));
+
+            await Promise.all(jailorWritePermissions);     
+        }
+
+        //next, let's do th emafia channel
+        let aliveMafiaPlayerIDs = gameCache.inGameRoles.filter(player => player.faction == "Mafia" && player.alive == true && player != jailedPlayer).map(player => player.id);
+        let mafiaWritePermissions = [];
         for (const playerID of aliveMafiaPlayerIDs){
             mafiaWritePermissions.push(mafiaChannel.permissionOverwrites.edit(playerID, {
                 SEND_MESSAGES: true
-            }));
-        }
-        for (const player of gameCache.inGameRoles){
-            generalWritePermissions.push(outputChannel.permissionOverwrites.edit(player.id, {
-                SEND_MESSAGES: false
-            }));
+            })); 
         }
 
         await Promise.all(mafiaWritePermissions);
-        await Promise.all(generalWritePermissions);
 
+
+        try {
+            await outputChannel.permissionOverwrites.edit(client.guilds.cache.get(guildID).roles.cache.find(role => role.name == "Alive Town Member").id, {
+                SEND_MESSAGES: false
+            });
+        } catch (e) {
+            await outputChannel.send("Someone messed with the channel roles needed to run this game :/ . This game will be aborted.");
+            return client.emit("onEndGameError", guildID, channelID);
+        }
+
+        //make sure all the permissions promises finish before continuing -----------------------------------------------------
 
         //we have to attach a listener to each message
         let collectors = [];
 
         let roleActionMessages = [];
         for (let player of gameCache.inGameRoles){
-            if (player.role == "Mafia" || player.alive) continue;
+            if (player.role == "Mafia" || player.alive || player == jailedPlayer) continue;
             else {
                 let msgValue = player.resolveNighttimeOptions?.(gameCache.inGameRoles, firstNight);
                 if (!msgValue) continue;
@@ -56,7 +91,7 @@ module.exports = function(client){
                     player.targets = {first: false, second: false, binary: false, options: false}; 
                     return interaction.followUp("Your selection was cleared."); 
                 }
-                if (["Witch", "Transporter"].indexOf(player.role)){
+                if (["Witch", "Transporter"].includes(player.role)){
                     if (!player.targets.first) {
                         player.targets.first = +interaction.customId;
                         let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${client.users.cache.get(+interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(+interaction.customId).tag} tonight.`;
@@ -65,8 +100,13 @@ module.exports = function(client){
                     player.targets.second = +interaction.customId;
                     let followUpMessage = player.role == "Witch" ? `You have decided to target ${client.users.cache.get(+interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(+interaction.customId).tag} tonight.`;
                     return interaction.followUp(followUpMessage);
-                } else if (["Veteran, Jailor"].indexOf(player.role)){
+                } else if (["Veteran, Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
+                    if (player.role == "Jailor" && interaction.customID == 1) {
+                        jailorChannel.send("The jailor has decided to execute you.")
+                    } else if (player.role == "Jailor"){
+                        jailorChannel.send("The jailor has decided to spare you.")
+                    }
                     return interaction.followUp("Your decision has been recorded.");
                 } else {
                     player.targets.first = +interaction.customId;
@@ -108,9 +148,12 @@ module.exports = function(client){
 
                 if (player.role == "Disguiser"){
                     if (!player.targets.first) {
+                        if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.followUp("You have to choose a mafia member as your first target.");
                         player.targets.first = +interaction.customId;
                         return interaction.followUp("You have chosen your mafia member to disguise.");
                     }
+
+                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.followUp("You can only disguise Mafia members as non-Mafia members.");
                     player.targets.second = +interaction.customId;
                     return interaction.followUp("You have chosen who your mafia member will be disguised as."); 
                 } else if (player.role == "Hypnotist"){

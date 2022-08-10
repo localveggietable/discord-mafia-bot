@@ -4,6 +4,10 @@ text.cjs
 test.cjs
 setIntervalDesignPattern.js
 
+**/.DS_Store
+
+.vscode/
+
 *.txt
 
 node_modules/

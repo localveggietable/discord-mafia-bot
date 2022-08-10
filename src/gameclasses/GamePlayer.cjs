@@ -9,9 +9,12 @@ class GamePlayer{
 
         this.alive = true;
         this.will = "";
+        this.publicWill = "";
         this.id = id;
         this.tag = tag;
+        //indicates the player's actual role
         this.role = role;
+        //indicates the player's public role (for death purposes only - for instance, implementing the disguiser ability won't be done using this property)
         this.publicRole = role;
         //this.faction will be initialized inside child classes.
         this.faction = null; 
@@ -24,12 +27,14 @@ class GamePlayer{
             options: false
         }
 
-        this.limitedUses = {
-            limited: false,
-            uses: 0
-        };
+        this.blackmailed = false;
+
+        //indicates whether or not the player is to be jailed
+        this.jailed = false;
+
+        this.limitedUses = ["Jailor", "Veteran", "Vigilante", "Janitor"].includes(role) ? {limited: true, uses: 3} : ["Doctor", "Bodyguard"].includes(role) ? {limited: true, uses: 1} : {limited: false, uses: 0};
         //0 indicates no defense, 1 indicates basic defense, 2 indicates powerful defense, 3 indicates immovable defense.
-        this.defense = 0;
+        this.defense = ["Godfather", "Executioner", "Witch"].includes(role) ? 1 : 0;
 
         //see https://town-of-salem.fandom.com/wiki/Ability
 
@@ -39,6 +44,7 @@ class GamePlayer{
         await outputChannel.send(this.will);
     }
 
+    //i think i want to split handledeath into handledeath and outputdeath to separate handling node-side state vs. client-side state.
     async handleDeath(client, guildID, channelID){
         const guild = client.guilds.cache.get(guildID);
         const member = guild.members.cache.get(this.id);
@@ -52,16 +58,19 @@ class GamePlayer{
         this.alive = false;
         await Promise.all([member.roles.remove(aliveRole), member.roles.add(deadRole)]);
 
-        const will = this.will === "" ? null : new EmbedBuilder()
+        const will = this.publicWill === "" ? null : new EmbedBuilder()
             .setColor(10070709)
             .setTitle(`${member.user.tag}'s Will`)
-            .addFields({value: this.will});
+            .addFields({value: this.publicWill});
 
-        
-        const toWrite = this.will === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send({content: `We found a will next to their body.`, embeds: [will]});
+        //Let's put this in the events folder
+        let toWrite = this.publicWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send({content: `We found a will next to their body.`, embeds: [will]});
         await toWrite;
+        outputChannel.send(`${member.user.tag}'s role was **${this.publicRole}**`);
 
-        await outputChannel.send(`${member.user.tag}'s role was **${this.role}**`);
+    }
+
+    async outputDeath(client, guildID, channelID){
 
     }
 }
