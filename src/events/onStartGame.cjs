@@ -88,12 +88,12 @@ module.exports = function(client){
 
         //Create a mafia only channel.
 
-        await client.guilds.cache.get(guildID).channels.create(`mafia-${outputChannel.name}`, {
+        await Promise.all([client.guilds.cache.get(guildID).channels.create(`mafia-${outputChannel.name}`, {
             type: "GUILD_TEXT",
             permissionOverwrites: [
                 //For everyone in the server
                 {
-                    id: client.guilds.cache.get(guildID).id,
+                    id: guildID,
                     deny: [Permissions.FLAGS.VIEW_CHANNEL]
                 },
                 {
@@ -113,17 +113,28 @@ module.exports = function(client){
                     allow: [Permissions.FLAGS.VIEW_CHANNEL]
                 },
             ]
-        });
-
-        await client.guilds.cache.get(guildID).channels.create(`jailor-${outputChannel.name}`, {
+        }), client.guilds.cache.get(guildID).channels.create(`jailor-${outputChannel.name}`, {
             type: "GUILD_TEXT",
             permissionOverwrites: [
                 {
-                    id: client.guilds.cache.get(guildID).id,
+                    id: guildID,
                     deny: [Permissions.FLAGS.VIEW_CHANNEL]
                 }
             ]
-        });
+        }), client.guilds.cache.get(guildID).channels.create(`dead-${outputChannel.name}`, {
+            type: "GUILD_TEXT",
+            permissionOverwrites: [
+                {
+                    id: guildID,
+                    deny: [Permissions.FLAGS.VIEW_CHANNEL]
+                },
+                {
+                    id: client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Dead Town Member").id,
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
+                }
+            ]
+        })]);
+
 
         //Set default permissions.
 

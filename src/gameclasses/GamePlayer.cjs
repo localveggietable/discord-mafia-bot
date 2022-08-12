@@ -27,6 +27,9 @@ class GamePlayer{
             options: false
         }
 
+        //.cleaned should be either false or a player object (the player who did the cleaning).
+        this.cleaned = false;
+
         this.blackmailed = false;
 
         //indicates whether or not the player is to be jailed
@@ -57,7 +60,15 @@ class GamePlayer{
 
         this.alive = false;
         await Promise.all([member.roles.remove(aliveRole), member.roles.add(deadRole)]);
+    }
 
+    async outputDeath(client, guildID, channelID){
+        const guild = client.guilds.cache.get(guildID);
+        const member = guild.members.cache.get(this.id);
+        const outputChannel = channelID ? guild.channels.cache.find((channel) => {
+            return channel.name.split("-")[2] == channelID
+        }) : guild.channels.cache.find((channel) => {return channel.name == "tos-channel"});
+        
         const will = this.publicWill === "" ? null : new EmbedBuilder()
             .setColor(10070709)
             .setTitle(`${member.user.tag}'s Will`)
@@ -66,12 +77,7 @@ class GamePlayer{
         //Let's put this in the events folder
         let toWrite = this.publicWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send({content: `We found a will next to their body.`, embeds: [will]});
         await toWrite;
-        outputChannel.send(`${member.user.tag}'s role was **${this.publicRole}**`);
-
-    }
-
-    async outputDeath(client, guildID, channelID){
-
+        outputChannel.send(`${member.user.tag}'s role was **${this.publicRole}**`); 
     }
 }
 

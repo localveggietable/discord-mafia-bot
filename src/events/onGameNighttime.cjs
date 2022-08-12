@@ -18,7 +18,9 @@ module.exports = function(client){
             return channel.name.split("-")[3] == channelID && channel.name.split("-")[0] == "jailor";
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "jailor-tos-channel"}); 
 
-        const mediumChannel = null;
+        const deadChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
+            return channel.name.split("-")[3] == channelID && channel.name.split("-")[0] == "dead";
+        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "dead-tos-channel"}); 
 
         const gameCache = client.games.get(guildID).get(channelID);
  
@@ -46,7 +48,7 @@ module.exports = function(client){
             await Promise.all(jailorWritePermissions);     
         }
 
-        //next, let's do th emafia channel
+        //next, let's do th mafia channel
         let aliveMafiaPlayerIDs = gameCache.inGameRoles.filter(player => player.faction == "Mafia" && player.alive == true && player != jailedPlayer).map(player => player.id);
         let mafiaWritePermissions = [];
         for (const playerID of aliveMafiaPlayerIDs){
@@ -55,8 +57,16 @@ module.exports = function(client){
             })); 
         }
 
-        await Promise.all(mafiaWritePermissions);
+        let aliveMediumPlayerIDs = gameCache.inGameRoles.filter(player => player.role == "Medium" && player.alive && player != jailedPlayer).map(player => player.id);
+        let mediumWritePermissions = [];
+        for (const playerID of aliveMediumPlayerIDs){
+            mediumWritePermissions.push(deadChannel.permissionOverwrites.edit(playerID, {
+                VIEW_CHANNEL: true,
+                SEND_MESSAGES: true
+            }));
+        }
 
+        await Promise.all(mafiaWritePermissions.concat(mediumWritePermissions));
 
         try {
             await outputChannel.permissionOverwrites.edit(client.guilds.cache.get(guildID).roles.cache.find(role => role.name == "Alive Town Member").id, {
@@ -177,14 +187,37 @@ module.exports = function(client){
 
         collectors.forEach(collector => collector.stop());
         
-        let denyMafiaWritePermissions = [];
+        let denyMafiaWritePermissions = [], denyMediumWritePermissions = [], denyJailorWritePermissions;
         for (const playerID of aliveMafiaPlayerIDs){
             denyMafiaWritePermissions.push(mafiaChannel.permissionOverwrites.edit(playerID, {
                 SEND_MESSAGES: false
             }));
         }
 
-        await Promise.all(denyMafiaWritePermissions);
+        for (const playerID of aliveMediumPlayerIDs){
+            denyMediumWritePermissions.push(playerID, {
+                SEND_MESSAGES: false,
+                VIEW_CHANNEL: false
+            });
+        }
+
+        denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
+            VIEW_CHANNEL: true,
+            SEND_MESSAGES: true
+        }));
+
+        denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
+            VIEW_CHANNEL: true,
+            SEND_MESSAGES: true
+        }));
+
+        //resert all the messages from the Jailor channel.
+        let deleted;
+        do {
+            deleted = await jailorChannel.bulkDelete(100);
+        } while (deleted.size > 0);
+
+        await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));
 
         return client.emit("gameDaytime", false, guildID, channelID);
 

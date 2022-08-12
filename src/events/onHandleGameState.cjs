@@ -131,6 +131,11 @@ module.exports = function(client){
 
                     if (target.priority < player.priority || player.jailed || player.role == "Transporter") break; 
 
+                    if (target.role == "Godfather"){
+                        const mafiosoPlayer = gameCache.inGameRoles.find(player => player.role == "Mafioso" && player.alive);
+                        if (mafiosoPlayer) mafiosoPlayer.targets.first = player.targets.second;
+                    }
+
                     target.targets.first = player.targets.second; 
                     break;
                 }
@@ -224,6 +229,8 @@ module.exports = function(client){
                     for (const visitingPlayerID of playerIDs){
                         publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("You were shot by the Veteran you visited!"));
                         publicAPIMap.get(visitingPlayerID).set("statusCodes", publicAPIMap.get(visitingPlayerID).get("statusCodes").push(7));
+
+                        newDeaths.push(gameCache.inGameRoles.find(player => player.id == visitingPlayerID));
                     }
                 }
                 switch (visitedByRole){
@@ -248,6 +255,7 @@ module.exports = function(client){
                             for (const visitingPlayerID of playerIDs){
                                 const possibleRoles = investigatorBrackets.find(arr => arr.includes(publicPlayerInformationMap.get(player.id).get("publicRole")));
                                 publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push(`Your player could be a ${possibleRoles.join("/")}`));
+                                publicAPIMap.get(visitingPlayerID).set("investigativeMessages", publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target could be a ${possibleRoles.join("/")}`));
                             }
                         }
                         break;
@@ -261,7 +269,8 @@ module.exports = function(client){
                                 for (const allVisitorID of targetMap.get(player.id).get("all")){
                                     if (allVisitorID == visitingPlayerID) continue;
                                     let publicPlayer = gameCache.inGameRoles.find(player => player.id == publicPlayerInformationMap.get(allVisitorID).get("publicID"));
-                                    publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by ${publicPlayer.tag}`))
+                                    publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by ${publicPlayer.tag}`));
+                                    publicAPIMap.get(visitingPlayerID).set("investigativeMessages", publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target was visited by ${publicPlayer.tag}`));
                                 }
                             }
                         }
@@ -274,7 +283,9 @@ module.exports = function(client){
                         } else {
                             for (const visitingPlayerID of playerIDs){
                                 const message = publicPlayerInformationMap.get(player.id).get("publicInnocent") ? "You cannot find evidence of wrongdoing. Your target seems innocent." : "Your target is suspicious!";
+                                const witchMessage = message.split(" ")[0] == "You" ? "The player you witched found that their target is innocent" : "The player you witched found that their target is suspicious."
                                 publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push(message));
+                                publicAPIMap.get(visitingPlayerID).set("investigativeMessages", publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(witchMessage));
                             }
                         }
                         break;
@@ -307,6 +318,7 @@ module.exports = function(client){
                                 publicAPIMap.get(player.id).set("messages", publicAPIMap.get(player.id).get("messages").push("Someone tried to attack you but your defense while on alert was too strong!"));
                                 publicAPIMap.get(player.id).set("statusCodes", publicAPIMap.get(player.id).get("statusCodes").push(18));
                             } else if (player.defense) {
+                                if (player.role == "Witch") player.defense = 0;
                                 publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("Your target's defense was too strong to kill."));
                                 publicAPIMap.get(player.id).set("messages", publicAPIMap.get(player.id).get("messages").push("Someone attacked you but your defense was too strong!"));
                                 publicAPIMap.get(player.id).set("statusCodes", publicAPIMap.get(player.id).set("statusCodes").push(12));
@@ -351,6 +363,7 @@ module.exports = function(client){
                                     publicAPIMap.get(visitingPlayerID).set("statusCodes", publicAPIMap.get(visitingPlayerID).get("statusCodes").push(11)); 
                                 }
                             } else {
+                                newDeaths.push(player);
                                 if (player.faction == "Town" && visitedByRole == "vigilante"){
                                     const vigilantePlayer = gameCache.inGameRoles.find(player => player.id == visitingPlayerID);
                                     if (player.faction == "Town") vigilantePlayer.limitedUses.uses = 0;
@@ -370,6 +383,11 @@ module.exports = function(client){
                             for (const visitingPlayerID of playerIDs){
                                 publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!"));
                             }
+                        } else {
+                            for (const visitingPlayerID of playerIDs){
+                                if (!player.id == visitingPlayerID) continue;
+                                --player.limitedUses.uses;
+                            }   
                         }
                         break;
                     case "doctor":
@@ -377,6 +395,11 @@ module.exports = function(client){
                             for (const visitingPlayerID of playerIDs){
                                 publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!"));
                             }
+                        } else {
+                            for (const visitingPlayerID of playerIDs){
+                                if (!player.id == visitingPlayerID) continue;
+                                --player.limitedUses.uses;
+                            }   
                         }
                         break;
                     case "escort":
@@ -437,6 +460,7 @@ module.exports = function(client){
                             if (player.jailed){
                                 publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!"));
                             } else {
+                                player.cleaned = gameCache.inGameRoles.find(player => player.id == visitingPlayerID);
                                 player.publicRole = "Cleaned";
                                 player.publicWill = "";
                                 --gameCache.inGameRoles.find(player => player.id == visitingPlayerID).limitedUses.uses;
@@ -466,7 +490,17 @@ module.exports = function(client){
 
                                         publicAPIMap.get(targetMap.get(doctorID).get("doctor")[0]).set("messages", publicAPIMap.get(doctorID).get("messages").push("Your target was attacked last night!"));
                                         publicAPIMap.get(doctorID).set("statusCodes", publicAPIMap.get(doctorID).set("statusCodes").push(9)); 
+                                    } else if (gameCache.inGameRoles.find(player => player.id == ambushedPlayerID).defense){
+                                        let player = gameCache.inGameRoles.find(player => player.id == ambushedPlayerID);
+                                        player.defense = 0;
+
+                                        publicAPIMap.get(visitingPlayerID).get("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("You ambushed someone who visited your target last night!")); 
+                                        publicAPIMap.get(visitingPlayerID).get("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("Your target's defense was too strong to kill!")); 
+
+                                        publicAPIMap.get(ambushedPlayerID).set("statusCodes", publicAPIMap.get(ambushedPlayerID).get("statusCodes").push(12));
+                                        publicAPIMap.get(ambushedPlayerID).set("messages", publicAPIMap.get("messages").push("Someone attacked you but your defense was too strong!"));
                                     } else {
+                                        newDeaths.push(gameCache.inGameRoles.find(player => player.id == ambushedPlayerID));
                                         publicAPIMap.get(visitingPlayerID).get("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("You ambushed someone who visited your target last night!"));
                                         publicAPIMap.get(ambushedPlayerID).get("messages", publicAPIMap.get(ambushedPlayerID).get("messages").push("You were attacked by a member of the Mafia! You have died!"));
                                         publicAPIMap.get(ambushedPlayerID).set("statusCodes", publicAPIMap.get(ambushedPlayerID).get("statusCodes").push(5));
@@ -529,11 +563,20 @@ module.exports = function(client){
                             publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push("Your target was in jail so you could not control them."));
                         } else if (player.priority < 2){
                             publicAPIMap.get(player.id).set("messages", publicAPIMap.get(player.id).get("messages").push("A Witch tried to control you but you are immune."));
+                            publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role}`]));
+                        } else if (["Spy", "Investigator", "Sheriff", "Lookout"].includes(player.role)){
+                            publicAPIMap.get(player.id).set("messages", publicAPIMap.get(player.id).get("messages").push("You feel a mystical power dominating you. You were controlled by a Witch!"));
+                            publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role}`]));
+                            publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push(publicAPIMap.get(player.id).get("investigativeMessages")));
                         } else {
                             publicAPIMap.get(player.id).set("messages", publicAPIMap.get(player.id).get("messages").push("You feel a mystical power dominating you. You were controlled by a Witch!"));
+                            publicAPIMap.get(visitingPlayerID).set("messages", publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role}`]));
                         }
                         break;
                     }
+
+                    default:
+                        break;
                 }
             }
 
@@ -575,12 +618,34 @@ module.exports = function(client){
                         else outputMessage.concat("\n", statusCodes[statusCode]);
 
                     }
-                }
+                }       
             }
             allPlayerMessages.push(client.users.cache.get(player.id).send(outputMessage));
+
+        }
+        newDeaths.map(player => player.handleDeath(client, guildID, channelID));
+        await Promise.all(allPlayerMessages);
+        await Promise.all(newDeaths);
+
+        //Reset temporary state
+        for (const player of gameCache.inGameRoles.filter(player => player.alive)){
+            player.targets = {
+                first: false,
+                second: false,
+                binary: false,
+                options: false
+            }
+            player.jailed = false;
+            player.cleaned = false;
+            player.publicRole = player.role;
+            player.publicWill = player.will;
         }
 
-        await Promise.all(allPlayerMessages);
+
+        //Reset all the state for the day.
+        //Includes targets,
+
+        client.emit("gameDaytime", guildID, channelID);
     });
 }
 
@@ -608,6 +673,7 @@ function createTargetMap(client, guildID, channelID){
         ["doctor", false],
         ["escort", false],
         ["transporter", false],
+        ["medium", false],
         ["killing", false],
         ["disguiser", false],
         ["forger", false],
@@ -634,7 +700,6 @@ function createPublicPlayerInformationMap(client, guildID, channelID){
         ["publicID", player.id],
         ["publicRole", player.role],
         ["publicInnocent", player.faction == "Mafia" && player.role != "Godfather" ? false : true], 
-        ["publicStatus", ``]
     ])));
 
     return publicPlayerInformationMap;
@@ -649,7 +714,8 @@ function createPublicAPIMap(client, guildID, channelID){
     gameCache.inGameRoles.filter(player => player.alive).forEach(player => publicAPIMap.set(player.id, new Collection([
         //each role name gets mapped to an array of players of that role that visited the current player. Role is the player's role; messages refers to the messages that will be sent to this player
         ["messages", []],
-        ["statusCodes", []] //This is specifically for the spy. We can store a reference to the array
+        ["statusCodes", []], //This is specifically for the spy. We can store a reference to the array
+        ["investigativeMessages", []]
 
     ])));
 

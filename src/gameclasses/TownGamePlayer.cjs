@@ -32,13 +32,15 @@ class TownGamePlayer extends GamePlayer{
             this.priority = 1;
         } else if (this.role == "Escort"){
             this.priority = 2;
-        } else if (["Bodyguard", "Doctor", "Investigator", "Lookout", "Sheriff", "Jailor", "Vigilante", "Spy"].includes(this.role)){
+        } else if (["Bodyguard", "Doctor", "Investigator", "Lookout", "Sheriff", "Jailor", "Vigilante", "Spy", "Medium"].includes(this.role)){
             this.priority = 3;
         } else if (this.role == "Transporter"){
             this.priority = 4;
         } else {
             this.priority = 0;
         }
+        //Whether or not the mayor has revealed themselves.
+        this.revealed = this.role == "Mayor" ? false : undefined;
     }
 
     //Returns a reference to the message to be sent to a player at the start of the gameNighttime event.
@@ -60,6 +62,8 @@ class TownGamePlayer extends GamePlayer{
         let playerButtons = [];
         for (const player of players){
             if (!player.alive || player.id == this.id) continue;
+            if (!(["Bodyguard, Doctor"].includes(this.role) && this.limitedUses.uses) && player.id == this.id) continue;
+            if (this.role == "Doctor" && player.revealed) continue;
             playerButtons.push(new MessageButton()
                 .setCustomId(player.id + "")
                 .setLabel(player.tag)
@@ -83,6 +87,7 @@ class TownGamePlayer extends GamePlayer{
     }
 
     resolveEmptyNighttimeOptions(){
+        if (this.role == "Vigilante" && !this.limitedUses.uses) return {content: ""};
         return {content: actionRoleObject[this.role].firstNight};
     }
 

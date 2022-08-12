@@ -19,9 +19,11 @@ module.exports = function(client){
         await delay(7000);
 
         let deathMessage = outputChannel.send("May God have mercy upon your soul.");
-        let handleDeath = player.handleDeath(client, guildID);
+        let handleDeath = player.handleDeath(client, guildID, channelID);
+        let outputDeath = player.outputDeath(client, guildID, channelID);
         await deathMessage;
         await handleDeath;
+        await outputDeath;
         
         let gameEnd = checkGameEnd(client, guildID, channelID);
         if (gameEnd.gameEnded) return client.emit("endGame", gameEnd.winningFactions, guildID, channelID);

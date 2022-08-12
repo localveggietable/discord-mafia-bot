@@ -4,10 +4,10 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("forge")
         .setDescription("Forge a player's will")
-        .addUserOption(option => 
-            option.setName("player_to_forge")
-                .setDescription("The player to be jailed")
-                .setRequired(true)
+        .addStringOption(option => 
+            option.setName("forged_will")
+                .setDescription("A string that will replace the forged player's will (default: \"\"))")
+                .setRequired(false)
         )
     
     ,
@@ -21,14 +21,15 @@ module.exports = {
         if (!gameCache) throw new Error("User's internals were not cleared from the custom gameUsers cache.");
 
         let player = gameCache.inGameRoles.find(player => player.id == interaction.user.id);
-        if (!player.alive || player.role != "Jailor") return interaction.followUp("You're not permitted to use this command!");
+        let target = gameCache.inGameRoles.find(target => target.id == player.targets.first);
+        if (!player.alive || player.role != "Forger") return interaction.followUp("You're not permitted to use this command!");
         if (gameCache.isDaytime) return interaction.followUp("You can only use this command at night!");
         
-        let target = gameCache.inGameRoles.find(target => target.id == params[0].id);
         if (!target) return interaction.followUp("That player doesn't exist!");
         if (!target.alive) return interaction.followUp("You can't jail a dead player!");
 
-        player.first.targets = target.id;
-        return interaction.followUp("Your choice has been recorded. If your target dies by lynching, you will have to repick another target.");
+        let publicWill = params[0] ? params[0] : "";
+        player.publicWill = publicWill;
+        return interaction.followUp("Your target's will has been forged.");
     }
 }
