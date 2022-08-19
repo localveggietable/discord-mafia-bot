@@ -4,7 +4,7 @@ const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.cjs");
 const delay = promisify(setTimeout);
 
 module.exports = function(client){
-    client.on("gameNighttime", async (firstNight, guildID, channelID) => {
+    client.on("gameNighttime", async (guildID, channelID) => {
         //useful object references
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
@@ -24,6 +24,7 @@ module.exports = function(client){
 
         const gameCache = client.games.get(guildID).get(channelID);
  
+        const firstNight = gameCache.day;
 
         //Tell the game cache that it is now nighttime.
         gameCache.isDaytime = false;
@@ -118,6 +119,18 @@ module.exports = function(client){
                         jailorChannel.send("The jailor has decided to spare you.")
                     }
                     return interaction.followUp("Your decision has been recorded.");
+                } else if (player.role == "Retributionist"){
+                    let clickedTarget = interaction.customId.slice(0, 6) == "target" ? true : false;
+                    let buttonID = clickedTarget ? interaction.customId.slice(6) : interaction.customId;
+
+                    if (clickedTarget){
+                        player.targets.second == +buttonID;
+                        return interaction.followUp("Your decision has been recorded");
+                    } else {
+                        player.targets.first == +buttonID;
+                        return interaction.followUp("Your decision has been recorded");
+                    }
+
                 } else {
                     player.targets.first = +interaction.customId;
                     return interaction.followUp("Your decision has been recorded.");
@@ -211,13 +224,12 @@ module.exports = function(client){
             SEND_MESSAGES: true
         }));
 
-        //resert all the messages from the Jailor channel.
+        await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));
+
         let deleted;
         do {
             deleted = await jailorChannel.bulkDelete(100);
         } while (deleted.size > 0);
-
-        await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));
 
         return client.emit("gameDaytime", false, guildID, channelID);
 

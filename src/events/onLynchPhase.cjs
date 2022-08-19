@@ -41,6 +41,13 @@ module.exports = function(client){
         //collector.stop() as desired. Having two different intervals is imprecise because of event loop nature
         const collector = lynchMessage.createMessageComponentCollector({componentType: ComponentType.Button, time: 30000});
 
+        const interval = setInterval(() => {
+            if (!(time--)){
+                handleSetInterval(rows, lynchMessage, client, time, collector, guildID, channelID);
+                clearInterval(interval);
+            }
+        }, 1000);
+
         collector.on("collect", (interaction) => {
             let playerExists = gameCache.inGameRoles.find((player) => {
                 return player.alive && (player.id == interaction.user.id);
@@ -57,13 +64,16 @@ module.exports = function(client){
             if (maxVoted.cardinality >= votesRequired){
                 collector.stop();
                 playerIsLynched = true;
-                client.emit("defensePhase", maxVoted.value, --lynches, time, guildID, channelID);
                 for (const row of rows){
                     for (let i = 0; i < 5; ++i){
                         row?.components[i].setDisabled(true);
                     }
                 }
                 lynchMessage.edit({content: "You can't vote anymore!", components: rows});
+
+                clearInterval(interval);
+
+                client.emit("defensePhase", maxVoted.value, --lynches, time, guildID, channelID);
             }
         });
 
@@ -71,13 +81,6 @@ module.exports = function(client){
         collector.on("end", () => {
             if (!playerIsLynched) outputChannel.send("It is now too late to continue voting");
         });
-
-        const interval = setInterval(() => {
-            if (!(time--)){
-                handleSetInterval(rows, lynchMessage, client, time, collector, guildID, channelID);
-                clearInterval(interval);
-            }
-        }, 1000);
 
     });      
 }

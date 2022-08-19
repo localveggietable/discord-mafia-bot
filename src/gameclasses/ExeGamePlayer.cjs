@@ -5,6 +5,7 @@ class ExeGamePlayer extends GamePlayer{
         super("Executioner", id, tag);
         this.won = false;
         this.priority = 0;
+        this.faction = "Executioner";
     }
 
 }

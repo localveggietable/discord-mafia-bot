@@ -8,6 +8,8 @@ module.exports = {
     ,
     async execute(client, interaction, params){
 
+        const outputChannel = interaction.guild.channels.cache.find((channel) => {return channel.name == "tos-channel"});
+
         let row = new MessageActionRow()
         .addComponents(
 
@@ -23,10 +25,23 @@ module.exports = {
 
         ); 
 
+        let rows = [row];
+
+        await interaction.guild.roles.create({
+            name: "Alive Town Member",
+            color: "ORANGE"
+        });
+
+        await outputChannel.send({content: "Choose a button:", components: rows});
+        
+        let aliveRole = interaction.guild.roles.cache.find(r => r.name == "Alive Town Member");
+        await interaction.member.roles.add(aliveRole);
+        
+        await outputChannel.permissionOverwrites.edit(aliveRole, {SEND_MESSAGES: true});
+        await outputChannel.permissionOverwrites.edit(aliveRole, {SEND_MESSAGES: false});
 
         interaction.followUp({content: `Pong! (${client.ws.ping}), in the guild ${interaction.guild.id}`, ephemeral: true});
 
-        
     }
 };
 

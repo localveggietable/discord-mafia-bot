@@ -25,7 +25,6 @@ class TownGamePlayer extends GamePlayer{
     constructor(role, id, tag){
         super(role, id, tag);
         this.faction = "Town";
-        this.retributionistCanUse = false;
        // this.retributionistCanUse = ["Jailor", "Veteran", "Mayor", "Medium", "Veteran"].indexOf(this.role) == -1 ? false : true;
        //do the above in handle death
         if (["Retributionist", "Transporter", "Veteran"].includes(this.role)){
@@ -52,7 +51,7 @@ class TownGamePlayer extends GamePlayer{
     */
     resolveNighttimeOptions(players, firstNight){
         if (!actionRoleObject[this.role] || (this.role == "Jailor" && !this.targets.first)) return;
-        if (actionRoleObject[this.role].firstNight && firstNight) return this.resolveEmptyNighttimeOptions();
+        if ((actionRoleObject[this.role].firstNight && firstNight) || (["Jailor", "Veteran", "Vigilante"].includes(this.role) && this.limitedUses.uses <= 0)) return this.resolveEmptyNighttimeOptions(firstNight);
         if (["Jailor", "Veteran"].includes(this.role)) return this.resolveBinaryNighttimeOptions();
         if (this.role == "Retributionist") return this.resolveRetributionistNighttimeOptions(players);
         return this.resolveDefaultNighttimeOptions(players);
@@ -86,9 +85,15 @@ class TownGamePlayer extends GamePlayer{
         return {content: actionRoleObject[this.role], components: rows};
     }
 
-    resolveEmptyNighttimeOptions(){
-        if (this.role == "Vigilante" && !this.limitedUses.uses) return {content: ""};
-        return {content: actionRoleObject[this.role].firstNight};
+    resolveEmptyNighttimeOptions(firstNight){
+        if (firstNight) return {content: actionRoleObject[this.role].firstNight}; 
+        if (!this.limitedUses.uses) return {content: ""};
+        switch (this.role){
+            case "Vigilante":
+                return {content: "You put your gun down from the guilt of shooting a town member."}; 
+            case "Jailor":
+                return {content: "You cannot execute your target because you killed a town member."};
+        }
     }
 
     resolveBinaryNighttimeOptions(){
@@ -113,25 +118,41 @@ class TownGamePlayer extends GamePlayer{
 
     resolveRetributionistNighttimeOptions(players){
         let playerButtons = [];
+        let targetButtons = [];
         for (const player of players){
-            if (player.retributionistCanUse === false) continue;
+            if (!player.retributionistCanUse) continue;
             playerButtons.push(new MessageButton()
             .setCustomId(player.id + "")
             .setLabel(`${player.tag} (${player.role})`)
             .setStyle("PRIMARY")); 
         }
-         playerButtons.push(new MessageButton()
-            .setCustomId("clear")
-            .setLabel("Clear Selection")
-            .setStyle("SECONDARY"));
+
+        for (const target of players.filter(target => target.alive)){
+            if (target.id == this.id) continue;
+            targetButtons.push(new MessageButton()
+                .setCustomId(`target${target.id}`))
+                .setLabel(`${target.tag}`)
+                .setStyle("PRIMARY");
+        }
+
+        targetButtons.push(new MessageButton()
+        .setCustomId("clear")
+        .setLabel("Clear Selection")
+        .setStyle("SECONDARY"));
 
         const rows = [new MessageActionRow().addComponents(playerButtons.slice(0, Math.min(5, playerButtons.length)))];
         
         if (playerButtons.length > 5) rows.push(new MessageActionRow()
             .addComponents(playerButtons.slice(5, Math.min(10, playerButtons.length))));
         
-        if (playerButtons.length > 10) rows.push(new MessageActionRow()
-            .addComponents(playerButtons.slice(10, playerButtons.length)));
+        rows.push(new MessageActionRow()
+            .addComponents(targetButtons.slice(0, Math.min(5, targetButtons.length))));
+
+        if (targetButtons.length > 5) rows.push(new MessageActionRow()
+            .addComponents(targetButtons.slice(5, Math.min(10, targetButtons.length))));
+
+        if (targetButtons.length > 10) rows.push(new MessageActionRow()
+            .addComponents(targetButtons.slice(10, targetButtons.length)));
 
         return {content: "Choose which dead town member you want to ressurect:", components: rows};
     }

@@ -11,7 +11,7 @@ module.exports = function(client){
         const gameCache = client.games.get(guildID).get(channelID);
         const player = gameCache.inGameRoles.find(player => player.id == playerID);
 
-        let jailorPlayer = gameCache.find(player => player.role == "Jailor");
+        let jailorPlayer = gameCache.inGameRoles.find(player => player.role == "Jailor");
         if (jailorPlayer.alive && jailorPlayer.targets.first == playerID) jailorPlayer.targets.first = false;
 
         await outputChannel.send(`The town has decided to lynch you, ${player.tag}. Do you have any last words?`);
@@ -30,7 +30,7 @@ module.exports = function(client){
 
         await delay(1000);
         await outputChannel.send(`It is too late to continue voting.`);
-        client.emit("gameNighttime", false, guildID, channelID);
+        client.emit("gameNighttime", guildID, channelID);
         
     });
 }

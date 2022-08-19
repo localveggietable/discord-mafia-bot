@@ -35,16 +35,32 @@ class GamePlayer{
         //indicates whether or not the player is to be jailed
         this.jailed = false;
 
-        this.limitedUses = ["Jailor", "Veteran", "Vigilante", "Janitor"].includes(role) ? {limited: true, uses: 3} : ["Doctor", "Bodyguard"].includes(role) ? {limited: true, uses: 1} : {limited: false, uses: 0};
+        switch (role){
+            case "Jailor": case "Janitor": case "Veteran": case "Vigilante":
+                this.limitedUses = {limited: true, uses: 3};
+                break;
+            case "Forger":
+                this.limitedUses = {limited: true, uses: 2};
+                break;
+            case "Doctor": case "Bodyguard":
+                this.limitedUses = {limited: true, uses: 1};
+                break;
+            default:
+                this.limitedUses = {limited: false, uses: Infinity};
+                break;
+        }
         //0 indicates no defense, 1 indicates basic defense, 2 indicates powerful defense, 3 indicates immovable defense.
         this.defense = ["Godfather", "Executioner", "Witch"].includes(role) ? 1 : 0;
 
+        //indicates whether or not retributionist can use the ability.
+        this.retributionistCanUse = false;
+
+        this.canSeance = this.role == "Medium" ? true : false;
+
+        this.seanced = false;
+
         //see https://town-of-salem.fandom.com/wiki/Ability
 
-    }
-
-    async printWill(outputChannel){
-        await outputChannel.send(this.will);
     }
 
     //i think i want to split handledeath into handledeath and outputdeath to separate handling node-side state vs. client-side state.
@@ -52,14 +68,20 @@ class GamePlayer{
         const guild = client.guilds.cache.get(guildID);
         const member = guild.members.cache.get(this.id);
 
-        const outputChannel = channelID ? guild.channels.cache.find((channel) => {
+        const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
-        }) : guild.channels.cache.find((channel) => {return channel.name == "tos-channel"});
+        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
 
         let [aliveRole, deadRole] = [guild.roles.cache.find(role => role.name == "Alive Town Member"), guild.roles.cache.find(role => role.name == "Dead Town Member")];
 
         this.alive = false;
+        //Below line throwing error
+        this.retributionistCanUse = (["Investigator", "Lookout", "Sheriff", "Spy", "Vigilante", "Bodyguard", "Doctor", "Escort"].includes(this.role)) ? true : false;
+
+        outputChannel.permissionOverwrites.delete(member.id);
+
         await Promise.all([member.roles.remove(aliveRole), member.roles.add(deadRole)]);
+        return this;
     }
 
     async outputDeath(client, guildID, channelID){
@@ -68,6 +90,8 @@ class GamePlayer{
         const outputChannel = channelID ? guild.channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : guild.channels.cache.find((channel) => {return channel.name == "tos-channel"});
+
+        if (this.cleaned) return outputChannel.send(`${member.user.tag} was cleaned. We could not determine their role or will`);
         
         const will = this.publicWill === "" ? null : new EmbedBuilder()
             .setColor(10070709)
@@ -77,7 +101,7 @@ class GamePlayer{
         //Let's put this in the events folder
         let toWrite = this.publicWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send({content: `We found a will next to their body.`, embeds: [will]});
         await toWrite;
-        outputChannel.send(`${member.user.tag}'s role was **${this.publicRole}**`); 
+        return outputChannel.send(`${member.user.tag}'s role was **${this.publicRole}**`); 
     }
 }
 

@@ -35,7 +35,7 @@ class MafiaGamePlayer extends GamePlayer{
     static resolveNighttimeOptions(players){
         let aliveMafiaMembers = players.filter(player => player.role == "Mafia" && player.alive);
         let aliveTownMembers = players.filter(player => player.role != "Mafia" && player.alive);
-        let mafiosoAndGodfatherRoles = aliveMafiaMembers.filter(player => ["Mafioso", "Godfather"].indexOf(player.role) != -1);
+        let mafiosoAndGodfatherRoles = aliveMafiaMembers.filter(player => ["Mafioso", "Godfather"].includes(player.role));
         let outputMessages = [];
         for (const mafiaMember of aliveMafiaMembers){
             if (["Godfather", "Mafioso"].indexOf(mafiaMember.role) != -1) continue;
@@ -72,6 +72,7 @@ class MafiaGamePlayer extends GamePlayer{
                 outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, choose who you want to disguise and what town member they should be disguised as:`, components: rows}]);
 
             } else if (mafiaMember.role == "Forger"){
+                if (!mafiaMember.limitedUses.uses) return {content: ""};
                 let townButtons = [];
                 for (const player of aliveTownMembers){
                     townButtons.push(new MessageButton()
@@ -152,6 +153,7 @@ class MafiaGamePlayer extends GamePlayer{
 
                 outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, choose a player to hypnotize, and what message you want to send them:`, components: rows}]);
             } else {
+                if (!mafiaMember.limitedUses.uses) return {content: ""};
                 let playerButtons = [];
                 for (const player of players){
                     if (!player.alive || player.id == mafiaMember.id) continue;
@@ -203,6 +205,37 @@ class MafiaGamePlayer extends GamePlayer{
         outputMessages.push([mafiosoAndGodfatherRoles, {content: "Godfather and/or Mafioso, choose who you want to kill:", components: rows}]);
 
         return outputMessages;
+    }
+
+    async handleDeath(client, guildID, channelID){
+        const gameCache = client.games.get(guildID).get(channelID);
+        const mafiaChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
+            return channel.name.split("-")[3] == channelID && channel.name.split("-")[0] == "mafia";
+        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "mafia-tos-channel"});
+
+        let toReturn = await super.handleDeath(client, guildID, channelID);
+
+        if (this.role == "Godfather"){
+            const aliveMafiaPlayer = gameCache.inGameRoles.find(player => player.alive && player.role == "Mafioso");
+            if (aliveMafiaPlayer) {
+                aliveMafiaPlayer.role = "Godfather";
+                await mafiaChannel.send(`${aliveMafiaPlayer.tag} has now been promoted to Godfather!`);
+            } else {
+                const aliveSupportMafiaPlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Mafia");
+                if (!aliveSupportMafiaPlayer) return toReturn;
+                aliveSupportMafiaPlayer.role = "Mafioso";
+                await mafiaChannel.send(`${aliveSupportMafiaPlayer.tag} has now become a Mafioso!`);
+            }
+        } else if (this.role == "Mafioso"){
+            const aliveGodfatherPlayer = gameCache.inGameRoles.find(player => player.alive && player.role == "Godfather");
+            if (aliveGodfatherPlayer) return toReturn;
+            const aliveSupportMafiaPlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Mafia");
+            if (!aliveSupportMafiaPlayer)  return toReturn;
+            aliveSupportMafiaPlayer.role = "Mafioso";
+            await mafiaChannel.send(`${aliveSupportMafiaPlayer.tag} has now become a Mafioso!`); 
+        }
+
+        return toReturn;
     }
 
 }

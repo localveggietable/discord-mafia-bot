@@ -68,9 +68,6 @@ const statusCodes = {
 module.exports = function(client){
     client.on("handleGameState", async (guildID, channelID) => {
         //TODO: figure out who's dead, manage permissions at a user-based level
-        const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
-            return channel.name.split("-")[2] == channelID
-        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
         const gameCache = client.games.get(guildID).get(channelID);
 
         let targetMap = createTargetMap(client, guildID, channelID);
@@ -194,9 +191,36 @@ module.exports = function(client){
                     }
                     break;
                 }
-                case "Mafioso": case "Godfather": case "Vigilante": {
-                    if (!player.targets.first) break;
+                case "Vigilante": {
+                    if (!player.targets.first) break; 
                     const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer == player.targets.first); 
+                    targetMap.get(target.id).set("killing", targetMap.get(target.id).get("killing") ? targetMap.get(target.id).get("killing").push(player.id) : [player.id]);
+                    targetMap.get(target.id).set("all", targetMap.get(target.id).get("all") ? targetMap.get(target.id).get("all").push(player.id) : [player.id]);
+                    break;
+                }
+                case "Mafioso": {
+                    let godfatherPlayer = actionTracker.find(player => player.role == "Godfather");
+                    let target;
+
+                    //indicates role blocked
+                    if (!player.targets.first) break; 
+                    if (godfatherPlayer && godfatherPlayer?.targets.first){
+                        target = gameCache.inGameRoles.find(player => player.id == godfatherPlayer.targets.first); 
+                    } else {
+                        target = gameCache.inGameRoles.find(targetPlayer => targetPlayer == player.targets.first); 
+                    }
+                    targetMap.get(target.id).set("killing", targetMap.get(target.id).get("killing") ? targetMap.get(target.id).get("killing").push(player.id) : [player.id]);
+                    targetMap.get(target.id).set("all", targetMap.get(target.id).get("all") ? targetMap.get(target.id).get("all").push(player.id) : [player.id]);
+                    break;
+                }
+                case "Godfather": {
+                    let mafiosoPlayer = actionTracker.find(player => player.role == "Mafioso");
+
+                    if (mafiosoPlayer?.targets.first) break;    
+                    if (!player.targets.first) break;
+
+                    let target = player.target.first;
+
                     targetMap.get(target.id).set("killing", targetMap.get(target.id).get("killing") ? targetMap.get(target.id).get("killing").push(player.id) : [player.id]);
                     targetMap.get(target.id).set("all", targetMap.get(target.id).get("all") ? targetMap.get(target.id).get("all").push(player.id) : [player.id]);
                     break;
@@ -579,28 +603,14 @@ module.exports = function(client){
                         break;
                 }
             }
-
-
-            //WRT Messages: Visits that should trigger messages:
-            /*
-            - Consort
-            - Escort
-            - Witch
-
-            Spy should very much be handled by backmessages (every player who gets visited by mafia will send a message to the spy)
-
-            - Vigilante (also handle guilt, etc. as backlogic)
-            - Mafioso/Godfather
-            - If either of the above happen and a doctor/bodyguard saves you
-
-            - Hypno message
-            - Blackmail
-            - Execution (if you're jailed)
-            - TI (backmessage)
-            - Visiting a Veteran (messages should be pushed onto the message array when the iterator is at the Veteran - we'll call this a backmessage)
-            */
         }
         uniq(newDeaths);
+        
+        for (const player of newDeaths){
+            if (!player.cleaned) continue;
+            publicAPIMap.get(player.cleaned.id).set("messages", publicAPIMap.get(player.cleaned.id).get("messages").push(`You secretly know that your target's role was ${player.role}`));
+            publicAPIMap.get(player.cleaned.id).set("messages", publicAPIMap.get(player.cleaned.id).get("messages").push(`You secretly know that your target's will was ${player.will}`)); 
+        }
 
         //print all the messages.
 
@@ -645,7 +655,7 @@ module.exports = function(client){
         //Reset all the state for the day.
         //Includes targets,
 
-        client.emit("gameDaytime", guildID, channelID);
+        client.emit("gameDaytime", false, guildID, channelID, newDeaths);
     });
 }
 
