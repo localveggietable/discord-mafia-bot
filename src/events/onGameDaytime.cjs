@@ -7,6 +7,8 @@ module.exports = function(client){
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
         let gameCache = client.games.get(guildID).get(channelID);
 
+        const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
+
         gameCache.day = firstDay ? 1 : gameCache.day + 1;
         gameCache.isDaytime = true;
         let time = firstDay ? 15 : 60;
@@ -26,13 +28,13 @@ module.exports = function(client){
                 SEND_MESSAGES: false
             }));
 
-            await outputChannel.permissionOverwrites.edit(client.guilds.cache.get(guildID).roles.cache.find(role => role.name == "Alive Town Member").id, {
+            await outputChannel.permissionOverwrites.edit(client.guilds.cache.get(guildID).roles.cache.find(role => role.name == aliveRoleName).id, {
                 SEND_MESSAGES: true
             }); 
 
             //Handle all the permissions. change this into alive role rather than a person by person basis.
             try {
-                await outputChannel.permissionOverwrites.edit(client.guilds.cache.get(guildID).roles.cache.find(role => role.name == "Alive Town Member").id, {
+                await outputChannel.permissionOverwrites.edit(client.guilds.cache.get(guildID).roles.cache.find(role => role.name == aliveRoleName).id, {
                     SEND_MESSAGES: true
                 });
             } catch (e) {

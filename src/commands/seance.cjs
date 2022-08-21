@@ -11,8 +11,8 @@ module.exports = {
         )
         .addStringOption(option => 
             option.setName("message_to_seance")
-                .setDescription("The message you want to send the player"))
-                .setRequired(true)
+                .setDescription("The message you want to send the player")
+                .setRequired(true))
     ,
     async execute(client, interaction, params){
         const userTarget = client.users.cache.find(user => user.tag == params[0]);

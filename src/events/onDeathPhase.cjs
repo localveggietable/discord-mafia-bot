@@ -19,7 +19,7 @@ module.exports = function(client){
         await delay(7000);
 
         let deathMessage = outputChannel.send("May God have mercy upon your soul.");
-        let handleDeath = player.handleDeath(client, guildID, channelID);
+        let handleDeath = player.handleDeath(client, guildID, channelID, true);
         let outputDeath = player.outputDeath(client, guildID, channelID);
         await deathMessage;
         await handleDeath;

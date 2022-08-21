@@ -4,9 +4,9 @@ module.exports = function(client){
             return channel.name.split("-")[2] == channelID
             }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
         
-        //    const gameCache = client.games.get(guildID).get(channelID);
+        const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
 
-        let aliveRole = client.guilds.cache.get(guildID).roles.cache.find(role => role.name == "Alive Town Member");
+        let aliveRole = client.guilds.cache.get(guildID).roles.cache.find(role => role.name == aliveRoleName);
         await Promise.all([outputChannel.permissionOverwrites.edit(aliveRole, {
             SEND_MESSAGES: false
         }), outputChannel.permissionOverwrites.edit(playerID, {

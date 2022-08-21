@@ -12,7 +12,7 @@ module.exports.setupGuild = function setupGuild(client, guildID){
     let defaultChannelObj = {
         ongoing: false,
         started: false,
-        players: 0,
+        players: [],
         inGameRoles: [],
         isDaytime: true,
         day: 0

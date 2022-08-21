@@ -5,7 +5,7 @@ const {addPlayerToGame} = require("../util/addPlayerToGame.cjs");
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName("tos-startgame")
+    .setName("startgame")
     .setDescription("Start a game of tos! (By default, the user who runs this command joins the game)")
     .addBooleanOption(option => 
         option.setName("autojoin")
@@ -30,8 +30,11 @@ module.exports = {
         if(!client.games.get(interaction.guildId)) setupGuild(client, interaction.guildId);
         client.games.get(interaction.guildId).get(channelNumber).ongoing = true;
     
-        if (!params[0]) return;
+        if (params[0] === false) return interaction.followUp("A game has successfully been started, but you have not joined it.");
         addPlayerToGame(client, interaction.guildId, channelNumber, interaction.member.id);
+
+        console.log("hi");
+        return interaction.followUp("A game has successfully been started.");
     }
 };
 

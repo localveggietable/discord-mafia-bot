@@ -23,6 +23,8 @@ module.exports = function(client){
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "dead-tos-channel"}); 
 
         const gameCache = client.games.get(guildID).get(channelID);
+
+        const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
  
         const firstNight = gameCache.day;
 
@@ -70,7 +72,7 @@ module.exports = function(client){
         await Promise.all(mafiaWritePermissions.concat(mediumWritePermissions));
 
         try {
-            await outputChannel.permissionOverwrites.edit(client.guilds.cache.get(guildID).roles.cache.find(role => role.name == "Alive Town Member").id, {
+            await outputChannel.permissionOverwrites.edit(client.guilds.cache.get(guildID).roles.cache.find(role => role.name == aliveRoleName).id, {
                 SEND_MESSAGES: false
             });
         } catch (e) {

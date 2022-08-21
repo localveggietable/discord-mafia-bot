@@ -7,33 +7,38 @@ const {TownGamePlayer} = require("../gameclasses/TownGamePlayer.cjs");
 module.exports = function(client){
     client.on("startGame", async function(guildID, channelID){
 
+        const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
+            return channel.name.split("-")[2] == channelID
+        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
+
         const gameCache = client.games.get(guildID).get(channelID);
+
         //Create roles.
 
-        //Needs to be changed, see TODO
-        if (!(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"))){
-            client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"));
+        const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
+        const deadRoleName = channelID ? `Dead Town Member ${channelID}`: "Dead Town Member";
+
+        if (client.guilds.cache.get(guildID).roles.cache.find(r => r.name == aliveRoleName || r.name == deadRoleName)){
+            return outputChannel.send(`You have existing roles that must be deleted before any game can be played.`);
         }
 
         await Promise.all([
         client.guilds.cache.get(guildID).roles.create({
-            name: "Alive Town Member",
+            name: aliveRoleName,
             color: "ORANGE"
         }), 
         client.guilds.cache.get(guildID).roles.create({
-            name: "Dead Town Member",
+            name: deadRoleName,
             color: "BLUE"
         })]);
 
-        const aliveRole = client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Alive Town Member");
+        const aliveRole = client.guilds.cache.get(guildID).roles.cache.find(r => r.name == aliveRoleName);
         await gameCache.players.map((playerID) => client.guilds.cache.get(guildID).members.cache.get(playerID)).forEach(member => member.roles.add(aliveRole).catch(console.error));
 
         //
 
         let time = 15;
-        const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
-            return channel.name.split("-")[2] == channelID
-        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
+        
 
         //Algo for assigning roles:
         //
@@ -77,14 +82,14 @@ module.exports = function(client){
         let shufflePlayers = shuffleArray([...gameCache.players]);
         let mafiaPlayerIDs = shufflePlayers.slice(9, 13);
         
-        gameCache.inGameRoles = [new TownGamePlayer("Jailor", shufflePlayers[0], client.users.cache.get(shufflePlayers[0]).tag), new TownGamePlayer(tiRole1, shufflePlayers[1], client.users.cache.get(shufflePlayers[1]).tag), 
+        gameCache.inGameRoles = shuffleArray([new TownGamePlayer("Jailor", shufflePlayers[0], client.users.cache.get(shufflePlayers[0]).tag), new TownGamePlayer(tiRole1, shufflePlayers[1], client.users.cache.get(shufflePlayers[1]).tag), 
         new TownGamePlayer(tiRole2, shufflePlayers[2], client.users.cache.get(shufflePlayers[2]).tag), new TownGamePlayer(tpRole, shufflePlayers[3], client.users.cache.get(shufflePlayers[3]).tag),
         new TownGamePlayer(tkRole, shufflePlayers[4], client.users.cache.get(shufflePlayers[4]).tag), new TownGamePlayer(tsRole, shufflePlayers[5], client.users.cache.get(shufflePlayers[5]).tag), 
         new TownGamePlayer(rtRole1, shufflePlayers[6], client.users.cache.get(shufflePlayers[6]).tag), new TownGamePlayer(rtRole2, shufflePlayers[7], client.users.cache.get(shufflePlayers[7]).tag), 
         new TownGamePlayer(rtRole3, shufflePlayers[8], client.users.cache.get(shufflePlayers[8]).tag), new MafiaGamePlayer("Godfather", shufflePlayers[9], client.users.cache.get(shufflePlayers[9]).tag), 
         new MafiaGamePlayer("Mafioso", shufflePlayers[10], client.users.cache.get(shufflePlayers[10]).tag), new MafiaGamePlayer(rmRole1, shufflePlayers[11], client.users.cache.get(shufflePlayers[11]).tag),
         new MafiaGamePlayer(rmRole2, shufflePlayers[12], client.users.cache.get(shufflePlayers[12]).tag), new ExeGamePlayer(shufflePlayers[13], client.users.cache.get(shufflePlayers[13]).tag), 
-        new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag)];
+        new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag)]);
 
         //Create a mafia only channel.
 
@@ -129,7 +134,7 @@ module.exports = function(client){
                     deny: [Permissions.FLAGS.VIEW_CHANNEL]
                 },
                 {
-                    id: client.guilds.cache.get(guildID).roles.cache.find(r => r.name == "Dead Town Member").id,
+                    id: client.guilds.cache.get(guildID).roles.cache.find(r => r.name == deadRoleName).id,
                     allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
                 }
             ]
@@ -139,21 +144,17 @@ module.exports = function(client){
         //Set default permissions.
 
 
-        try {
-                await outputChannel.permissionOverwrites.set([
-                {
-                    id: guildID,
-                    deny: [Permissions.FLAGS.SEND_MESSAGES]
-                },
-                {
-                    id: client.guilds.cache.get(guildID).roles.cache.find(role => role.name == "Alive Town Member").id,
-                    allow: [Permissions.FLAGS.SEND_MESSAGES]
-                }
-            ]);
-        } catch (e) {
-            await outputChannel.send("Someone messed with the channel roles needed to run this game :/ . This game will be aborted.");
-            return client.emit("onEndGameError", guildID, channelID);
-        }
+        await outputChannel.permissionOverwrites.set([
+            {
+                id: guildID,
+                deny: [Permissions.FLAGS.SEND_MESSAGES]
+            },
+            {
+                id: client.guilds.cache.get(guildID).roles.cache.find(role => role.name == aliveRoleName).id,
+                allow: [Permissions.FLAGS.SEND_MESSAGES]
+            }
+        ]);
+
 
         //Send players their roles
 
