@@ -15,7 +15,7 @@ module.exports = function(client){
         for (let player of gameCache.inGameRoles){
             if (!player.alive) continue;
             lynchButtons.push(new MessageButton()
-                .setCustomId(player.id + "")
+                .setCustomId(player.id)
                 .setLabel(client.users.cache.get(player.id).tag)
                 .setStyle("PRIMARY"));
         }

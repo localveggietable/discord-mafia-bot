@@ -52,6 +52,14 @@ module.exports = function(client){
         });
 
         setTimeout(async () => {
+            collector.stop();
+
+            let mayorPlayer = gameCache.inGameRoles.find(player => player.revealed && player.alive);
+            if (mayorPlayer) {
+                let mayorVote = votes[gameCache.inGameRoles.indexOf(mayorPlayer)];
+                if (mayorVote) votes.push(mayorVote, mayorVote);
+            }
+
             const {value} = countMax(votes);
             playerKilled = Array.isArray(value) ? false : (value == 1 ? false : true);
             const promises = [];

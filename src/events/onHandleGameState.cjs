@@ -95,15 +95,24 @@ module.exports = function(client){
                 case "Retributionist": {
                     if (!(player.targets.first && player.targets.second)) break;
                     const ressurectTarget = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first);
-                    const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer == player.targets.second);
-                    targetMap.get(target.id).set(ressurectTarget.role.toLowerCase(), targetMap.get(target.id).get(ressurectTarget.role.toLowerCase()) ? targetMap.get(target.id).get(ressurectTarget.role.toLowerCase()).push(player.id) : [player.id]);
-                    targetMap.get(target.id).set("all", targetMap.get(target.id).get("all") ? targetMap.get(target.id).get("all").push(player.id) : [player.id]);
+                    const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.second);
+                    if (targetMap.get(target.id).get(ressurectTarget.role.toLowerCase())){
+                        targetMap.get(target.id).get(ressurectTarget.role.toLowerCase()).push(player.id); 
+                    } else {
+                        targetMap.get(target.id).set(ressurectTarget.role.toLowerCase(), [player.id]);
+                    }
+
+                    if (targetMap.get(target.id).get("all")){
+                        targetMap.get(target.id).get("all").push(player.id);
+                    } else {
+                        targetMap.get(target.id).set("all", [player.id]);
+                    }
                     break;
                 }
                 case "Transporter": {
                     if (!(player.targets.first && player.targets.second)) break;
                     const firstTarget = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first);
-                    const secondTarget = gameCache.inGameRoles.find(targetPlayer => targetPlayer == player.targets.second);
+                    const secondTarget = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.second);
 
                     //The idea is we can take all the players that visit the first player and have them instead visit the second player, vice versa.
 
@@ -193,7 +202,7 @@ module.exports = function(client){
                 }
                 case "Vigilante": {
                     if (!player.targets.first) break; 
-                    const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer == player.targets.first); 
+                    const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first); 
                     targetMap.get(target.id).set("killing", targetMap.get(target.id).get("killing") ? targetMap.get(target.id).get("killing").push(player.id) : [player.id]);
                     targetMap.get(target.id).set("all", targetMap.get(target.id).get("all") ? targetMap.get(target.id).get("all").push(player.id) : [player.id]);
                     break;
@@ -207,7 +216,7 @@ module.exports = function(client){
                     if (godfatherPlayer && godfatherPlayer?.targets.first){
                         target = gameCache.inGameRoles.find(player => player.id == godfatherPlayer.targets.first); 
                     } else {
-                        target = gameCache.inGameRoles.find(targetPlayer => targetPlayer == player.targets.first); 
+                        target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first); 
                     }
                     targetMap.get(target.id).set("killing", targetMap.get(target.id).get("killing") ? targetMap.get(target.id).get("killing").push(player.id) : [player.id]);
                     targetMap.get(target.id).set("all", targetMap.get(target.id).get("all") ? targetMap.get(target.id).get("all").push(player.id) : [player.id]);
@@ -227,7 +236,7 @@ module.exports = function(client){
                 }
                 default: {
                     if (!player.targets.first) break;
-                    const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer == player.targets.first); 
+                    const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first); 
                     targetMap.get(target.id).set(player.role.toLowerCase(), targetMap.get(target.id).get(player.role.toLowerCase()) ? targetMap.get(target.id).get(player.role.toLowerCase()).push(player.id) : [player.id]);
                     targetMap.get(target.id).set("all", targetMap.get(target.id).get("all") ? targetMap.get(target.id).get("all").push(player.id) : [player.id]);
                     break;
@@ -619,6 +628,7 @@ module.exports = function(client){
             let outputMessage = "Here's what happened in the game tonight:";
             const messages = publicAPIMap.get(player.id).get("messages");
 
+            console.log(messages);
             for (const message of messages){
                 if (typeof message == "string"){
                     outputMessage.concat("\n", message);

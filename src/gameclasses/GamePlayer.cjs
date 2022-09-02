@@ -63,7 +63,6 @@ class GamePlayer{
 
     }
 
-    //i think i want to split handledeath into handledeath and outputdeath to separate handling node-side state vs. client-side state.
     async handleDeath(client, guildID, channelID, lynched = false){
         const guild = client.guilds.cache.get(guildID);
         const member = guild.members.cache.get(this.id);

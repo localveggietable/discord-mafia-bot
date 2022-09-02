@@ -1,8 +1,9 @@
 const {shuffleArray} = require( "../util/shuffleArray.cjs");
-const {WitchGamePlayer} = require("../gameclasses/WitchGamePlayer.cjs");
-const {ExeGamePlayer} = require("../gameclasses/ExeGamePlayer.cjs");
-const {MafiaGamePlayer} = require("../gameclasses/MafiaGamePlayer.cjs");
-const {TownGamePlayer} = require("../gameclasses/TownGamePlayer.cjs");
+const {Permissions} = require("discord.js");
+const WitchGamePlayer = require("../gameclasses/WitchGamePlayer.cjs");
+const ExeGamePlayer = require("../gameclasses/ExeGamePlayer.cjs");
+const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.cjs");
+const TownGamePlayer = require("../gameclasses/TownGamePlayer.cjs");
 
 module.exports = function(client){
     client.on("startGame", async function(guildID, channelID){
@@ -17,11 +18,7 @@ module.exports = function(client){
 
         const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
         const deadRoleName = channelID ? `Dead Town Member ${channelID}`: "Dead Town Member";
-
-        if (client.guilds.cache.get(guildID).roles.cache.find(r => r.name == aliveRoleName || r.name == deadRoleName)){
-            return outputChannel.send(`You have existing roles that must be deleted before any game can be played.`);
-        }
-
+        
         await Promise.all([
         client.guilds.cache.get(guildID).roles.create({
             name: aliveRoleName,
@@ -47,9 +44,9 @@ module.exports = function(client){
         // Decide everyone's roles who are not random town.
         //
 
-        let tiRoles = ["Investigator", "Lookout", "Spy"], tpRoles = ["Doctor", "Bodyguard"], tkRoles = ["Veteran, Vigilante"], tsRoles = ["Escort", "Mayor", "Retributionist", "Medium", "Transporter"], mafRoles = ["Ambusher", "Blackmailer", "Consigliere", "Consort", "Disguiser", "Forger", "Framer", "Hypnotist", "Janitor"];
+        let tiRoles = ["Investigator", "Lookout", "Spy"], tpRoles = ["Doctor", "Bodyguard"], tkRoles = ["Veteran", "Vigilante"], tsRoles = ["Escort", "Mayor", "Retributionist", "Medium", "Transporter"], mafRoles = ["Ambusher", "Blackmailer", "Consigliere", "Consort", "Disguiser", "Forger", "Framer", "Hypnotist", "Janitor"];
 
-        let [tiRole1, tiRole2, tpRole, tkRole, tsRole, rmRole1] = [tiRoles[Math.floor(Math.random() * 3)], tiRoles[Math.floor(Math.random() * 4)], 
+        let [tiRole1, tiRole2, tpRole, tkRole, tsRole, rmRole1] = [tiRoles[Math.floor(Math.random() * 3)], tiRoles[Math.floor(Math.random() * 3)], 
             tpRoles[Math.floor(Math.random() * 2)], tkRoles[Math.floor(Math.random() * 2)],
             tsRoles[Math.floor(Math.random() * 5)], mafRoles[Math.floor(Math.random() * 9)]];
         
@@ -65,22 +62,20 @@ module.exports = function(client){
         let rtRole1, rtRole2, rtRole3;
 
         rtRole1 = rtRoles[Math.floor(Math.random() * (rtRoles.length - 1))];
-        if (["Veteran", "Mayor", "Retributionist"].indexOf(rtRole1) > -1) {
+        if (["Veteran", "Mayor", "Retributionist"].includes(rtRole1)) {
             rtRoles.splice(rtRoles.indexOf(rtRole1), 1);
         }
 
         rtRole2 = rtRoles[Math.floor(Math.random() * (rtRoles.length - 1))];
-        if (["Veteran", "Mayor", "Retributionist"].indexOf(rtRole2) > -1) {
+        if (["Veteran", "Mayor", "Retributionist"].includes(rtRole2)) {
             rtRoles.splice(rtRoles.indexOf(rtRole2), 1);
         }
 
         rtRole3 = rtRoles[Math.floor(Math.random() * (rtRoles.length - 1))];
-        if (["Veteran", "Mayor", "Retributionist"].indexOf(rtRole3) > -1) {
-            rtRoles.splice(rtRoles.indexOf(rtRole3), 1);
-        }
 
         let shufflePlayers = shuffleArray([...gameCache.players]);
         let mafiaPlayerIDs = shufflePlayers.slice(9, 13);
+
         
         gameCache.inGameRoles = shuffleArray([new TownGamePlayer("Jailor", shufflePlayers[0], client.users.cache.get(shufflePlayers[0]).tag), new TownGamePlayer(tiRole1, shufflePlayers[1], client.users.cache.get(shufflePlayers[1]).tag), 
         new TownGamePlayer(tiRole2, shufflePlayers[2], client.users.cache.get(shufflePlayers[2]).tag), new TownGamePlayer(tpRole, shufflePlayers[3], client.users.cache.get(shufflePlayers[3]).tag),
@@ -91,7 +86,7 @@ module.exports = function(client){
         new MafiaGamePlayer(rmRole2, shufflePlayers[12], client.users.cache.get(shufflePlayers[12]).tag), new ExeGamePlayer(shufflePlayers[13], client.users.cache.get(shufflePlayers[13]).tag), 
         new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag)]);
 
-        //Create a mafia only channel.
+        console.log(gameCache.inGameRoles.length, "\n");
 
         await Promise.all([client.guilds.cache.get(guildID).channels.create(`mafia-${outputChannel.name}`, {
             type: "GUILD_TEXT",
@@ -163,9 +158,11 @@ module.exports = function(client){
             messages.push(client.users.cache.get(player.id).send(`Welcome to tos! Your role is ${player.role}`));
         }
 
+        await Promise.all(messages);
+
         let interval = setInterval(() => {
-            handleSetInterval(outputChannel, gameCache, guildID, channelID, time--);
-            if (!time){
+            handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time--);
+            if (time < 0){
                 clearInterval(interval);
             }
         }, 1000);
@@ -174,9 +171,9 @@ module.exports = function(client){
 
 //this ensures that gameDaytime is emitted only after the channel has been notified.
 async function handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time){
-    await outputChannel.send(time);
     if (!time){
         gameCache.started = true;
-        client.emit("gameDaytime", true, guildID, channelID);
+        return client.emit("gameDaytime", true, guildID, channelID); 
     }
+    if (!(time % 5)) await outputChannel.send({content: time + ""});
 }

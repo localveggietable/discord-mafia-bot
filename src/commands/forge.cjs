@@ -26,7 +26,7 @@ module.exports = {
         if (gameCache.isDaytime) return interaction.followUp("You can only use this command at night!");
         
         if (!target) return interaction.followUp("That player doesn't exist!");
-        if (!target.alive) return interaction.followUp("You can't jail a dead player!");
+        if (!target.alive) return interaction.followUp("You can't forge a dead player!");
 
         let publicWill = params[0] ? params[0] : "";
         player.publicWill = publicWill;

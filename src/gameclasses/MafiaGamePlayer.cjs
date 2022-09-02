@@ -3,7 +3,8 @@ const GamePlayer = require("./GamePlayer.cjs");
 
 var actionRoleObject = {
     Janitor: "Choose who you want to clean:",
-    Ambush: "Choose who you want to ambush:",
+    Ambusher: "Choose who you want to ambush:",
+    Framer: "Choose who you want to frame:",
     Blackmailer: "Choose who you want to blackmail:",
     Consigliere: "Choose who you want to investigate:",
     Consort: "Choose who you want to role block:"
@@ -33,9 +34,9 @@ class MafiaGamePlayer extends GamePlayer{
 
     */
     static resolveNighttimeOptions(players){
-        let aliveMafiaMembers = players.filter(player => player.role == "Mafia" && player.alive);
-        let aliveTownMembers = players.filter(player => player.role != "Mafia" && player.alive);
-        let mafiosoAndGodfatherRoles = aliveMafiaMembers.filter(player => ["Mafioso", "Godfather"].includes(player.role));
+        let aliveMafiaMembers = players.filter(player => player.faction == "Mafia" && player.alive);
+        let aliveTownMembers = players.filter(player => player.faction != "Mafia" && player.alive);
+        let mafiosoAndGodfatherRoles = aliveMafiaMembers.filter(player => ["Mafioso", "Godfather"].includes(player.role) && player.alive);
         let outputMessages = [];
         for (const mafiaMember of aliveMafiaMembers){
             if (["Godfather", "Mafioso"].indexOf(mafiaMember.role) != -1) continue;
@@ -43,13 +44,13 @@ class MafiaGamePlayer extends GamePlayer{
                 let townButtons = [], mafiaButtons = [];
                 for (const player of aliveMafiaMembers){
                     mafiaButtons.push(new MessageButton()
-                        .setCustomId(player.id + "")
+                        .setCustomId(player.id)
                         .setLabel(player.tag)
                         .setStyle("PRIMARY"));
                 }
                 for (const player of aliveTownMembers){
                     townButtons.push(new MessageButton()
-                        .setCustomId(player.id + "")
+                        .setCustomId(player.id)
                         .setLabel(player.tag)
                         .setStyle("PRIMARY"));  
                 }
@@ -76,7 +77,7 @@ class MafiaGamePlayer extends GamePlayer{
                 let townButtons = [];
                 for (const player of aliveTownMembers){
                     townButtons.push(new MessageButton()
-                        .setCustomId(player.id + "")
+                        .setCustomId(player.id)
                         .setLabel(player.tag)
                         .setStyle("PRIMARY"));  
                 }
@@ -102,7 +103,7 @@ class MafiaGamePlayer extends GamePlayer{
                 for (const player of players){
                     if (!player.alive || player.id == mafiaMember.id) continue;
                     playerButtons.push(new MessageButton()
-                        .setCustomId(player.id + "")
+                        .setCustomId(player.id)
                         .setLabel(player.tag)
                         .setStyle("PRIMARY"));
                 }
@@ -158,7 +159,7 @@ class MafiaGamePlayer extends GamePlayer{
                 for (const player of players){
                     if (!player.alive || player.id == mafiaMember.id) continue;
                     playerButtons.push(new MessageButton()
-                        .setCustomId(player.id + "")
+                        .setCustomId(player.id)
                         .setLabel(player.tag)
                         .setStyle("PRIMARY"));
                 }
@@ -184,7 +185,7 @@ class MafiaGamePlayer extends GamePlayer{
         let townButtons = [];
         for (const player of aliveTownMembers){
             townButtons.push(new MessageButton()
-                .setCustomId(player.id + "")
+                .setCustomId(player.id)
                 .setLabel(player.tag)
                 .setStyle("PRIMARY"));
         }
@@ -201,6 +202,8 @@ class MafiaGamePlayer extends GamePlayer{
             
         if (townButtons.length > 10) rows.push(new MessageActionRow()
             .addComponents(townButtons.slice(10, townButtons.length)));
+
+        console.log(rows.length);
 
         outputMessages.push([mafiosoAndGodfatherRoles, {content: "Godfather and/or Mafioso, choose who you want to kill:", components: rows}]);
 

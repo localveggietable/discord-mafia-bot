@@ -1,3 +1,5 @@
+const {Permissions} = require("discord.js");
+
 module.exports = function(client){
     client.on("endGame", async (winningFactions, guildID, channelID) => {
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
@@ -34,12 +36,19 @@ module.exports = function(client){
             client.gameUsers.delete(player.id);
         }
 
-        await Promise.all(client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == aliveRoleName)),
-        client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == deadRoleName)));
+        await Promise.all([client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == aliveRoleName)),
+        client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == deadRoleName))]);
 
         await Promise.all([client.guilds.cache.get(guildID).channels.delete(mafiaChannel), client.guilds.cache.get(guildID).channels.delete(jailorChannel), client.guilds.cache.get(guildID).channels.delete(deadChannel)]);
 
         await outputChannel.send(`The game ended! Players ${winningUsers.join(" ")} won!`);
+
+        await outputChannel.permissionOverwrites.set([
+            {
+                id: guildID,
+                allow: [Permissions.FLAGS.SEND_MESSAGES]
+            }
+        ]);
 
         client.games.get(guildID).set(channelID, defaultChannelObj);
     });
