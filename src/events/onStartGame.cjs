@@ -175,5 +175,5 @@ async function handleSetInterval(outputChannel, gameCache, client, guildID, chan
         gameCache.started = true;
         return client.emit("gameDaytime", true, guildID, channelID); 
     }
-    if (!(time % 5)) await outputChannel.send({content: time + ""});
+    if (!(time % 5)) await outputChannel.send({content: `The game starts in ${time} seconds`});
 }

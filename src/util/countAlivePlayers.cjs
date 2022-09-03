@@ -5,8 +5,8 @@ module.exports.countAlivePlayers = function(client, guildID, channelID){
     for (let player of playerList){
         if (player.alive){ 
             ++count;
-            if (player.faction == "Town") {++townCount}
-            else if (player.faction == "Mafia") {++mafCount}
+            if (player.faction == "Town") ++townCount;
+            else if (player.faction == "Mafia") ++mafCount;
         }
     }
 

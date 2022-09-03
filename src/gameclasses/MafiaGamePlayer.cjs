@@ -52,7 +52,7 @@ class MafiaGamePlayer extends GamePlayer{
                     townButtons.push(new MessageButton()
                         .setCustomId(player.id)
                         .setLabel(player.tag)
-                        .setStyle("PRIMARY"));  
+                        .setStyle("SECONDARY"));  
                 }
 
                 const rows = [new MessageActionRow().addComponents(mafiaButtons), 
