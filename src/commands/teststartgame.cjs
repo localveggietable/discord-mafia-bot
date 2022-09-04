@@ -11,6 +11,7 @@ module.exports = {
     async execute(client, interaction){
 
         interaction.guild.roles.cache.filter(r => r.name == "Alive Town Member" || r.name == "Dead Town Member").forEach(r => r.delete());
+        interaction.guild.channels.cache.filter(c => c.name == "mafia-tos-channel" || c.name == "jailor-tos-channel" || c.name == "dead-tos-channel").forEach(c => c.delete());
 
         //do a regex match of interaction.channel.name
         const channelName = interaction.channel.name;

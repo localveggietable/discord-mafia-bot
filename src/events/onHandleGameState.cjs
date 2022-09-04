@@ -230,7 +230,7 @@ module.exports = function(client){
                     break;
                 }
                 case "Framer": {
-                    if (!(player.targets.first && player.targets.second)) break;
+                    if (!player.targets.first) break;
                     const target = gameCache.inGameRoles.find(target => target.id == player.targets.first);
 
                     if (targetMap.get(target.id).get("framer")) {
@@ -245,6 +245,7 @@ module.exports = function(client){
                         targetMap.get(target.id).set("all", [player.id]);
                     }
                     if(target.jailed) break;
+                    console.log(`being set, ${target.id}`);
                     publicPlayerInformationMap.get(target.id).set("publicRole", "Framer");
                     publicPlayerInformationMap.get(target.id).set("publicInnocent", false);
 
@@ -310,7 +311,7 @@ module.exports = function(client){
                     if (mafiosoPlayer?.targets.first) break;    
                     if (!player.targets.first) break;
 
-                    let target = player.target.first;
+                    let target = player.targets.first;
 
                     if (targetMap.get(target.id).get("killing")){
                         targetMap.get(target.id).get("killing").push(player.id);
@@ -389,6 +390,7 @@ module.exports = function(client){
                             }
                         } else {
                             for (const visitingPlayerID of playerIDs){
+                                console.log(`${player.id}, Public role is: ${publicPlayerInformationMap.get(player.id).get("publicRole")}`);
                                 const possibleRoles = investigatorBrackets.find(arr => arr.includes(publicPlayerInformationMap.get(player.id).get("publicRole")));
                                 publicAPIMap.get(visitingPlayerID).get("messages").push(`Your player could be a ${possibleRoles.join("/")}`);
                                 publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target could be a ${possibleRoles.join("/")}`);
@@ -720,8 +722,8 @@ module.exports = function(client){
         
         for (const player of newDeaths){
             if (!player.cleaned) continue;
-            publicAPIMap.get(player.cleaned.id).get("messages").push(`You secretly know that your target's role was ${player.role}`);
-            publicAPIMap.get(player.cleaned.id).get("messages").push(`You secretly know that your target's will was ${player.will}`); 
+            publicAPIMap.get(player.cleaned.id).get("messages").push(`You secretly know that your target's role was ${player.role}.`);
+            publicAPIMap.get(player.cleaned.id).get("messages").push(player.will ? `You secretly know that your target's will was ${player.will}.` : `You secretly know that your target did not have a will.`); 
         }
 
         //print all the messages.
@@ -734,11 +736,12 @@ module.exports = function(client){
             console.log(messages);
             for (const message of messages){
                 if (typeof message == "string"){
-                    outputMessage.concat("\n", message);
+                    console.log(message);
+                    outputMessage = outputMessage.concat("\n", message);
                 } else {
                     for (const statusCode of message){
                         if (typeof statusCode == "string") outputMessage.concat("\n", statusCode);
-                        else outputMessage.concat("\n", statusCodes[statusCode]);
+                        else {outputMessage = outputMessage.concat("\n", statusCodes[statusCode]);}
 
                     }
                 }       

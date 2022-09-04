@@ -89,7 +89,6 @@ module.exports = function(client){
         for (let player of gameCache.inGameRoles){
             if (player.faction == "Mafia" || !player.alive || player == jailedPlayer) continue;
             else {
-                console.log("sending");
                 let msgValue = player.resolveNighttimeOptions?.(gameCache.inGameRoles, firstNight);
                 if (!msgValue) continue;
                 let msgRef = await client.users.cache.get(player.id).send(msgValue);
@@ -199,7 +198,7 @@ module.exports = function(client){
             collectors.push(collector);
         }
 
-        await delay(120000);
+        await delay(60000);
 
         collectors.forEach(collector => collector.stop());
         

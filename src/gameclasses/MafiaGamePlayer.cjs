@@ -19,7 +19,7 @@ class MafiaGamePlayer extends GamePlayer{
             this.priority = 1;
         } else if (this.role == "Consort"){
             this.priority = 2;
-        } else if (["Blackmailer", "Disguiser", "Consigliere", "Forger", "Framer", "Hypnotist", "Janitor", "Godfather", "Mafioso"].indexOf(this.role)){
+        } else if (["Blackmailer", "Disguiser", "Consigliere", "Forger", "Framer", "Hypnotist", "Janitor", "Godfather", "Mafioso"].includes(this.role)){
             this.priority = 3;
         } else {
             this.priority = 0;
@@ -202,8 +202,6 @@ class MafiaGamePlayer extends GamePlayer{
             
         if (townButtons.length > 10) rows.push(new MessageActionRow()
             .addComponents(townButtons.slice(10, townButtons.length)));
-
-        console.log(rows.length);
 
         outputMessages.push([mafiosoAndGodfatherRoles, {content: "Godfather and/or Mafioso, choose who you want to kill:", components: rows}]);
 

@@ -85,7 +85,7 @@ class GamePlayer{
             }
         }
 
-        if (this.faction == "Jester") this.won = true;
+        if (this.faction == "Jester" && lynched) this.won = true;
         
         this.alive = false;
         //Below line throwing error

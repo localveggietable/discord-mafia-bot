@@ -44,12 +44,12 @@ module.exports = function(client){
         // Decide everyone's roles who are not random town.
         //
 
-        let tiRoles = ["Investigator", "Lookout", "Spy"], tpRoles = ["Doctor", "Bodyguard"], tkRoles = ["Veteran", "Vigilante"], tsRoles = ["Escort", "Mayor", "Retributionist", "Medium", "Transporter"], mafRoles = ["Ambusher", "Blackmailer", "Consigliere", "Consort", "Disguiser", "Forger", "Framer", "Hypnotist", "Janitor"];
+        let tiRoles = ["Investigator", "Lookout", "Spy", "Sheriff"], tpRoles = ["Doctor", "Bodyguard"], tkRoles = ["Veteran", "Vigilante"], tsRoles = ["Escort", "Mayor", "Retributionist", "Medium", "Transporter"], mafRoles = ["Ambusher", "Blackmailer", "Consigliere", "Consort", "Disguiser", "Forger", "Framer", "Hypnotist", "Janitor"];
 
-        let [tiRole1, tiRole2, tpRole, tkRole, tsRole, rmRole1] = [tiRoles[Math.floor(Math.random() * 3)], tiRoles[Math.floor(Math.random() * 3)], 
+        let [tiRole1, tiRole2, tpRole, tkRole, tsRole, rmRole1] = [tiRoles[Math.floor(Math.random() * 4)], tiRoles[Math.floor(Math.random() * 4)], 
             tpRoles[Math.floor(Math.random() * 2)], tkRoles[Math.floor(Math.random() * 2)],
             tsRoles[Math.floor(Math.random() * 5)], mafRoles[Math.floor(Math.random() * 9)]];
-        
+
         let rmRole2 = rmRole1 == "Ambusher" ? mafRoles[Math.floor(Math.random() * 8 + 1)] : mafRoles[Math.floor(Math.random() * 9)]; 
 
         let rtRoles = tiRoles.concat(tpRoles, tkRoles, tsRoles);
@@ -75,7 +75,6 @@ module.exports = function(client){
 
         let shufflePlayers = shuffleArray([...gameCache.players]);
         let mafiaPlayerIDs = shufflePlayers.slice(9, 13);
-
         
         gameCache.inGameRoles = shuffleArray([new TownGamePlayer("Jailor", shufflePlayers[0], client.users.cache.get(shufflePlayers[0]).tag), new TownGamePlayer(tiRole1, shufflePlayers[1], client.users.cache.get(shufflePlayers[1]).tag), 
         new TownGamePlayer(tiRole2, shufflePlayers[2], client.users.cache.get(shufflePlayers[2]).tag), new TownGamePlayer(tpRole, shufflePlayers[3], client.users.cache.get(shufflePlayers[3]).tag),
@@ -86,7 +85,9 @@ module.exports = function(client){
         new MafiaGamePlayer(rmRole2, shufflePlayers[12], client.users.cache.get(shufflePlayers[12]).tag), new ExeGamePlayer(shufflePlayers[13], client.users.cache.get(shufflePlayers[13]).tag), 
         new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag)]);
 
-        console.log(gameCache.inGameRoles.length, "\n");
+        for (const player of gameCache.inGameRoles){
+            console.log(`${player.tag}: ${player.role} \n`);
+        }
 
         await Promise.all([client.guilds.cache.get(guildID).channels.create(`mafia-${outputChannel.name}`, {
             type: "GUILD_TEXT",

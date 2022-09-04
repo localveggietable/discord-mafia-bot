@@ -18,9 +18,6 @@ module.exports.checkGameEnd = function(client, guildID, channelID){
     const { _ , townCount, mafCount} = countAlivePlayers(client, guildID, channelID); //eslint-disable-line
     let winningFactions = exeHasWon ? ["Executioner"] : jesterHasWon ? ["Jester"] : [];
 
-    console.log({_, townCount, mafCount});
-
-
     if (!townCount || !mafCount){
         if (!townCount.length && !mafCount.length){
             return {gameEnded: true, winningFactions: []};

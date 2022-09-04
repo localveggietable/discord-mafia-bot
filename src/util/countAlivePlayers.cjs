@@ -10,5 +10,6 @@ module.exports.countAlivePlayers = function(client, guildID, channelID){
         }
     }
 
+    console.log(count);
     return {count, townCount, mafCount};
 }
