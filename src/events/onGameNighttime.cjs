@@ -198,7 +198,7 @@ module.exports = function(client){
             collectors.push(collector);
         }
 
-        await delay(60000);
+        await delay(600000);
 
         collectors.forEach(collector => collector.stop());
         

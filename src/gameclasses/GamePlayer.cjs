@@ -76,16 +76,17 @@ class GamePlayer{
 
         let exePlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Executioner");
 
-        if (exePlayer && exePlayer.id != this.id) {
+        if (exePlayer && exePlayer.targetID == this.id) {
             if (lynched){
                 exePlayer.won = true;
             } else {
                 //make executioner a jester
-                exePlayer.faction = "Jester";
+                exePlayer.jester = true;
             }
+        } else if (this.faction == "Executioner" && this.jester && lynched){ 
+            this.won = true;
+            this.canRevenge = true;
         }
-
-        if (this.faction == "Jester" && lynched) this.won = true;
         
         this.alive = false;
         //Below line throwing error

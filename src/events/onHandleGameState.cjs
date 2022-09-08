@@ -40,7 +40,7 @@ const messageOptions = {
     role_executioner: "Your target wants someone to be lynched at any cost. They must be an Executioner"
 };
 
-const investigatorBrackets = [["Veteran", "Vigilante", "Ambusher", "Mafioso"], ["Medium", "Janitor", "Retributionist"], ["Spy", "Blackmailer", "Jailor"], ["Framer", "Jester"], ["Lookout", "Forger", "Witch"], ["Escort", "Transporter", "Consort", "Hypnotist"], ["Doctor", "Disguiser"], ["Investigator", "Consigliere", "Mayor"], ["Bodyguard", "Godfather"]];
+const investigatorBrackets = [["Veteran", "Vigilante", "Ambusher", "Mafioso"], ["Medium", "Janitor", "Retributionist"], ["Spy", "Blackmailer", "Jailor"], ["Framer", "Jester"], ["Lookout", "Forger", "Witch"], ["Escort", "Transporter", "Consort", "Hypnotist"], ["Doctor", "Disguiser"], ["Sheriff", "Executioner"], ["Investigator", "Consigliere", "Mayor"], ["Bodyguard", "Godfather"]];
 
 const statusCodes = {
     0: "Your target was transported to another location.",
@@ -245,7 +245,6 @@ module.exports = function(client){
                         targetMap.get(target.id).set("all", [player.id]);
                     }
                     if(target.jailed) break;
-                    console.log(`being set, ${target.id}`);
                     publicPlayerInformationMap.get(target.id).set("publicRole", "Framer");
                     publicPlayerInformationMap.get(target.id).set("publicInnocent", false);
 
@@ -271,10 +270,10 @@ module.exports = function(client){
                         targetMap.get(target.id).set("killing", [player.id]);
                     }
 
-                    if (targetMap.get(target.id).get("killing")){
-                        targetMap.get(target.id).get("killing").push(player.id);
+                    if (targetMap.get(target.id).get("all")){
+                        targetMap.get(target.id).get("all").push(player.id);
                     } else {
-                        targetMap.get(target.id).set("killing", [player.id]);
+                        targetMap.get(target.id).set("all", [player.id]);
                     }
                     break;
                 }
@@ -311,12 +310,36 @@ module.exports = function(client){
                     if (mafiosoPlayer?.targets.first) break;    
                     if (!player.targets.first) break;
 
-                    let target = player.targets.first;
+                    let targetID = player.targets.first;
 
-                    if (targetMap.get(target.id).get("killing")){
-                        targetMap.get(target.id).get("killing").push(player.id);
+                    if (targetMap.get(targetID).get("killing")){
+                        targetMap.get(targetID).get("killing").push(player.id);
                     } else {
-                        targetMap.get(target.id).set("killing", [player.id]);
+                        targetMap.get(targetID).set("killing", [player.id]);
+                    }
+
+                    if (targetMap.get(targetID).get("all")){
+                        targetMap.get(targetID).get("all").push(player.id);
+                    } else {
+                        targetMap.get(targetID).set("all", [player.id]);
+                    }
+                   
+                    break;
+                }
+                case "Doctor": case "Bodyguard": {
+                    if (!player.targets.first) break;
+                    const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first); 
+
+                    if (player === target){
+                        player.defense = 1;
+                        --player.limitedUses.uses;
+                        break;
+                    }
+
+                    if (targetMap.get(target.id).get(player.role.toLowerCase())){
+                        targetMap.get(target.id).get(player.role.toLowerCase()).push(player.id);
+                    } else {
+                        targetMap.get(target.id).set(player.role.toLowerCase(), [player.id]);
                     }
 
                     if (targetMap.get(target.id).get("all")){
@@ -324,8 +347,8 @@ module.exports = function(client){
                     } else {
                         targetMap.get(target.id).set("all", [player.id]);
                     }
-                   
-                    break;
+
+                    break; 
                 }
                 default: {
                     if (!player.targets.first) break;
@@ -441,6 +464,7 @@ module.exports = function(client){
                         break;
                     case "killing":
                         for (const [index, visitingPlayerID] of playerIDs.entries()){
+                            console.log(playerIDs);
                             if (["mafioso", "godfather"].includes(visitedByRole)){
                                 for (const spy of actionTracker.filter(player => player.role == "Spy")){
                                     publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
@@ -457,9 +481,14 @@ module.exports = function(client){
                                 publicAPIMap.get(player.id).get("statusCodes").push(18);
                             } else if (player.defense) {
                                 if (player.role == "Witch") player.defense = 0;
-                                publicAPIMap.get(visitingPlayerID).get("messages").push("Your target's defense was too strong to kill.");
-                                publicAPIMap.get(player.id).get("messages").push("Someone attacked you but your defense was too strong!");
-                                publicAPIMap.get(player.id).get("statusCodes").push(12);
+                                if (player.role == "Doctor"){
+                                    publicAPIMap.get(player.id).get("messages").push("You were attacked but someone nursed you back to health!");
+                                    publicAPIMap.get(player.id).get("statusCodes").push(4, 9);
+                                } else {
+                                    publicAPIMap.get(visitingPlayerID).get("messages").push("Your target's defense was too strong to kill.");
+                                    publicAPIMap.get(player.id).get("messages").push("Someone attacked you but your defense was too strong!");
+                                    publicAPIMap.get(player.id).get("statusCodes").push(12);
+                                }
                             } else if (targetMap.get(player.id).get("doctor")){
                                 publicAPIMap.get(player.id).get("messages").push("You were attacked but someone nursed you back to health!");
                                 publicAPIMap.get(player.id).get("statusCodes").push(4); 
@@ -486,6 +515,8 @@ module.exports = function(client){
                                 } else {
                                     publicAPIMap.get(bodyguardID).get("messages").push("You were killed protecting your target!");
                                     publicAPIMap.get(bodyguardID).get("statusCodes").push(8);
+
+                                    newDeaths.push(actionTracker.find(player => player.id == bodyguardID));
                                 }
 
                                 if (targetMap.get(visitingPlayerID).get("doctor")) {
@@ -499,16 +530,19 @@ module.exports = function(client){
                                 } else {
                                     publicAPIMap.get(visitingPlayerID).get("messages").push("You were killed by a Bodyguard!");
                                     publicAPIMap.get(visitingPlayerID).get("statusCodes").push(11); 
+
+                                    newDeaths.push(actionTracker.find(player => player.id == visitingPlayerID));
                                 }
                             } else {
                                 newDeaths.push(player);
-                                if (player.faction == "Town" && visitedByRole == "vigilante"){
+                                if (gameCache.inGameRoles.find(player => player.id == visitingPlayerID).role == "Vigilante"){
+                                    console.log("right");
                                     const vigilantePlayer = gameCache.inGameRoles.find(player => player.id == visitingPlayerID);
                                     if (player.faction == "Town") vigilantePlayer.limitedUses.uses = 0;
                                     --vigilantePlayer.limitedUses.uses;
 
                                     publicAPIMap.get(player.id).get("messages").push("You were shot by a Vigilante! You have died!");
-                                    publicAPIMap.get(player.id).get("statusCodes", publicAPIMap.get(player.id).get("statusCodes").push(6));
+                                    publicAPIMap.get(player.id).get("statusCodes").push(6);
                                 } else {
                                     publicAPIMap.get(player.id).get("messages").push("You were attacked by a member of the Mafia! You have died!");
                                     publicAPIMap.get(player.id).get("statusCodes").push(5);
@@ -516,28 +550,11 @@ module.exports = function(client){
                             }
                         }
                         break;
-                    case "bodyguard":
+                    case "bodyguard": case "doctor":
                         if (player.jailed){
                             for (const visitingPlayerID of playerIDs){
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                             }
-                        } else {
-                            for (const visitingPlayerID of playerIDs){
-                                if (!player.id == visitingPlayerID) continue;
-                                --player.limitedUses.uses;
-                            }   
-                        }
-                        break;
-                    case "doctor":
-                        if (player.jailed){
-                            for (const visitingPlayerID of playerIDs){
-                                publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
-                            }
-                        } else {
-                            for (const visitingPlayerID of playerIDs){
-                                if (!(player.id == visitingPlayerID)) continue;
-                                --player.limitedUses.uses;
-                            }   
                         }
                         break;
                     case "escort":
@@ -632,6 +649,14 @@ module.exports = function(client){
                                         let player = gameCache.inGameRoles.find(player => player.id == ambushedPlayerID);
                                         player.defense = 0;
 
+                                        if (player.role == "Witch") player.defense = 0;
+                                        if (player.role == "Doctor"){
+                                            publicAPIMap.get(player.id).get("messages").push("You were attacked but someone nursed you back to health!");
+                                            publicAPIMap.get(player.id).get("statusCodes").push(4, 9);
+
+                                            break;
+                                        }
+
                                         publicAPIMap.get(visitingPlayerID).get("messages").push("You ambushed someone who visited your target last night!"); 
                                         publicAPIMap.get(visitingPlayerID).get("messages").push("Your target's defense was too strong to kill!"); 
 
@@ -674,7 +699,7 @@ module.exports = function(client){
                             if (player.jailed){ 
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                             } else {
-                                publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role}`]);
+                                publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role.toLowerCase()}`]);
                             }
                         }  
                         break; 
@@ -701,14 +726,14 @@ module.exports = function(client){
                             publicAPIMap.get(visitingPlayerID).get("messages").push("Your target was in jail so you could not control them.");
                         } else if (player.priority < 2){
                             publicAPIMap.get(player.id).get("messages").push("A Witch tried to control you but you are immune.");
-                            publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role}`]);
+                            publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role.toLowerCase()}`]);
                         } else if (["Spy", "Investigator", "Sheriff", "Lookout"].includes(player.role)){
                             publicAPIMap.get(player.id).get("messages").push("You feel a mystical power dominating you. You were controlled by a Witch!");
-                            publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role}`]);
+                            publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role.toLowerCase()}`]);
                             publicAPIMap.get(visitingPlayerID).get("messages").push(publicAPIMap.get(player.id).get("investigativeMessages"));
                         } else {
                             publicAPIMap.get(player.id).get("messages").push("You feel a mystical power dominating you. You were controlled by a Witch!");
-                            publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role}`]);
+                            publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role.toLowerCase()}`]);
                         }
                         break;
                     }
@@ -718,6 +743,18 @@ module.exports = function(client){
                 }
             }
         }
+
+        //Jester
+        const jesterPlayer = gameCache.inGameRoles.find(player => player.jester && player.targets.first);
+        if (jesterPlayer){
+            const hauntedPlayerID = jesterPlayer.targets.first
+            publicAPIMap.get(hauntedPlayerID).get("messages").push("You were haunted by the Jester. You committed suicide over the guilt!");
+            publicAPIMap.get(hauntedPlayerID).get("statusCodes").push(16);
+            newDeaths.push(gameCache.inGameRoles.find(player => player.id == hauntedPlayerID));
+
+            jesterPlayer.canRevenge = false;
+        }
+
         uniq(newDeaths);
         
         for (const player of newDeaths){
@@ -765,6 +802,8 @@ module.exports = function(client){
             player.cleaned = false;
             player.publicRole = player.role;
             player.publicWill = player.will;
+
+            if (["Bodyguard", "Doctor"].includes(player.role)) player.defense = 0;
         }
 
 
