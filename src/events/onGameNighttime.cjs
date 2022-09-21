@@ -198,6 +198,12 @@ module.exports = function(client){
             collectors.push(collector);
         }
 
+        let minute = 0;
+        let interval = setInterval(() => {
+            console.log("A minute has passed!");
+            ++minute;
+            if (minute == 10) clearInterval(interval);
+        }, 60000);
         await delay(600000);
 
         collectors.forEach(collector => collector.stop());

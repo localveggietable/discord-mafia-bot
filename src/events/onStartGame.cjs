@@ -82,7 +82,7 @@ module.exports = function(client){
         new TownGamePlayer(rtRole1, shufflePlayers[6], client.users.cache.get(shufflePlayers[6]).tag), new TownGamePlayer(rtRole2, shufflePlayers[7], client.users.cache.get(shufflePlayers[7]).tag), 
         new TownGamePlayer(rtRole3, shufflePlayers[8], client.users.cache.get(shufflePlayers[8]).tag), new MafiaGamePlayer("Godfather", shufflePlayers[9], client.users.cache.get(shufflePlayers[9]).tag), 
         new MafiaGamePlayer("Mafioso", shufflePlayers[10], client.users.cache.get(shufflePlayers[10]).tag), new MafiaGamePlayer(rmRole1, shufflePlayers[11], client.users.cache.get(shufflePlayers[11]).tag),
-        new MafiaGamePlayer(rmRole2, shufflePlayers[12], client.users.cache.get(shufflePlayers[12]).tag), new ExeGamePlayer(shufflePlayers[13], client.users.cache.get(shufflePlayers[13]).tag, shufflePlayers[0]), 
+        new MafiaGamePlayer(rmRole2, shufflePlayers[12], client.users.cache.get(shufflePlayers[12]).tag), new ExeGamePlayer(shufflePlayers[13], client.users.cache.get(shufflePlayers[13]).tag, shufflePlayers[Math.floor(Math.random() * 9)]), 
         new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag)]);
 
         for (const player of gameCache.inGameRoles){
@@ -156,7 +156,8 @@ module.exports = function(client){
 
         let messages = [];
         for (const player of gameCache.inGameRoles) {
-            messages.push(client.users.cache.get(player.id).send(`Welcome to tos! Your role is ${player.role}`));
+            const msgToSend = player.faction == "Executioner" ? `Welcome to tos! Your role is ${player.role} \nYour target this game is ${gameCache.inGameRoles.find(target => target.id == player.targetID).tag}` : `Welcome to tos! Your role is ${player.role}`;
+            messages.push(client.users.cache.get(player.id).send(msgToSend));
         }
 
         await Promise.all(messages);

@@ -413,7 +413,6 @@ module.exports = function(client){
                             }
                         } else {
                             for (const visitingPlayerID of playerIDs){
-                                console.log(`${player.id}, Public role is: ${publicPlayerInformationMap.get(player.id).get("publicRole")}`);
                                 const possibleRoles = investigatorBrackets.find(arr => arr.includes(publicPlayerInformationMap.get(player.id).get("publicRole")));
                                 publicAPIMap.get(visitingPlayerID).get("messages").push(`Your player could be a ${possibleRoles.join("/")}`);
                                 publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target could be a ${possibleRoles.join("/")}`);
@@ -464,7 +463,6 @@ module.exports = function(client){
                         break;
                     case "killing":
                         for (const [index, visitingPlayerID] of playerIDs.entries()){
-                            console.log(playerIDs);
                             if (["mafioso", "godfather"].includes(visitedByRole)){
                                 for (const spy of actionTracker.filter(player => player.role == "Spy")){
                                     publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
@@ -536,7 +534,6 @@ module.exports = function(client){
                             } else {
                                 newDeaths.push(player);
                                 if (gameCache.inGameRoles.find(player => player.id == visitingPlayerID).role == "Vigilante"){
-                                    console.log("right");
                                     const vigilantePlayer = gameCache.inGameRoles.find(player => player.id == visitingPlayerID);
                                     if (player.faction == "Town") vigilantePlayer.limitedUses.uses = 0;
                                     --vigilantePlayer.limitedUses.uses;
@@ -564,7 +561,7 @@ module.exports = function(client){
                             }
                         } else if (player.priority <= 2 || player.role == "Transporter") {
                             publicAPIMap.get(player.id).get("messages").push("Someone tried to roleblock you but you're immune!");
-                            publicAPIMap.get(player.id).get("statusCodes").get("statusCodes").push(13);
+                            publicAPIMap.get(player.id).get("statusCodes").push(13);
                         } else {
                             publicAPIMap.get(player.id).get("messages").push("Someone occupied your night. You were role blocked!");
                             publicAPIMap.get(player.id).get("statusCodes").push(1);    
@@ -630,7 +627,7 @@ module.exports = function(client){
                         if (player.jailed) {
                             publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!"); 
                         } else {
-                            let ambushedPlayersID = targetMap.get(player.id).get("all").filter(player => player.faction != "Mafia");
+                            let ambushedPlayersID = targetMap.get(player.id).get("all").filter(visitorID => gameCache.inGameRoles.find(gp => gp.id == visitorID).faction != 'Mafia');
                             const randomIndex = Math.floor(Math.random() * ambushedPlayersID.length);
 
                             for (const [index, ambushedPlayerID] of ambushedPlayersID.entries()){
@@ -773,7 +770,6 @@ module.exports = function(client){
             console.log(messages);
             for (const message of messages){
                 if (typeof message == "string"){
-                    console.log(message);
                     outputMessage = outputMessage.concat("\n", message);
                 } else {
                     for (const statusCode of message){

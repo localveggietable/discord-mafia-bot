@@ -1,4 +1,4 @@
-const { ComponentType, MessageActionRow, MessageButton } = require("discord.js");
+const { MessageActionRow, MessageButton } = require("discord.js");
 const { countMax } = require("../util/countMax.cjs");
 
 module.exports = function(client){
@@ -39,7 +39,7 @@ module.exports = function(client){
         
         //TODO: get rid of the time attribute on the collector. Manage the time separately using setinterval, and then call
         //collector.stop() as desired. Having two different intervals is imprecise because of event loop nature
-        const collector = lynchMessage.createMessageComponentCollector({componentType: ComponentType.Button, time: 30000});
+        const collector = lynchMessage.createMessageComponentCollector({componentType: "BUTTON", time: 30000});
 
         const interval = setInterval(() => {
             if (!(time--)){

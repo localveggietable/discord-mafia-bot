@@ -10,9 +10,6 @@ module.exports = {
     ,
     async execute(client, interaction){
 
-        interaction.guild.roles.cache.filter(r => r.name == "Alive Town Member" || r.name == "Dead Town Member").forEach(r => r.delete());
-        interaction.guild.channels.cache.filter(c => c.name == "mafia-tos-channel" || c.name == "jailor-tos-channel" || c.name == "dead-tos-channel").forEach(c => c.delete());
-
         //do a regex match of interaction.channel.name
         const channelName = interaction.channel.name;
         if (!(new RegExp("^tos-channel(-[1-9])?$").test(channelName))){
@@ -22,6 +19,11 @@ module.exports = {
         if (client.games.get(interaction.guildId)?.get(channelNumber).ongoing){
             return interaction.followUp("A game has already started on this channel! You must wait for the game to end or expire, or create a game on a new channel"); 
         } 
+
+        //SHOULD ACTUALLY ONLY DO THIS IF NO GAMES ARE CURRRENLTY PRESENT.
+        
+        interaction.guild.roles.cache.filter(r => r.name == "Alive Town Member" || r.name == "Dead Town Member").forEach(r => r.delete());
+        interaction.guild.channels.cache.filter(c => c.name == "mafia-tos-channel" || c.name == "jailor-tos-channel" || c.name == "dead-tos-channel").forEach(c => c.delete());
     
         if(!client.games.get(interaction.guildId)) setupGuild(client, interaction.guildId);
         client.games.get(interaction.guildId).get(channelNumber).ongoing = true;
