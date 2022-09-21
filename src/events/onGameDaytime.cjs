@@ -5,13 +5,20 @@ module.exports = function(client){
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
+
+        const mafiaChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
+            return channel.name.split("-")[3] == channelID && channel.name.split("-")[0] == "mafia";
+        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "mafia-tos-channel"});
+
         let gameCache = client.games.get(guildID).get(channelID);
 
         const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
 
-        gameCache.day = firstDay ? 1 : gameCache.day + 1;
+        gameCache.day = firstDay ? 1 : ++gameCache.day;
         gameCache.isDaytime = true;
         let time = firstDay ? 15 : 60;
+
+        await outputChannel.send(`This is the beginning of day ${gameCache.day}`);
 
         if (!firstDay) {
             await outputChannel.send(`Day ${gameCache.day}`);
@@ -41,22 +48,29 @@ module.exports = function(client){
                 await outputChannel.send("Someone messed with the channel roles needed to run this game :/ . This game will be aborted.");
                 return client.emit("onEndGameError", guildID, channelID);
             }      
+        } else {
+            let message = '';
+            gameCache.inGameRoles.filter(player => player.faction == "Mafia").forEach((player) => {
+                message += `${player.tag} is a ${player.role} \n`;
+            });
+            await mafiaChannel.send(message.trim());
         }
 
         let interval = setInterval(async () => {
             --time;
-            handleSetInterval(time, outputChannel, client, guildID, channelID);
-            if (!(--time)){ 
+            handleSetInterval(time, outputChannel, client, guildID, channelID, firstDay);
+            if (!time){ 
                 clearInterval(interval);
             }
         }, 1000);
     });
 }
 
-async function handleSetInterval(time, outputChannel, client, guildID, channelID){
+async function handleSetInterval(time, outputChannel, client, guildID, channelID, firstDay){
     if (!time){
         await outputChannel.send("The discussion phase ends now!");
-        client.emit("lynchPhase", 45, 3, guildID, channelID);
+        if (firstDay) return client.emit("gameNighttime", guildID, channelID);
+        return client.emit("lynchPhase", 45, 3, guildID, channelID);
     } else if (!(time % 15)){
         await outputChannel.send(`The discussion phase ends in ${time} seconds`);
     }

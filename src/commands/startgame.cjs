@@ -6,7 +6,7 @@ const {addPlayerToGame} = require("../util/addPlayerToGame.cjs");
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("startgame")
-    .setDescription("Start a game of tos! (By default, the user who runs this command joins the game)")
+    .setDescription("Start a game of tos! (By default, the user who runs this command joins the game).")
     .addBooleanOption(option => 
         option.setName("autojoin")
             .setDescription("Sets whether or not the user invoking this command automatically joins the game")
@@ -14,7 +14,7 @@ module.exports = {
     ,
     async execute(client, interaction, params){
 
-        if (!(interaction.guild.roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member"))){
+        if (interaction.guild.roles.cache.find(r => r.name == "Alive Town Member" || r.name == "Dead Town Member")){
             return interaction.followUp("You currently have either/both \"Alive Town Member\" or \"Dead Town Member\" defined as a server role. Delete the role(s) or change their name(s) to continue.");
         }
         //do a regex match of interaction.channel.name
@@ -29,11 +29,12 @@ module.exports = {
     
         if(!client.games.get(interaction.guildId)) setupGuild(client, interaction.guildId);
         client.games.get(interaction.guildId).get(channelNumber).ongoing = true;
+
+        console.log(interaction.member.id);
     
         if (params[0] === false) return interaction.followUp("A game has successfully been started, but you have not joined it.");
         addPlayerToGame(client, interaction.guildId, channelNumber, interaction.member.id);
 
-        console.log("hi");
         return interaction.followUp("A game has successfully been started.");
     }
 };

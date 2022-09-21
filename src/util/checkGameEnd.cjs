@@ -11,13 +11,12 @@ const { countAlivePlayers } = require("./countAlivePlayers.cjs");
 
 module.exports.checkGameEnd = function(client, guildID, channelID){
     const gameCache = client.games.get(guildID).get(channelID);
-    const aliveWitch = gameCache.ingameRoles.find(player => player.faction == "Witch" && player.alive) ? 1 : 0;
+    const aliveWitch = gameCache.inGameRoles.find(player => player.faction == "Witch" && player.alive) ? 1 : 0;
     const exeHasWon = gameCache.inGameRoles.find(player => player.faction == "Executioner" && player.won) ? true : false;
     const jesterHasWon = gameCache.inGameRoles.find(player => player.faction == "Jester" && player.won) ? true : false; 
 
     const { _ , townCount, mafCount} = countAlivePlayers(client, guildID, channelID); //eslint-disable-line
     let winningFactions = exeHasWon ? ["Executioner"] : jesterHasWon ? ["Jester"] : [];
-
 
     if (!townCount || !mafCount){
         if (!townCount.length && !mafCount.length){

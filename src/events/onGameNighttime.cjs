@@ -87,7 +87,7 @@ module.exports = function(client){
 
         let roleActionMessages = [];
         for (let player of gameCache.inGameRoles){
-            if (player.role == "Mafia" || player.alive || player == jailedPlayer) continue;
+            if (player.faction == "Mafia" || !player.alive || player == jailedPlayer) continue;
             else {
                 let msgValue = player.resolveNighttimeOptions?.(gameCache.inGameRoles, firstNight);
                 if (!msgValue) continue;
@@ -99,43 +99,43 @@ module.exports = function(client){
         for (let [player, msg] of roleActionMessages){
             const collector = msg.createMessageComponentCollector({componentType: "BUTTON"});
             collector.on("collect", (interaction) => {
-                if (interaction.user.id != player.id) return interaction.followUp("You can't click this button!");
+                if (interaction.user.id != player.id) return interaction.reply("You can't click this button!");
                 if (interaction.customId == "clear"){
                     player.targets = {first: false, second: false, binary: false, options: false}; 
-                    return interaction.followUp("Your selection was cleared."); 
+                    return interaction.reply("Your selection was cleared."); 
                 }
                 if (["Witch", "Transporter"].includes(player.role)){
                     if (!player.targets.first) {
-                        player.targets.first = +interaction.customId;
-                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${client.users.cache.get(+interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(+interaction.customId).tag} tonight.`;
-                        return interaction.followUp(followUpMessage);
+                        player.targets.first = interaction.customId;
+                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${client.users.cache.get(interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(interaction.customId).tag} tonight.`;
+                        return interaction.reply(followUpMessage);
                     }
-                    player.targets.second = +interaction.customId;
-                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${client.users.cache.get(+interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(+interaction.customId).tag} tonight.`;
-                    return interaction.followUp(followUpMessage);
+                    player.targets.second = interaction.customId;
+                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${client.users.cache.get(interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(interaction.customId).tag} tonight.`;
+                    return interaction.reply(followUpMessage);
                 } else if (["Veteran, Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
                     if (player.role == "Jailor" && interaction.customID == 1) {
-                        jailorChannel.send("The jailor has decided to execute you.")
+                        jailorChannel.send("The jailor has decided to execute you.");
                     } else if (player.role == "Jailor"){
-                        jailorChannel.send("The jailor has decided to spare you.")
+                        jailorChannel.send("The jailor has decided to spare you.");
                     }
-                    return interaction.followUp("Your decision has been recorded.");
+                    return interaction.reply("Your decision has been recorded.");
                 } else if (player.role == "Retributionist"){
                     let clickedTarget = interaction.customId.slice(0, 6) == "target" ? true : false;
                     let buttonID = clickedTarget ? interaction.customId.slice(6) : interaction.customId;
 
                     if (clickedTarget){
-                        player.targets.second == +buttonID;
-                        return interaction.followUp("Your decision has been recorded");
+                        player.targets.second == buttonID;
+                        return interaction.reply("Your decision has been recorded");
                     } else {
-                        player.targets.first == +buttonID;
-                        return interaction.followUp("Your decision has been recorded");
+                        player.targets.first == buttonID;
+                        return interaction.reply("Your decision has been recorded");
                     }
 
                 } else {
-                    player.targets.first = +interaction.customId;
-                    return interaction.followUp("Your decision has been recorded.");
+                    player.targets.first = interaction.customId;
+                    return interaction.reply("Your decision has been recorded.");
                 }
             });
             collectors.push(collector);
@@ -151,58 +151,64 @@ module.exports = function(client){
 
         mainMafiaCollector.on("collect", (interaction) => {
             let player = mainMafiaRoleActionMessageContent[0].find(player => player.id == interaction.user.id);
-            if (!player) return interaction.followUp({content: "You can't click this button!", ephemeral: true});
-            let actionPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Mafia");
+            if (!player) return interaction.reply({content: "You can't click this button!", ephemeral: true});
+            let actionPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Mafioso") || player ;
             if (interaction.customId == "clear"){
                 actionPlayer.targets = {first: false, second: false, binary: false, options: false}; 
-                return interaction.followUp("Your selection was cleared."); 
+                return interaction.reply("Your selection was cleared."); 
             } 
-            actionPlayer.targets.first = +interaction.customId;
-            return interaction.followUp("Your decision has been recorded.");       
+            actionPlayer.targets.first = interaction.customId;
+            return interaction.reply("Your decision has been recorded.");       
         });
 
         for (let [player, msg] of mafiaRoleActionMessageContent){
             let msgRef = await mafiaChannel.send(msg);
             const collector = msgRef.createMessageComponentCollector({componentType: "BUTTON"});
             collector.on("collect", (interaction) => {
-                if (interaction.user.id != player.id) return interaction.followUp({content: "You can't click this button!", ephemeral: true});
+                if (interaction.user.id != player.id) return interaction.reply({content: "You can't click this button!", ephemeral: true});
                 if (interaction.customId == "clear"){
                     player.targets = {first: false, second: false, binary: false, options: false}; 
-                    return interaction.followUp("Your selection was cleared."); 
+                    return interaction.reply("Your selection was cleared."); 
                 }
 
                 if (player.role == "Disguiser"){
                     if (!player.targets.first) {
-                        if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.followUp("You have to choose a mafia member as your first target.");
-                        player.targets.first = +interaction.customId;
-                        return interaction.followUp("You have chosen your mafia member to disguise.");
+                        if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.reply("You have to choose a mafia member as your first target.");
+                        player.targets.first = interaction.customId;
+                        return interaction.reply("You have chosen your mafia member to disguise.");
                     }
 
-                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.followUp("You can only disguise Mafia members as non-Mafia members.");
-                    player.targets.second = +interaction.customId;
-                    return interaction.followUp("You have chosen who your mafia member will be disguised as."); 
+                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.reply("You can only disguise Mafia members as non-Mafia members.");
+                    player.targets.second = interaction.customId;
+                    return interaction.reply("You have chosen who your mafia member will be disguised as."); 
                 } else if (player.role == "Hypnotist"){
-                    if (["transport", "guard", "block", "heal", "witch"].indexOf(interaction.customId)){
+                    if (["transport", "guard", "block", "heal", "witch"].includes(interaction.customId)){
                         player.targets.options = interaction.customId;
-                        return interaction.followUp("You have chosen which message your target will see.");
+                        return interaction.reply("You have chosen which message your target will see.");
                     } else {
-                        player.targets.first = +interaction.customId;
-                        return interaction.followUp("You have chosen which town member will be hypnotized.");
+                        player.targets.first = interaction.customId;
+                        return interaction.reply("You have chosen which town member will be hypnotized.");
                     }
                 } else {
-                    player.targets.first = +interaction.customId;
-                    return interaction.followUp("Your decision has been recorded.");
+                    player.targets.first = interaction.customId;
+                    return interaction.reply("Your decision has been recorded.");
                 }
 
             });
             collectors.push(collector);
         }
 
-        await delay(45000);
+        let minute = 0;
+        let interval = setInterval(() => {
+            console.log("A minute has passed!");
+            ++minute;
+            if (minute == 10) clearInterval(interval);
+        }, 60000);
+        await delay(600000);
 
         collectors.forEach(collector => collector.stop());
         
-        let denyMafiaWritePermissions = [], denyMediumWritePermissions = [], denyJailorWritePermissions;
+        let denyMafiaWritePermissions = [], denyMediumWritePermissions = [], denyJailorWritePermissions = [];
         for (const playerID of aliveMafiaPlayerIDs){
             denyMafiaWritePermissions.push(mafiaChannel.permissionOverwrites.edit(playerID, {
                 SEND_MESSAGES: false
@@ -216,24 +222,26 @@ module.exports = function(client){
             });
         }
 
-        denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
-            VIEW_CHANNEL: true,
-            SEND_MESSAGES: true
-        }));
+        if (jailor.alive && jailor.targets.first) {
+            denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
+                VIEW_CHANNEL: true,
+                SEND_MESSAGES: true
+            }));
+    
+            denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
+                VIEW_CHANNEL: true,
+                SEND_MESSAGES: true
+            })); 
 
-        denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
-            VIEW_CHANNEL: true,
-            SEND_MESSAGES: true
-        }));
-
-        await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));
+            await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));
+        }
 
         let deleted;
         do {
             deleted = await jailorChannel.bulkDelete(100);
         } while (deleted.size > 0);
 
-        return client.emit("gameDaytime", false, guildID, channelID);
+        return client.emit("handleGameState", guildID, channelID);
 
     });
 }

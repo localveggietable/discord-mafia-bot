@@ -63,7 +63,6 @@ class GamePlayer{
 
     }
 
-    //i think i want to split handledeath into handledeath and outputdeath to separate handling node-side state vs. client-side state.
     async handleDeath(client, guildID, channelID, lynched = false){
         const guild = client.guilds.cache.get(guildID);
         const member = guild.members.cache.get(this.id);
@@ -77,16 +76,17 @@ class GamePlayer{
 
         let exePlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Executioner");
 
-        if (exePlayer && exePlayer.id != this.id) {
+        if (exePlayer && exePlayer.targetID == this.id) {
             if (lynched){
                 exePlayer.won = true;
             } else {
                 //make executioner a jester
-                exePlayer.faction = "Jester";
+                exePlayer.jester = true;
             }
+        } else if (this.faction == "Executioner" && this.jester && lynched){ 
+            this.won = true;
+            this.canRevenge = true;
         }
-
-        if (this.faction == "Jester") this.won = true;
         
         this.alive = false;
         //Below line throwing error

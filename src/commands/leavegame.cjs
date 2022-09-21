@@ -4,7 +4,7 @@ const removePlayerFromGame = require("../util/removePlayerFromGame.cjs");
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("leavegame")
-    .setDescription("Leave a game of tos"),
+    .setDescription("Leave a game of tos."),
     async execute(client, interaction){
         const channelName = interaction.channel.name;
         if (!(new RegExp("^tos-channel(-[1-9])?$").test(channelName))){
@@ -12,11 +12,12 @@ module.exports = {
         }
         const channelNumber = channelName.split("-").length == 2 ? 0 : +channelName.split("-")[2]; 
     
-        if(!client.games.get(interaction.guildID).get(channelNumber).ongoing){
+
+        if(!client.games.get(interaction.guildId).get(channelNumber).ongoing){
             return interaction.followUp(`No game has been started yet!`);
         }
     
-        if(!client.games.get(interaction.guildID).get(channelNumber).players.filter((player) => {player.id == interaction.member.id}).length){
+        if(!client.games.get(interaction.guildId).get(channelNumber).players.find((playerId) => {return playerId == interaction.member.id}).length){
             return interaction.followUp(`You're not in this game!`);
         }
     
