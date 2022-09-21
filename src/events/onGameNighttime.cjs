@@ -113,8 +113,10 @@ module.exports = function(client){
                     player.targets.second = interaction.customId;
                     let followUpMessage = player.role == "Witch" ? `You have decided to target ${client.users.cache.get(interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(interaction.customId).tag} tonight.`;
                     return interaction.reply(followUpMessage);
-                } else if (["Veteran, Jailor"].includes(player.role)){
+                } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
+                    console.log(player.targets.binary);
+                    console.log(interaction.customId);
                     if (player.role == "Jailor" && interaction.customID == 1) {
                         jailorChannel.send("The jailor has decided to execute you.");
                     } else if (player.role == "Jailor"){
@@ -204,7 +206,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 10) clearInterval(interval);
         }, 60000);
-        await delay(600000);
+        await delay(80000);
 
         collectors.forEach(collector => collector.stop());
         
