@@ -206,7 +206,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 10) clearInterval(interval);
         }, 60000);
-        await delay(80000);
+        await delay(1000);
 
         collectors.forEach(collector => collector.stop());
         

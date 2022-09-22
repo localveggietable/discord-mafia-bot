@@ -463,12 +463,11 @@ module.exports = function(client){
                         break;
                     case "killing":
                         for (const [index, visitingPlayerID] of playerIDs.entries()){
-                            if (["mafioso", "godfather"].includes(visitedByRole)){
+                            if (["mafioso", "godfather"].includes(gameCache.inGameRoles.find(player => player.id == visitingPlayerID).role)){
                                 for (const spy of actionTracker.filter(player => player.role == "Spy")){
                                     publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
                                 }
                             }
-                            
                             if (player.jailed){
                                 for (const visitingPlayerID of playerIDs){
                                     publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");

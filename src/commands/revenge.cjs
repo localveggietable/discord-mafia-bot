@@ -27,7 +27,7 @@ module.exports = {
         
         let target = gameCache.inGameRoles.find(target => target.id == userTarget.id);
         if (!target) return interaction.followUp("That player doesn't exist!");
-        if (!target.alive) return interaction.followUp("You take revenge on a dead player!");
+        if (!target.alive) return interaction.followUp("You can't take revenge on a dead player!");
 
         player.targets.first = target.id;
 

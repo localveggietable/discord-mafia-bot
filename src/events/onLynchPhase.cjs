@@ -39,41 +39,49 @@ module.exports = function(client){
         
         //TODO: get rid of the time attribute on the collector. Manage the time separately using setinterval, and then call
         //collector.stop() as desired. Having two different intervals is imprecise because of event loop nature
-        const collector = lynchMessage.createMessageComponentCollector({componentType: "BUTTON", time: 30000});
-
-        const interval = setInterval(() => {
-            if (!(time--)){
-                handleSetInterval(rows, lynchMessage, client, time, collector, guildID, channelID);
-                clearInterval(interval);
-            }
-        }, 1000);
+        const collector = lynchMessage.createMessageComponentCollector({componentType: "BUTTON"});
 
         collector.on("collect", (interaction) => {
             let playerExists = gameCache.inGameRoles.find((player) => {
                 return player.alive && (player.id == interaction.user.id);
             });
             if (!playerExists) return interaction.reply({content: "You can't click this button!", ephemeral: true});
+            if (interaction.customId == interaction.user.id) return interaction.reply({content: "You can't vote for yourself!", ephemeral: true});
 
             let playerNumber = gameCache.inGameRoles.indexOf(playerExists);
-            votes[playerNumber] = +interaction.customId;
 
-            outputChannel.send(`${client.users.cache.get(playerExists.id).tag} voted for ${client.users.cache.get(interaction.customId).tag}`);
+            if (votes[playerNumber] == interaction.customId){
+                votes[playerNumber] = 0;
+                interaction.reply(`${client.users.cache.get(playerExists.id).tag} cancelled their vote!`);
+            } else {
+                votes[playerNumber] = interaction.customId;
 
-            let maxVoted = countMax(votes);
+                let numVotesNeeded = votesRequired;
 
-            if (maxVoted.cardinality >= votesRequired){
-                collector.stop();
-                playerIsLynched = true;
-                for (const row of rows){
-                    for (let i = 0; i < 5; ++i){
-                        row?.components[i].setDisabled(true);
-                    }
+                for (const vote of votes){
+                    if (vote == interaction.customId) --numVotesNeeded;
                 }
-                lynchMessage.edit({content: "You can't vote anymore!", components: rows});
 
-                clearInterval(interval);
+                const pluralVote = numVotesNeeded ? "votes" : "vote";
 
-                client.emit("defensePhase", maxVoted.value, --lynches, time, guildID, channelID);
+                interaction.reply(`${client.users.cache.get(playerExists.id).tag} voted for ${client.users.cache.get(interaction.customId).tag}. ${numVotesNeeded} ${pluralVote} are still needed to bring this player to trial!`);
+
+                let maxVoted = countMax(votes);
+
+                if (maxVoted.cardinality >= votesRequired){
+                    collector.stop();
+                    playerIsLynched = true;
+                    for (const row of rows){
+                        for (let i = 0; i < 5; ++i){
+                            row?.components[i].setDisabled(true);
+                        }
+                    }
+                    lynchMessage.edit({content: "You can't vote anymore!", components: rows});
+
+                    clearInterval(interval);
+
+                    client.emit("defensePhase", maxVoted.value, --lynches, time, guildID, channelID);
+                }
             }
         });
 
@@ -82,19 +90,25 @@ module.exports = function(client){
             if (!playerIsLynched) outputChannel.send("It is now too late to continue voting");
         });
 
+        const interval = setInterval(() => {
+            --time;
+            if (!time){
+                handleSetInterval(rows, lynchMessage, client, collector, guildID, channelID);
+                clearInterval(interval);
+            }
+        }, 1000);
+
     });      
 }
 
 
-async function handleSetInterval(rows, lynchMessage, client, time, collector, guildID, channelID){
-    if (!time){
-        collector.stop();
-        for (const row of rows){
-            for (let i = 0; i < 5; ++i){
-                row?.components[i].setDisabled(true);
-            }
+async function handleSetInterval(rows, lynchMessage, client, collector, guildID, channelID){
+    collector.stop();
+    for (const row of rows){
+        for (let i = 0; i < 5; ++i){
+            row?.components[i].setDisabled(true);
         }
-        await lynchMessage.edit({content: "You can't vote anymore!", components: rows});
-        client.emit("gameNighttime", guildID, channelID);
     }
+    await lynchMessage.edit({content: "You can't vote anymore!", components: rows});
+    client.emit("gameNighttime", guildID, channelID);
 }
