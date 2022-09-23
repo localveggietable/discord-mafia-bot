@@ -752,6 +752,9 @@ module.exports = function(client){
         }
 
         uniq(newDeaths);
+
+        if (!newDeaths.length) ++gameCache.daysWithoutDeath;
+        else gameCache.daysWithoutDeath = 0;
         
         for (const player of newDeaths){
             if (!player.cleaned) continue;

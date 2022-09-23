@@ -24,6 +24,8 @@ module.exports = function(client){
         await deathMessage;
         await handleDeath;
         await outputDeath;
+
+        gameCache.daysWithoutDeath = -1;
         
         let gameEnd = checkGameEnd(client, guildID, channelID);
         if (gameEnd.gameEnded) return client.emit("endGame", gameEnd.winningFactions, guildID, channelID);

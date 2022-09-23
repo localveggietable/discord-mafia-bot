@@ -15,8 +15,8 @@ module.exports.setupGuild = function setupGuild(client, guildID){
         players: [],
         inGameRoles: [],
         isDaytime: true,
-        day: 0
-
+        day: 0,
+        daysWithoutDeath: 0
     };
 
 

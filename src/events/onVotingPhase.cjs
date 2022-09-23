@@ -64,22 +64,23 @@ module.exports = function(client){
             playerKilled = Array.isArray(value) ? false : (value == 1 ? false : true);
             const promises = [];
             for (const [index, element] of votes.entries()){
-            switch (element){
-                case 0:
-                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} **abstained**.`));
-                    break;
-                case 1:
-                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **not guilty**.`));
-                    break;
-                case 2:
-                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **guilty**`));
-                    break; 
+                if (index >= gameCache.inGameRoles.length) break;
+                switch (element){
+                    case 0:
+                        promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} **abstained**.`));
+                        break;
+                    case 1:
+                        promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **not guilty**.`));
+                        break;
+                    case 2:
+                        promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **guilty**`));
+                        break; 
                 } 
             }
             await Promise.all(promises);
             if (playerKilled) return client.emit("deathPhase", playerID, guildID, channelID);
             else return client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
-            }, 20000);
+            }, 360000);
 
        
 

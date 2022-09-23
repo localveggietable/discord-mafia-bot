@@ -28,7 +28,7 @@ module.exports = {
 
         const [sourcePlayer, targetPlayer] = [gameCache.inGameRoles.find(interaction.user.id), gameCache.inGameRoles.find(userTarget.id)];
 
-        if (!sourcePlayer.alive ) return interaction.followUp("You can't whisper as a dead player!");
+        if (!sourcePlayer.alive) return interaction.followUp("You can't whisper as a dead player!");
         if (sourcePlayer.revealed) return interaction.followUp("You can't whisper as a revealed Mayor!");
         if (!gameCache.isDaytime) return interaction.followUp("You can only use this command in the day!");
         if (!targetPlayer.alive) return interaction.followUp("You can't whisper to a dead player!");

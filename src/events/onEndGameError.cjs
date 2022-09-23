@@ -30,6 +30,7 @@ module.exports = function(client){
         };
 
         for (let player of gameCache.inGameRoles){
+            await outputChannel.permissionOverwrites.delete(player.id);
             client.gameUsers.delete(player.id);
         }
 
@@ -39,6 +40,8 @@ module.exports = function(client){
         await Promise.all([client.guilds.cache.get(guildID).channels.delete(mafiaChannel), client.guilds.cache.get(guildID).channels.delete(jailorChannel), client.guilds.cache.get(guildID).channels.delete(deadChannel)]);
 
         await outputChannel.send("Someone messed with the roles needed to run this game :/ . This game will be aborted.");
+
+        await outputChannel.permissionOverwrites.delete(guildID);
 
         client.games.get(guildID).set(channelID, defaultChannelObj);
     });

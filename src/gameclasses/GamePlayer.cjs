@@ -72,6 +72,10 @@ class GamePlayer{
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
 
         const gameCache = client.games.get(guildID).get(channelID);
+
+        this.blackmailed = false;
+        outputChannel.permissionOverwrites.delete(this.id);
+        
         let [aliveRole, deadRole] = [guild.roles.cache.find(role => role.name == "Alive Town Member"), guild.roles.cache.find(role => role.name == "Dead Town Member")];
 
         let exePlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Executioner");

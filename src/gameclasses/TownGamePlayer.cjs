@@ -60,7 +60,7 @@ class TownGamePlayer extends GamePlayer{
     resolveDefaultNighttimeOptions(players){
         let playerButtons = [];
         for (const player of players){
-            if (!player.alive || player.id == this.id) continue;
+            if (!player.alive) continue;
             if (!(["Bodyguard, Doctor"].includes(this.role) && this.limitedUses.uses) && player.id == this.id) continue;
             if (this.role == "Doctor" && player.revealed) continue;
             playerButtons.push(new MessageButton()

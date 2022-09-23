@@ -13,10 +13,9 @@ module.exports.checkGameEnd = function(client, guildID, channelID){
     const gameCache = client.games.get(guildID).get(channelID);
     const aliveWitch = gameCache.inGameRoles.find(player => player.faction == "Witch" && player.alive) ? 1 : 0;
     const exeHasWon = gameCache.inGameRoles.find(player => player.faction == "Executioner" && player.won) ? true : false;
-    const jesterHasWon = gameCache.inGameRoles.find(player => player.faction == "Jester" && player.won) ? true : false; 
 
     const { _ , townCount, mafCount} = countAlivePlayers(client, guildID, channelID); //eslint-disable-line
-    let winningFactions = exeHasWon ? ["Executioner"] : jesterHasWon ? ["Jester"] : [];
+    let winningFactions = exeHasWon ? ["Executioner"] : [];
 
     if (!townCount || !mafCount){
         if (!townCount.length && !mafCount.length){
@@ -37,6 +36,8 @@ module.exports.checkGameEnd = function(client, guildID, channelID){
             } else {
                 return {gameEnded: true, winningFactions: winningFactions.push("Mafia")};
             }
+        } else if(gameCache.day >= 7 && gameCache.daysWithoutDeath >= 2){
+            return {gameEnded: true, winningFactions: winningFactions};
         } else {
             return {gameEnded: false, winningFactions: null};
         }

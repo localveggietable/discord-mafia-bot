@@ -31,6 +31,15 @@ module.exports = function(client){
         //Tell the game cache that it is now nighttime.
         gameCache.isDaytime = false;
 
+        //Reset blackmailed players' permissions
+
+        let blackmailedPlayers = gameCache.inGameRoles.filter(player => player.alive && player.blackmailed);
+
+        await blackmailedPlayers.map(player => {
+            player.blackmailed = false;
+            return outputChannel.permissionOverwrites.delete(player.id)
+        });
+
         //set permissions of different channels. The first one is jailor channel.
 
         let jailor = gameCache.inGameRoles.find(player => player.role == "Jailor");
@@ -205,8 +214,8 @@ module.exports = function(client){
             console.log("A minute has passed!");
             ++minute;
             if (minute == 10) clearInterval(interval);
-        }, 60000);
-        await delay(1000);
+        }, 600000);
+        await delay(60000);
 
         collectors.forEach(collector => collector.stop());
         
@@ -227,12 +236,12 @@ module.exports = function(client){
         if (jailor.alive && jailor.targets.first) {
             denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
                 VIEW_CHANNEL: true,
-                SEND_MESSAGES: true
+                SEND_MESSAGES: false
             }));
     
             denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
                 VIEW_CHANNEL: true,
-                SEND_MESSAGES: true
+                SEND_MESSAGES: false
             })); 
 
             await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));

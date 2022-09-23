@@ -15,6 +15,7 @@ bot.games:  <int, <int, object>>, where object looks like
     inGameRoles: array[gameplayer]
     isDaytime: boolean
     day: int
+    daysWithoutDeath: int
 }
 
 */
