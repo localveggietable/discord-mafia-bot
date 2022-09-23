@@ -89,6 +89,45 @@ module.exports = function(client){
             console.log(`${player.tag}: ${player.role} \n`);
         }
 
+        //Set default permissions.
+
+
+        await outputChannel.permissionOverwrites.set([
+            {
+                id: guildID,
+                deny: [Permissions.FLAGS.SEND_MESSAGES]
+            },
+            {
+                id: client.guilds.cache.get(guildID).roles.cache.find(role => role.name == aliveRoleName).id,
+                allow: [Permissions.FLAGS.SEND_MESSAGES]
+            }
+        ]);
+
+
+        //Send players their roles
+
+        let messages = [];
+        for (const player of gameCache.inGameRoles) {
+            const msgToSend = player.faction == "Executioner" ? `Welcome to tos! Your role is ${player.role} \nYour target this game is ${gameCache.inGameRoles.find(target => target.id == player.targetID).tag}` : `Welcome to tos! Your role is ${player.role}`;
+            messages.push(client.users.cache.get(player.id).send(msgToSend));
+        }
+
+        await Promise.all(messages);
+
+        let interval = setInterval(() => {
+            handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time--, mafiaPlayerIDs, deadRoleName);
+            if (time < 0){
+                clearInterval(interval);
+            }
+        }, 1000);
+    });
+}
+
+//this ensures that gameDaytime is emitted only after the channel has been notified.
+async function handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time, mafiaPlayerIDs, deadRoleName){
+    if (!time){
+        gameCache.started = true;
+
         await Promise.all([client.guilds.cache.get(guildID).channels.create(`mafia-${outputChannel.name}`, {
             type: "GUILD_TEXT",
             permissionOverwrites: [
@@ -135,46 +174,7 @@ module.exports = function(client){
                 }
             ]
         })]);
-
-
-        //Set default permissions.
-
-
-        await outputChannel.permissionOverwrites.set([
-            {
-                id: guildID,
-                deny: [Permissions.FLAGS.SEND_MESSAGES]
-            },
-            {
-                id: client.guilds.cache.get(guildID).roles.cache.find(role => role.name == aliveRoleName).id,
-                allow: [Permissions.FLAGS.SEND_MESSAGES]
-            }
-        ]);
-
-
-        //Send players their roles
-
-        let messages = [];
-        for (const player of gameCache.inGameRoles) {
-            const msgToSend = player.faction == "Executioner" ? `Welcome to tos! Your role is ${player.role} \nYour target this game is ${gameCache.inGameRoles.find(target => target.id == player.targetID).tag}` : `Welcome to tos! Your role is ${player.role}`;
-            messages.push(client.users.cache.get(player.id).send(msgToSend));
-        }
-
-        await Promise.all(messages);
-
-        let interval = setInterval(() => {
-            handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time--);
-            if (time < 0){
-                clearInterval(interval);
-            }
-        }, 1000);
-    });
-}
-
-//this ensures that gameDaytime is emitted only after the channel has been notified.
-async function handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time){
-    if (!time){
-        gameCache.started = true;
+        
         return client.emit("gameDaytime", true, guildID, channelID); 
     }
     if (!(time % 5)) await outputChannel.send({content: `The game starts in ${time} seconds`});

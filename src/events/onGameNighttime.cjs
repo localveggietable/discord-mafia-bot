@@ -211,10 +211,10 @@ module.exports = function(client){
 
         let minute = 0;
         let interval = setInterval(() => {
-            console.log("A minute has passed!");
+            console.log(`${minute} minute(s) have passed!`);
             ++minute;
             if (minute == 10) clearInterval(interval);
-        }, 600000);
+        }, 60000);
         await delay(60000);
 
         collectors.forEach(collector => collector.stop());

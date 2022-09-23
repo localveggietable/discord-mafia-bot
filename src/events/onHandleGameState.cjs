@@ -775,6 +775,7 @@ module.exports = function(client){
                     outputMessage = outputMessage.concat("\n", message);
                 } else {
                     for (const statusCode of message){
+                        console.log(typeof statusCode);
                         if (typeof statusCode == "string") outputMessage.concat("\n", statusCode);
                         else {outputMessage = outputMessage.concat("\n", statusCodes[statusCode]);}
 
