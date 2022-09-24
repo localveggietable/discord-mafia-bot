@@ -16,9 +16,9 @@ module.exports = function(client){
 
         gameCache.day = firstDay ? 1 : ++gameCache.day;
         gameCache.isDaytime = true;
-        let time = firstDay ? 15 : 160;
+        let time = firstDay ? 15 : 15;
 
-        await outputChannel.send(`This is the beginning of day ${gameCache.day}`);
+        await outputChannel.send(`This is the beginning of day ${gameCache.day}.`);
 
         if (!firstDay) {
             await outputChannel.send(`Day ${gameCache.day}`);

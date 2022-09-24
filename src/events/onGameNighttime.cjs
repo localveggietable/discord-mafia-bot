@@ -184,12 +184,12 @@ module.exports = function(client){
 
                 if (player.role == "Disguiser"){
                     if (!player.targets.first) {
-                        if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.reply("You have to choose a mafia member as your first target.");
+                        if (gameCache.inGameRoles.find(player => player.id == interaction.customId).faction == "Mafia") return interaction.reply("You have to choose a mafia member as your first target.");
                         player.targets.first = interaction.customId;
                         return interaction.reply("You have chosen your mafia member to disguise.");
                     }
 
-                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.reply("You can only disguise Mafia members as non-Mafia members.");
+                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).faction == "Mafia") return interaction.reply("You can only disguise Mafia members as non-Mafia members.");
                     player.targets.second = interaction.customId;
                     return interaction.reply("You have chosen who your mafia member will be disguised as."); 
                 } else if (player.role == "Hypnotist"){
@@ -215,7 +215,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 10) clearInterval(interval);
         }, 60000);
-        await delay(60000);
+        await delay(6000);
 
         collectors.forEach(collector => collector.stop());
         

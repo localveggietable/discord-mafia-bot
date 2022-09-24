@@ -35,7 +35,8 @@ module.exports = function(client){
             components: rows
         });
 
-        let votes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], playerIsLynched = false;
+        let votes = gameCache.inGameRoles.find(player => player.alive && player.revealed) ? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let playerIsLynched = false;
         
         //TODO: get rid of the time attribute on the collector. Manage the time separately using setinterval, and then call
         //collector.stop() as desired. Having two different intervals is imprecise because of event loop nature
@@ -51,10 +52,19 @@ module.exports = function(client){
             let playerNumber = gameCache.inGameRoles.indexOf(playerExists);
 
             if (votes[playerNumber] == interaction.customId){
-                votes[playerNumber] = 0;
-                interaction.reply(`${client.users.cache.get(playerExists.id).tag} cancelled their vote!`);
+                if (playerExists.revealed){
+                    votes[playerNumber] = votes[15] = votes[16] = 0;
+                    interaction.reply(`${client.users.cache.get(playerExists.id).tag} cancelled their vote!`);
+                } else {
+                    votes[playerNumber] = 0;
+                    interaction.reply(`${client.users.cache.get(playerExists.id).tag} cancelled their vote!`);
+                }
             } else {
-                votes[playerNumber] = interaction.customId;
+                if (playerExists.revealed){
+                    votes [playerNumber] = votes[15] = votes[16] = interaction.customId;
+                } else {
+                    votes[playerNumber] = interaction.customId;
+                }
 
                 let numVotesNeeded = votesRequired;
 
@@ -62,13 +72,15 @@ module.exports = function(client){
                     if (vote == interaction.customId) --numVotesNeeded;
                 }
 
-                const pluralVote = numVotesNeeded ? "votes" : "vote";
+                const pluralVote = numVotesNeeded != 1 ? "votes" : "vote";
 
                 interaction.reply(`${client.users.cache.get(playerExists.id).tag} voted for ${client.users.cache.get(interaction.customId).tag}. ${numVotesNeeded} ${pluralVote} are still needed to bring this player to trial!`);
 
                 let maxVoted = countMax(votes);
 
-                if (maxVoted.cardinality >= votesRequired){
+                console.log(maxVoted.count);
+
+                if (maxVoted.count >= votesRequired){
                     collector.stop();
                     playerIsLynched = true;
                     for (const row of rows){
@@ -87,7 +99,7 @@ module.exports = function(client){
 
 
         collector.on("end", () => {
-            if (!playerIsLynched) outputChannel.send("It is now too late to continue voting");
+            if (!playerIsLynched) outputChannel.send("It is now too late to continue voting.");
         });
 
         const interval = setInterval(() => {

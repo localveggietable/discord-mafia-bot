@@ -6,7 +6,7 @@ module.exports = {
     .setName("tos-ping")
     .setDescription("Measures the websocket ping.")
     ,
-    async execute(client, interaction, params){
+    async execute(client, interaction){
 
         return interaction.followUp({content: `Pong! (${client.ws.ping}), in the guild ${interaction.guild.name}`, ephemeral: true});
 

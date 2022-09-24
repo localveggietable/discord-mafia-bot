@@ -226,7 +226,7 @@ module.exports = function(client){
                     if (townTarget.jailed) break;
                     publicPlayerInformationMap.get(mafiaTarget.id).set("publicID", townTarget.id);
                     publicPlayerInformationMap.get(mafiaTarget.id).set("publicRole", townTarget.role);
-                    publicPlayerInformationMap.get(mafiaTarget.id).set("publicInnocent", townTarget.faction == "Mafia" && townTarget.role != "Godfather" ? true : false);
+                    publicPlayerInformationMap.get(mafiaTarget.id).set("publicInnocent", townTarget.faction == "Mafia" && townTarget.role != "Godfather" ? false : true);
                     break;
                 }
                 case "Framer": {
@@ -442,6 +442,7 @@ module.exports = function(client){
                             } 
                         } else {
                             for (const visitingPlayerID of playerIDs){
+                                console.log(publicPlayerInformationMap.get(player.id).get("publicInnocent"));
                                 const message = publicPlayerInformationMap.get(player.id).get("publicInnocent") ? "You cannot find evidence of wrongdoing. Your target seems innocent." : "Your target is suspicious!";
                                 const witchMessage = message.split(" ")[0] == "You" ? "The player you witched found that their target is innocent" : "The player you witched found that their target is suspicious."
                                 publicAPIMap.get(visitingPlayerID).get("messages").push(message);
@@ -599,7 +600,7 @@ module.exports = function(client){
                             if (player.jailed) {
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                             } else {
-                                publicAPIMap.get(player.id).get("messages").push(gameCache.inGameRoles.find(player => player.id == visitingPlayerID).targets.options);
+                                publicAPIMap.get(player.id).get("messages").push(messageOptions[gameCache.inGameRoles.find(player => player.id == visitingPlayerID).targets.options]);
                             }
                         }  
                         break;

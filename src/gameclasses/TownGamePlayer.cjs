@@ -64,14 +64,15 @@ class TownGamePlayer extends GamePlayer{
             if (this.role == "Doctor" && player.revealed) continue;
             if (!(["Bodyguard", "Doctor"].includes(this.role) && this.limitedUses.uses) && player.id == this.id) continue;
             else if (player.id == this.id){
+                const roleMsg = this.role == "Doctor" ? "Heal" : "Protect";
                 playerButtons.unshift(new MessageButton()
-                    .setCustomId(player.id + "")
-                    .setLabel("Self Heal (1 left)")
+                    .setCustomId(player.id)
+                    .setLabel(`Self ${roleMsg} (1 left)`)
                     .setStyle("SUCCESS")); 
                 continue;
             }
             playerButtons.push(new MessageButton()
-                .setCustomId(player.id + "")
+                .setCustomId(player.id)
                 .setLabel(player.tag)
                 .setStyle("PRIMARY"));
         }
@@ -87,7 +88,7 @@ class TownGamePlayer extends GamePlayer{
             .addComponents(playerButtons.slice(5, Math.min(10, playerButtons.length))));
         
         if (playerButtons.length > 10) rows.push(new MessageActionRow()
-            .addComponents(playerButtons.slice(10, Math.min(5, playerButtons.length))));
+            .addComponents(playerButtons.slice(10, Math.min(15, playerButtons.length))));
 
         if (playerButtons.length > 15) rows.push(new MessageActionRow()
             .addComponents(playerButtons.slice(15, playerButtons.length)));
@@ -132,7 +133,7 @@ class TownGamePlayer extends GamePlayer{
         for (const player of players){
             if (!player.retributionistCanUse) continue;
             playerButtons.push(new MessageButton()
-            .setCustomId(player.id + "")
+            .setCustomId(player.id)
             .setLabel(`${player.tag} (${player.role})`)
             .setStyle("PRIMARY")); 
         }

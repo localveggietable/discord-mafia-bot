@@ -75,7 +75,7 @@ class GamePlayer{
 
         this.blackmailed = false;
         outputChannel.permissionOverwrites.delete(this.id);
-        
+
         let [aliveRole, deadRole] = [guild.roles.cache.find(role => role.name == "Alive Town Member"), guild.roles.cache.find(role => role.name == "Dead Town Member")];
 
         let exePlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Executioner");
@@ -117,6 +117,7 @@ class GamePlayer{
             .addFields({value: this.publicWill});
 
         //Let's put this in the events folder
+        outputChannel.send(`${member.user.tag}'s role was **${this.publicRole}**`)
         let toWrite = this.publicWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send({content: `We found a will next to their body.`, embeds: [will]});
         await toWrite;
         return outputChannel.send(`${member.user.tag}'s role was **${this.publicRole}**`); 
