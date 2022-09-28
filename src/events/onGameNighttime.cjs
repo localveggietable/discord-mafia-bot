@@ -163,13 +163,22 @@ module.exports = function(client){
         mainMafiaCollector.on("collect", (interaction) => {
             let player = mainMafiaRoleActionMessageContent[0].find(player => player.id == interaction.user.id);
             if (!player) return interaction.reply({content: "You can't click this button!", ephemeral: true});
-            let actionPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Mafioso") || player ;
+            
             if (interaction.customId == "clear"){
-                actionPlayer.targets = {first: false, second: false, binary: false, options: false}; 
+                player.targets = {first: false, second: false, binary: false, options: false}; 
                 return interaction.reply("Your selection was cleared."); 
             } 
-            actionPlayer.targets.first = interaction.customId;
+            player.targets.first = interaction.customId;
             return interaction.reply("Your decision has been recorded.");       
+        });
+
+        mainMafiaCollector.on("end", () => {
+            let mafiosoPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Mafioso"); 
+            let godfatherPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Godfather");  
+
+            if (godfatherPlayer?.targets.first){
+                mafiosoPlayer.targets.first = godfatherPlayer.targets.first;
+            }
         });
 
         for (let [player, msg] of mafiaRoleActionMessageContent){

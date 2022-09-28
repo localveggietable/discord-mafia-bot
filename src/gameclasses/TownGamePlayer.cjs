@@ -93,7 +93,7 @@ class TownGamePlayer extends GamePlayer{
         if (playerButtons.length > 15) rows.push(new MessageActionRow()
             .addComponents(playerButtons.slice(15, playerButtons.length)));
 
-        return {content: actionRoleObject[this.role], components: rows};
+        return {content: actionRoleObject[this.role].default ?  actionRoleObject[this.role].default : actionRoleObject[this.role], components: rows};
     }
 
     resolveEmptyNighttimeOptions(firstNight){

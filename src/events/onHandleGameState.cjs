@@ -160,8 +160,11 @@ module.exports = function(client){
                     if (target.priority < player.priority || player.jailed || player.role == "Transporter") break; 
 
                     if (target.role == "Godfather"){
-                        const mafiosoPlayer = gameCache.inGameRoles.find(player => player.role == "Mafioso" && player.alive);
+                        const mafiosoPlayer = actionTracker.find(player => player.role == "Mafioso");
                         if (mafiosoPlayer) mafiosoPlayer.targets.first = player.targets.second;
+                    } if (target.role == "Mafioso"){
+                        const godfatherPlayer = actionTracker.find(player => player.role == "Godfather");
+                        if (godfatherPlayer && godfatherPlayer.targets.first) break;
                     }
 
                     target.targets.first = player.targets.second; 
@@ -784,6 +787,8 @@ module.exports = function(client){
                     }
                 }       
             }
+
+           if (outputMessage == "Here's what happened in the game tonight:") outputMessage = "You slept peacefully last night. (You didn't receive any messages!)"; 
             allPlayerMessages.push(client.users.cache.get(player.id).send(outputMessage));
 
         }

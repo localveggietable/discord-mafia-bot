@@ -87,6 +87,8 @@ class GamePlayer{
                 //make executioner a jester
                 exePlayer.jester = true;
                 exePlayer.role = "Jester";
+
+                await client.users.cache.get(exePlayer.id).send("Your target has been killed at night, so you have now become a Jester! Your objective is to get yourself lynched.");
             }
         } else if (this.jester && lynched){ 
             this.won = true;

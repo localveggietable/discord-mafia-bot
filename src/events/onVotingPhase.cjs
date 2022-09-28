@@ -84,7 +84,7 @@ module.exports = function(client){
             await Promise.all(promises);
             if (playerKilled) return client.emit("deathPhase", playerID, guildID, channelID);
             else return client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
-            }, 360000);
+            }, 150000);
 
        
 

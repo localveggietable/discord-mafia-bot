@@ -32,6 +32,6 @@ module.exports = function(client){
             });
             await Promise.all([outputChannel.send(`It's judgement time! Decide whether or not ${client.users.cache.get(playerID).tag} is guilty.`), outputChannel.permissionOverwrites.edit(aliveRole, {SEND_MESSAGES: true})]);
             client.emit("votingPhase", playerID, lynchesLeft, timeLeft, guildID, channelID); 
-        },200000)
+        },60000)
     });
 }
