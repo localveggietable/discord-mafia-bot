@@ -26,7 +26,7 @@ module.exports = {
     
         addPlayerToGame(client, interaction.guildId, channelNumber, interaction.member.id);
         if(client.games.get(interaction.guildId).get(channelNumber).players.length == 15){
-            await interaction.followUp(`Enough players have joined! The game will start automatically in 15 seconds. To start the game now, enter the command ${inlineCode("/startNow")}.`);
+            await interaction.followUp("Enough players have joined! The game will start automatically in 15 seconds.");
             return client.emit("startGame", interaction.guildId, channelNumber);
         }
 

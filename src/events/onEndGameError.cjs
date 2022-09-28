@@ -1,5 +1,5 @@
 module.exports = function(client){
-    client.on("endGameError", async (guildID, channelID) => {
+    client.on("endGameError", async (guildID, channelID, intentional = false) => {
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
@@ -39,7 +39,7 @@ module.exports = function(client){
 
         await Promise.all([client.guilds.cache.get(guildID).channels.delete(mafiaChannel), client.guilds.cache.get(guildID).channels.delete(jailorChannel), client.guilds.cache.get(guildID).channels.delete(deadChannel)]);
 
-        await outputChannel.send("Someone messed with the roles needed to run this game :/ . This game will be aborted.");
+        if (!intentional) await outputChannel.send("Someone messed with the roles needed to run this game :/ . This game will be aborted.");
 
         await outputChannel.permissionOverwrites.delete(guildID);
 

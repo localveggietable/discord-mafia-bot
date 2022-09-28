@@ -26,7 +26,7 @@ module.exports = function(client){
 
         const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
  
-        const firstNight = gameCache.day;
+        const firstNight = gameCache.day == 1 ? true : false;
 
         //Tell the game cache that it is now nighttime.
         gameCache.isDaytime = false;
@@ -183,15 +183,13 @@ module.exports = function(client){
                 }
 
                 if (player.role == "Disguiser"){
-                    if (!player.targets.first) {
-                        if (gameCache.inGameRoles.find(player => player.id == interaction.customId).faction == "Mafia") return interaction.reply("You have to choose a mafia member as your first target.");
+                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).faction == "Mafia") {
                         player.targets.first = interaction.customId;
                         return interaction.reply("You have chosen your mafia member to disguise.");
+                    } else {
+                        player.targets.second = interaction.customId;
+                        return interaction.reply("You have chosen who your mafia member will be disguised as."); 
                     }
-
-                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).faction == "Mafia") return interaction.reply("You can only disguise Mafia members as non-Mafia members.");
-                    player.targets.second = interaction.customId;
-                    return interaction.reply("You have chosen who your mafia member will be disguised as."); 
                 } else if (player.role == "Hypnotist"){
                     if (["transport", "guard", "block", "heal", "witch"].includes(interaction.customId)){
                         player.targets.options = interaction.customId;
@@ -213,9 +211,9 @@ module.exports = function(client){
         let interval = setInterval(() => {
             console.log(`${minute} minute(s) have passed!`);
             ++minute;
-            if (minute == 10) clearInterval(interval);
+            if (minute == 100) clearInterval(interval);
         }, 60000);
-        await delay(6000);
+        await delay(60000);
 
         collectors.forEach(collector => collector.stop());
         

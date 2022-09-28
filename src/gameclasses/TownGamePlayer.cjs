@@ -13,7 +13,7 @@ var actionRoleObject = {
     Veteran: "Choose whether or not to go on alert:",
     Vigilante: {
         firstNight: "You spend the night polishing your gun so you cannot shoot anyone.",
-        default: "Choose who you want to shoot"
+        default: "Choose who you want to shoot:"
     },
     Bodyguard: "Choose who you want to protect:",
     Doctor: "Choose who you want to heal:",

@@ -90,6 +90,7 @@ module.exports = function(client){
 
         //might be a good idea to handle all messages separately to avoid clutter. <-YES DO THIS 
         //also set the 
+        let transportedPlayerArray = [];
         for (let player of actionTracker){
             switch (player.role){
                 case "Retributionist": {
@@ -140,10 +141,9 @@ module.exports = function(client){
                         targetMap.get(secondTarget.id).set("all", [player.id]);
                     }
                     if (firstTarget.jailed || secondTarget.jailed) break;
+
+                    transportedPlayerArray.push([firstTarget.id, secondTarget.id]);
                         
-                    const tempFirstTargetMap = targetMap.get(firstTarget.id);
-                    targetMap.set(firstTarget.id, targetMap.get(secondTarget.id));
-                    targetMap.set(secondTarget.id, tempFirstTargetMap);
                     break;
                 }
                 case "Witch": {
@@ -371,10 +371,12 @@ module.exports = function(client){
             }
         }
 
+        for (let [firstPlayerID, secondPlayerID] of transportedPlayerArray){
+            const tempFirstTargetMap = targetMap.get(firstPlayerID);
+            targetMap.set(firstPlayerID, targetMap.get(secondPlayerID));
+            targetMap.set(secondPlayerID, tempFirstTargetMap);
+        }
 
-
-    
-    
         //Now, we have to resolve the messages that each player will have to see. Also, we will need to handle any lasting state effects (death, blackmailing)
 
         //put all the new players who died here
@@ -414,8 +416,8 @@ module.exports = function(client){
                         } else {
                             for (const visitingPlayerID of playerIDs){
                                 const possibleRoles = investigatorBrackets.find(arr => arr.includes(publicPlayerInformationMap.get(player.id).get("publicRole")));
-                                publicAPIMap.get(visitingPlayerID).get("messages").push(`Your player could be a ${possibleRoles.join("/")}`);
-                                publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target could be a ${possibleRoles.join("/")}`);
+                                publicAPIMap.get(visitingPlayerID).get("messages").push(`Your player could be a ${possibleRoles.join("/")}.`);
+                                publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target could be a ${possibleRoles.join("/")}.`);
                             }
                         }
                         break;
@@ -430,7 +432,7 @@ module.exports = function(client){
                                     if (allVisitorID == visitingPlayerID) continue;
                                     let publicPlayer = gameCache.inGameRoles.find(player => player.id == publicPlayerInformationMap.get(allVisitorID).get("publicID"));
                                     publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by ${publicPlayer.tag}`);
-                                    publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target was visited by ${publicPlayer.tag}`);
+                                    publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target was visited by ${publicPlayer.tag}.`);
                                 }
                             }
                         }
@@ -444,7 +446,7 @@ module.exports = function(client){
                             for (const visitingPlayerID of playerIDs){
                                 console.log(publicPlayerInformationMap.get(player.id).get("publicInnocent"));
                                 const message = publicPlayerInformationMap.get(player.id).get("publicInnocent") ? "You cannot find evidence of wrongdoing. Your target seems innocent." : "Your target is suspicious!";
-                                const witchMessage = message.split(" ")[0] == "You" ? "The player you witched found that their target is innocent" : "The player you witched found that their target is suspicious."
+                                const witchMessage = message.split(" ")[0] == "You" ? "The player you witched found that their target is innocent." : "The player you witched found that their target is suspicious."
                                 publicAPIMap.get(visitingPlayerID).get("messages").push(message);
                                 publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(witchMessage);
                             }
@@ -613,7 +615,6 @@ module.exports = function(client){
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                             } else {
                                 player.cleaned = gameCache.inGameRoles.find(player => player.id == visitingPlayerID);
-                                player.publicRole = "Cleaned";
                                 player.publicWill = "";
                                 --gameCache.inGameRoles.find(player => player.id == visitingPlayerID).limitedUses.uses;
                             }
@@ -777,7 +778,7 @@ module.exports = function(client){
                 } else {
                     for (const statusCode of message){
                         console.log(typeof statusCode);
-                        if (typeof statusCode == "string") outputMessage.concat("\n", statusCode);
+                        if (typeof statusCode == "string") outputMessage = outputMessage.concat("\n", statusCode);
                         else {outputMessage = outputMessage.concat("\n", statusCodes[statusCode]);}
 
                     }
@@ -800,7 +801,6 @@ module.exports = function(client){
             }
             player.jailed = false;
             player.cleaned = false;
-            player.publicRole = player.role;
             player.publicWill = player.will;
 
             if (["Bodyguard", "Doctor"].includes(player.role)) player.defense = 0;

@@ -41,13 +41,15 @@ module.exports = function(client){
 
             let playerNumber = gameCache.inGameRoles.indexOf(playerExists);
             let temp = votes[playerNumber];
-            votes[playerNumber] = +interaction.customId;
+
+            if (temp == interaction.customId) votes[playerNumber] = 0;
+            else votes[playerNumber] = interaction.customId;
 
             if (!temp){
-                return outputChannel.reply(`${client.users.cache.get(playerExists.id).tag} has voted.`)
+                return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has voted.`)
             } else{
-                if (interaction.customId == temp) return outputChannel.reply(`${client.users.cache.get(playerExists.id).tag} has rescinded their vote.`);
-                else return outputChannel.reply(`${client.users.cache.get(playerExists.id).tag} has changed their vote.`);
+                if (temp == interaction.customId) return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has rescinded their vote.`);
+                else return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has changed their vote.`);
             }
         });
 

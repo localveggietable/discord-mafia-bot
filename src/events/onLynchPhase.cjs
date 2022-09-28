@@ -2,7 +2,7 @@ const { MessageActionRow, MessageButton } = require("discord.js");
 const { countMax } = require("../util/countMax.cjs");
 
 module.exports = function(client){
-    client.on("lynchPhase", async (remainingTime = 45, remainingLynches = 3, guildID, channelID ) => {
+    client.on("lynchPhase", async (remainingTime = 360, remainingLynches = 3, guildID, channelID ) => {
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
         return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
@@ -81,11 +81,11 @@ module.exports = function(client){
                 console.log(maxVoted.count);
 
                 if (maxVoted.count >= votesRequired){
-                    collector.stop();
                     playerIsLynched = true;
+                    collector.stop();
                     for (const row of rows){
                         for (let i = 0; i < 5; ++i){
-                            row?.components[i].setDisabled(true);
+                            row.components[i]?.setDisabled(true);
                         }
                     }
                     lynchMessage.edit({content: "You can't vote anymore!", components: rows});
@@ -118,7 +118,7 @@ async function handleSetInterval(rows, lynchMessage, client, collector, guildID,
     collector.stop();
     for (const row of rows){
         for (let i = 0; i < 5; ++i){
-            row?.components[i].setDisabled(true);
+            row.components[i]?.setDisabled(true);
         }
     }
     await lynchMessage.edit({content: "You can't vote anymore!", components: rows});
