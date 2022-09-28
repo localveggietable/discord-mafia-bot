@@ -3,7 +3,7 @@ module.exports = function(client){
         
         if (!interaction.isCommand()) return;
 
-        await interaction.deferReply();
+        await interaction.deferReply().catch(() => {});
 
         var params = [];
         const options = interaction.options.data;

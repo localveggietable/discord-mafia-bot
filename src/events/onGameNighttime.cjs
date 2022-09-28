@@ -26,10 +26,19 @@ module.exports = function(client){
 
         const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
  
-        const firstNight = gameCache.day;
+        const firstNight = gameCache.day == 1 ? true : false;
 
         //Tell the game cache that it is now nighttime.
         gameCache.isDaytime = false;
+
+        //Reset blackmailed players' permissions
+
+        let blackmailedPlayers = gameCache.inGameRoles.filter(player => player.alive && player.blackmailed);
+
+        await blackmailedPlayers.map(player => {
+            player.blackmailed = false;
+            return outputChannel.permissionOverwrites.delete(player.id)
+        });
 
         //set permissions of different channels. The first one is jailor channel.
 
@@ -113,8 +122,10 @@ module.exports = function(client){
                     player.targets.second = interaction.customId;
                     let followUpMessage = player.role == "Witch" ? `You have decided to target ${client.users.cache.get(interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(interaction.customId).tag} tonight.`;
                     return interaction.reply(followUpMessage);
-                } else if (["Veteran, Jailor"].includes(player.role)){
+                } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
+                    console.log(player.targets.binary);
+                    console.log(interaction.customId);
                     if (player.role == "Jailor" && interaction.customID == 1) {
                         jailorChannel.send("The jailor has decided to execute you.");
                     } else if (player.role == "Jailor"){
@@ -152,13 +163,22 @@ module.exports = function(client){
         mainMafiaCollector.on("collect", (interaction) => {
             let player = mainMafiaRoleActionMessageContent[0].find(player => player.id == interaction.user.id);
             if (!player) return interaction.reply({content: "You can't click this button!", ephemeral: true});
-            let actionPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Mafioso") || player ;
+            
             if (interaction.customId == "clear"){
-                actionPlayer.targets = {first: false, second: false, binary: false, options: false}; 
+                player.targets = {first: false, second: false, binary: false, options: false}; 
                 return interaction.reply("Your selection was cleared."); 
             } 
-            actionPlayer.targets.first = interaction.customId;
+            player.targets.first = interaction.customId;
             return interaction.reply("Your decision has been recorded.");       
+        });
+
+        mainMafiaCollector.on("end", () => {
+            let mafiosoPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Mafioso"); 
+            let godfatherPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Godfather");  
+
+            if (godfatherPlayer?.targets.first){
+                mafiosoPlayer.targets.first = godfatherPlayer.targets.first;
+            }
         });
 
         for (let [player, msg] of mafiaRoleActionMessageContent){
@@ -172,15 +192,13 @@ module.exports = function(client){
                 }
 
                 if (player.role == "Disguiser"){
-                    if (!player.targets.first) {
-                        if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.reply("You have to choose a mafia member as your first target.");
+                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).faction == "Mafia") {
                         player.targets.first = interaction.customId;
                         return interaction.reply("You have chosen your mafia member to disguise.");
+                    } else {
+                        player.targets.second = interaction.customId;
+                        return interaction.reply("You have chosen who your mafia member will be disguised as."); 
                     }
-
-                    if (gameCache.inGameRoles.find(player => player.id == interaction.customId).role == "Mafia") return interaction.reply("You can only disguise Mafia members as non-Mafia members.");
-                    player.targets.second = interaction.customId;
-                    return interaction.reply("You have chosen who your mafia member will be disguised as."); 
                 } else if (player.role == "Hypnotist"){
                     if (["transport", "guard", "block", "heal", "witch"].includes(interaction.customId)){
                         player.targets.options = interaction.customId;
@@ -200,11 +218,11 @@ module.exports = function(client){
 
         let minute = 0;
         let interval = setInterval(() => {
-            console.log("A minute has passed!");
+            console.log(`${minute} minute(s) have passed!`);
             ++minute;
-            if (minute == 10) clearInterval(interval);
+            if (minute == 100) clearInterval(interval);
         }, 60000);
-        await delay(600000);
+        await delay(60000);
 
         collectors.forEach(collector => collector.stop());
         
@@ -225,12 +243,12 @@ module.exports = function(client){
         if (jailor.alive && jailor.targets.first) {
             denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
                 VIEW_CHANNEL: true,
-                SEND_MESSAGES: true
+                SEND_MESSAGES: false
             }));
     
             denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
                 VIEW_CHANNEL: true,
-                SEND_MESSAGES: true
+                SEND_MESSAGES: false
             })); 
 
             await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));

@@ -37,18 +37,20 @@ module.exports = function(client){
             let playerExists = gameCache.inGameRoles.find((player) => {
                 return player.alive && (player.id == interaction.user.id);
             });
-            if (!playerExists) return interaction.reply({content: "You can't click this button!", ephemeral: true});
+            if (!playerExists || playerExists.id == playerID) return interaction.reply({content: "You can't click this button!", ephemeral: true});
 
             let playerNumber = gameCache.inGameRoles.indexOf(playerExists);
             let temp = votes[playerNumber];
-            votes[playerNumber] = +interaction.customId;
+
+            if (temp == interaction.customId) votes[playerNumber] = 0;
+            else votes[playerNumber] = interaction.customId;
 
             if (!temp){
-                await outputChannel.send(`${client.users.cache.get(playerExists.id).tag} has voted.`)
+                return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has voted.`)
             } else{
-                if (interaction.customId == temp) await outputChannel.send(`${client.users.cache.get(playerExists.id).tag} has rescinded their vote.`);
-                else await outputChannel.send(`${client.users.cache.get(playerExists.id).tag} has changed their vote.`);
-            } 
+                if (temp == interaction.customId) return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has rescinded their vote.`);
+                else return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has changed their vote.`);
+            }
         });
 
         setTimeout(async () => {
@@ -64,22 +66,25 @@ module.exports = function(client){
             playerKilled = Array.isArray(value) ? false : (value == 1 ? false : true);
             const promises = [];
             for (const [index, element] of votes.entries()){
-            switch (element){
-                case 0:
-                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} **abstained**.`));
-                    break;
-                case 1:
-                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **not guilty**.`));
-                    break;
-                case 2:
-                    promises.push(outputChannel.send(`${client.users.cache.get(gameCache.inGameRoles[index].id).tag} voted **guilty**`));
-                    break; 
+                if (index >= gameCache.inGameRoles.length) break;
+                const votingPlayer = gameCache.inGameRoles[index];
+                if (!votingPlayer.alive) continue;
+                switch (element){
+                    case 0:
+                        promises.push(outputChannel.send(`${votingPlayer.tag} **abstained**.`));
+                        break;
+                    case 1:
+                        promises.push(outputChannel.send(`${votingPlayer.tag} voted **not guilty**.`));
+                        break;
+                    case 2:
+                        promises.push(outputChannel.send(`${votingPlayer.tag} voted **guilty**`));
+                        break; 
                 } 
             }
             await Promise.all(promises);
             if (playerKilled) return client.emit("deathPhase", playerID, guildID, channelID);
             else return client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
-            }, 20000);
+            }, 150000);
 
        
 

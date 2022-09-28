@@ -72,6 +72,10 @@ class GamePlayer{
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
 
         const gameCache = client.games.get(guildID).get(channelID);
+
+        this.blackmailed = false;
+        outputChannel.permissionOverwrites.delete(this.id);
+
         let [aliveRole, deadRole] = [guild.roles.cache.find(role => role.name == "Alive Town Member"), guild.roles.cache.find(role => role.name == "Dead Town Member")];
 
         let exePlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Executioner");
@@ -82,8 +86,11 @@ class GamePlayer{
             } else {
                 //make executioner a jester
                 exePlayer.jester = true;
+                exePlayer.role = "Jester";
+
+                await client.users.cache.get(exePlayer.id).send("Your target has been killed at night, so you have now become a Jester! Your objective is to get yourself lynched.");
             }
-        } else if (this.faction == "Executioner" && this.jester && lynched){ 
+        } else if (this.jester && lynched){ 
             this.won = true;
             this.canRevenge = true;
         }
@@ -98,7 +105,7 @@ class GamePlayer{
         return this;
     }
 
-    async outputDeath(client, guildID, channelID){
+    async outputDeath(client, guildID, channelID, lynched = true){
         const guild = client.guilds.cache.get(guildID);
         const member = guild.members.cache.get(this.id);
         const outputChannel = channelID ? guild.channels.cache.find((channel) => {
@@ -113,9 +120,11 @@ class GamePlayer{
             .addFields({value: this.publicWill});
 
         //Let's put this in the events folder
+        await outputChannel.send(`${member.user.tag}'s role was **${this.role}**`);
         let toWrite = this.publicWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send({content: `We found a will next to their body.`, embeds: [will]});
         await toWrite;
-        return outputChannel.send(`${member.user.tag}'s role was **${this.publicRole}**`); 
+        if (this.jester && lynched) await outputChannel.send("The jester will get its revenge from the grave!"); 
+        return; 
     }
 }
 

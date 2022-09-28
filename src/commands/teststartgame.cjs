@@ -1,4 +1,4 @@
-const {SlashCommandBuilder, inlineCode} = require("@discordjs/builders");
+const {SlashCommandBuilder} = require("@discordjs/builders");
 const {setupGuild} = require("../util/setupGuild.cjs");
 const {addPlayerToGame} = require("../util/addPlayerToGame.cjs");
 
@@ -37,7 +37,7 @@ module.exports = {
         interaction.followUp("A game has successfully been started.");
 
         if(client.games.get(interaction.guildId).get(channelNumber).players.length == 15){
-            await interaction.followUp(`Enough players have joined! The game will start automatically in 15 seconds. To start the game now, enter the command ${inlineCode("/startNow")}.`);
+            await interaction.followUp(`Enough players have joined! The game will start automatically in 15 seconds.`);
             return client.emit("startGame", interaction.guildId, channelNumber);
         }
     }

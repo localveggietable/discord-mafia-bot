@@ -13,7 +13,7 @@ var actionRoleObject = {
     Veteran: "Choose whether or not to go on alert:",
     Vigilante: {
         firstNight: "You spend the night polishing your gun so you cannot shoot anyone.",
-        default: "Choose who you want to shoot"
+        default: "Choose who you want to shoot:"
     },
     Bodyguard: "Choose who you want to protect:",
     Doctor: "Choose who you want to heal:",
@@ -60,11 +60,19 @@ class TownGamePlayer extends GamePlayer{
     resolveDefaultNighttimeOptions(players){
         let playerButtons = [];
         for (const player of players){
-            if (!player.alive || player.id == this.id) continue;
-            if (!(["Bodyguard, Doctor"].includes(this.role) && this.limitedUses.uses) && player.id == this.id) continue;
+            if (!player.alive) continue;
             if (this.role == "Doctor" && player.revealed) continue;
+            if (!(["Bodyguard", "Doctor"].includes(this.role) && this.limitedUses.uses) && player.id == this.id) continue;
+            else if (player.id == this.id){
+                const roleMsg = this.role == "Doctor" ? "Heal" : "Protect";
+                playerButtons.unshift(new MessageButton()
+                    .setCustomId(player.id)
+                    .setLabel(`Self ${roleMsg} (1 left)`)
+                    .setStyle("SUCCESS")); 
+                continue;
+            }
             playerButtons.push(new MessageButton()
-                .setCustomId(player.id + "")
+                .setCustomId(player.id)
                 .setLabel(player.tag)
                 .setStyle("PRIMARY"));
         }
@@ -80,9 +88,12 @@ class TownGamePlayer extends GamePlayer{
             .addComponents(playerButtons.slice(5, Math.min(10, playerButtons.length))));
         
         if (playerButtons.length > 10) rows.push(new MessageActionRow()
-            .addComponents(playerButtons.slice(10, playerButtons.length)));
+            .addComponents(playerButtons.slice(10, Math.min(15, playerButtons.length))));
 
-        return {content: actionRoleObject[this.role], components: rows};
+        if (playerButtons.length > 15) rows.push(new MessageActionRow()
+            .addComponents(playerButtons.slice(15, playerButtons.length)));
+
+        return {content: actionRoleObject[this.role].default ?  actionRoleObject[this.role].default : actionRoleObject[this.role], components: rows};
     }
 
     resolveEmptyNighttimeOptions(firstNight){
@@ -122,7 +133,7 @@ class TownGamePlayer extends GamePlayer{
         for (const player of players){
             if (!player.retributionistCanUse) continue;
             playerButtons.push(new MessageButton()
-            .setCustomId(player.id + "")
+            .setCustomId(player.id)
             .setLabel(`${player.tag} (${player.role})`)
             .setStyle("PRIMARY")); 
         }

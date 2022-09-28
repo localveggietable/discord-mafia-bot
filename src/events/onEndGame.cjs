@@ -1,5 +1,3 @@
-const {Permissions} = require("discord.js");
-
 module.exports = function(client){
     client.on("endGame", async (winningFactions, guildID, channelID) => {
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
@@ -32,6 +30,7 @@ module.exports = function(client){
         const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
         const deadRoleName = channelID ? `Dead Town Member ${channelID}`: "Dead Town Member";
         for (let player of gameCache.inGameRoles){
+            await outputChannel.permissionOverwrites.delete(player.id);
             if (winningFactions.includes(player.faction)) winningUsers.push(player.tag);
             client.gameUsers.delete(player.id);
         }
@@ -43,13 +42,8 @@ module.exports = function(client){
 
         await outputChannel.send(`The game ended! Players ${winningUsers.join(" ")} won!`);
 
-        await outputChannel.permissionOverwrites.set([
-            {
-                id: guildID,
-                allow: [Permissions.FLAGS.SEND_MESSAGES]
-            }
-        ]);
-
+        await outputChannel.permissionOverwrites.delete(guildID);
+        
         client.games.get(guildID).set(channelID, defaultChannelObj);
     });
 }
