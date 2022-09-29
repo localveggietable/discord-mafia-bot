@@ -416,11 +416,14 @@ module.exports = function(client){
                 if (player.role == "Veteran" && player.targets.binary && visitedByRole != "executed"){
                     for (const visitingPlayerID of playerIDs){
                         publicAPIMap.get(player.id).get("messages").push("You shot someone who visited you last night!");
+                        if (visitedByRole)
                         publicAPIMap.get(visitingPlayerID).get("messages").push("You were shot by the Veteran you visited!");
                         publicAPIMap.get(visitingPlayerID).get("statusCodes").push(7);
 
                         newDeaths.push(gameCache.inGameRoles.find(player => player.id == visitingPlayerID));
                     }
+
+                    continue;
                 }
                 switch (visitedByRole){
                     case "executed": {
@@ -464,7 +467,6 @@ module.exports = function(client){
                             } 
                         } else {
                             for (const visitingPlayerID of playerIDs){
-                                console.log(publicPlayerInformationMap.get(player.id).get("publicInnocent"));
                                 const message = publicPlayerInformationMap.get(player.id).get("publicInnocent") ? "You cannot find evidence of wrongdoing. Your target seems innocent." : "Your target is suspicious!";
                                 const witchMessage = message.split(" ")[0] == "You" ? "The player you witched found that their target is innocent." : "The player you witched found that their target is suspicious."
                                 publicAPIMap.get(visitingPlayerID).get("messages").push(message);
@@ -638,7 +640,9 @@ module.exports = function(client){
                             if (player.jailed){
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                             } else {
-                                player.cleaned = gameCache.inGameRoles.find(player => player.id == visitingPlayerID);
+                                if (player.cleaned) player.cleaned.push(gameCache.inGameRoles.find(player => player.id == visitingPlayerID));
+                                else player.cleaned = [gameCache.inGameRoles.find(player => player.id == visitingPlayerID)];
+
                                 player.publicWill = "";
                                 --gameCache.inGameRoles.find(player => player.id == visitingPlayerID).limitedUses.uses;
                             }
@@ -785,8 +789,10 @@ module.exports = function(client){
         
         for (const player of newDeaths){
             if (!player.cleaned) continue;
-            publicAPIMap.get(player.cleaned.id).get("messages").push(`You secretly know that your target's role was ${player.role}.`);
-            publicAPIMap.get(player.cleaned.id).get("messages").push(player.will ? `You secretly know that your target's will was ${player.will}.` : `You secretly know that your target did not have a will.`); 
+            for (const cleaningPlayer of player.cleaned){
+                publicAPIMap.get(cleaningPlayer.id).get("messages").push(`You secretly know that your target's role was ${player.role}.`);
+                publicAPIMap.get(cleaningPlayer.id).get("messages").push(player.will ? `You secretly know that your target's will was ${player.will}.` : `You secretly know that your target did not have a will.`); 
+            }
         }
 
         //print all the messages.

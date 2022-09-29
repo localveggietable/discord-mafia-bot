@@ -140,7 +140,7 @@ class TownGamePlayer extends GamePlayer{
             .setStyle("PRIMARY")); 
         }
 
-        if (!playerButtons.length) return {content: ""};
+        if (!playerButtons.length) return;
 
         for (const target of players.filter(target => target.alive)){
             if (target.id == this.id) continue;

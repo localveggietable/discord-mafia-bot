@@ -21,9 +21,15 @@ module.exports.checkGameEnd = function(client, guildID, channelID){
         if (!townCount.length && !mafCount.length){
             return {gameEnded: true, winningFactions: []};
         } else if (!townCount){
-            return aliveWitch ? {gameEnded: true, winningFactions: winningFactions.push("Mafia", "Witch")} : {gameEnded: true, winningFactions: winningFactions.push("Mafia")};  
+            if (aliveWitch){
+                winningFactions.push("Mafia", "Witch");
+            } else {
+                winningFactions.push("Mafia");
+            }
+            return {gameEnded: true, winningFactions};  
         } else {
-            return {gameEnded: true, winningFactions: winningFactions.push("Town")};
+            winningFactions.push("Town");
+            return {gameEnded: true, winningFactions};
         }
     } else {
         if (townCount == 1 && mafCount == 1){
@@ -32,9 +38,11 @@ module.exports.checkGameEnd = function(client, guildID, channelID){
             if (!["Transporter", "Escort", "Jailor"].includes(townMember.role) || !["Godfather", "Mafioso"].includes(mafiaMember[0].role)){
                 return {gameEnded: false, winningFactions: null}
             } else if (mafiaMember.role == "Mafioso" && townMember.role == "Transporter"){
-                return {gameEnded: true, winningFactions: winningFactions.push("Town")};
+                winningFactions.push("Town");
+                return {gameEnded: true, winningFactions};
             } else {
-                return {gameEnded: true, winningFactions: winningFactions.push("Mafia")};
+                winningFactions.push("Mafia");
+                return {gameEnded: true, winningFactions};
             }
         } else if(gameCache.day >= 7 && gameCache.daysWithoutDeath >= 2){
             return {gameEnded: true, winningFactions: winningFactions};

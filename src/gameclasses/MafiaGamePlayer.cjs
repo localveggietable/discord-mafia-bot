@@ -179,7 +179,7 @@ class MafiaGamePlayer extends GamePlayer{
 
                 let returnContent = `${mafiaMember.tag}, ${actionRoleObject[mafiaMember.role]}`; 
                 if (mafiaMember.role == "Janitor") returnContent = returnContent.concat(` (You have ${mafiaMember.limitedUses.uses} cleanings left.)`);
-                outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, ${actionRoleObject[mafiaMember.role]}`, components: rows}]);
+                outputMessages.push([mafiaMember, {content: returnContent, components: rows}]);
             }
 
         }

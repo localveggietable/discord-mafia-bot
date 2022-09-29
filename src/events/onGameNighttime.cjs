@@ -121,8 +121,6 @@ module.exports = function(client){
                     return interaction.reply(followUpMessage);
                 } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
-                    console.log(player.targets.binary);
-                    console.log(interaction.customId);
                     if (player.role == "Jailor" && interaction.customID == 1) {
                         jailorChannel.send("The jailor has decided to execute you.");
                     } else if (player.role == "Jailor"){
