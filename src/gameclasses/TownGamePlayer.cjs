@@ -50,10 +50,10 @@ class TownGamePlayer extends GamePlayer{
 
     */
     resolveNighttimeOptions(players, firstNight){
+        if (this.role == "Retributionist") return this.resolveRetributionistNighttimeOptions(players);
         if (!actionRoleObject[this.role] || (this.role == "Jailor" && !this.targets.first)) return;
         if ((actionRoleObject[this.role].firstNight && firstNight) || (["Jailor", "Veteran", "Vigilante"].includes(this.role) && this.limitedUses.uses <= 0)) return this.resolveEmptyNighttimeOptions(firstNight);
         if (["Jailor", "Veteran"].includes(this.role)) return this.resolveBinaryNighttimeOptions();
-        if (this.role == "Retributionist") return this.resolveRetributionistNighttimeOptions(players);
         return this.resolveDefaultNighttimeOptions(players);
     }
 
@@ -93,12 +93,14 @@ class TownGamePlayer extends GamePlayer{
         if (playerButtons.length > 15) rows.push(new MessageActionRow()
             .addComponents(playerButtons.slice(15, playerButtons.length)));
 
-        return {content: actionRoleObject[this.role].default ?  actionRoleObject[this.role].default : actionRoleObject[this.role], components: rows};
+        let returnContent = actionRoleObject[this.role].default ?  actionRoleObject[this.role].default : actionRoleObject[this.role];
+        if (this.role == "Vigilante") returnContent = returnContent.concat(` (You have ${this.limitedUses.uses} bullets left.)`);
+        return {content: returnContent, components: rows};
     }
 
     resolveEmptyNighttimeOptions(firstNight){
         if (firstNight) return {content: actionRoleObject[this.role].firstNight}; 
-        if (!this.limitedUses.uses) return {content: ""};
+        if (!this.limitedUses.uses) return;
         switch (this.role){
             case "Vigilante":
                 return {content: "You put your gun down from the guilt of shooting a town member."}; 
@@ -122,7 +124,7 @@ class TownGamePlayer extends GamePlayer{
                 .setStyle("PRIMARY")
             )];
 
-        const message = this.role == "Jailor" ? actionRoleObject[this.role].default : actionRoleObject[this.role];
+        const message = this.role == "Jailor" ? `${actionRoleObject[this.role].default} (You have ${this.limitedUses.uses} executions left.)` : `${actionRoleObject[this.role]} (You have ${this.limitedUses.uses} alerts left.)`;
         
         return {content: message, components: row};
     }
@@ -137,6 +139,8 @@ class TownGamePlayer extends GamePlayer{
             .setLabel(`${player.tag} (${player.role})`)
             .setStyle("PRIMARY")); 
         }
+
+        if (!playerButtons.length) return {content: ""};
 
         for (const target of players.filter(target => target.alive)){
             if (target.id == this.id) continue;

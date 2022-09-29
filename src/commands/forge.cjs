@@ -12,6 +12,7 @@ module.exports = {
     
     ,
     execute(client, interaction, params){
+        //Refactor this to be inside the mafia channel only.
         if (!client.gameUsers.get(interaction.user.id)) return interaction.followUp("You can't use this command outside of a game!");
         if (interaction.inGuild()) return interaction.followUp("You should be DM'ing me this command, not sending it through a Discord server!");
 

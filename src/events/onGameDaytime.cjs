@@ -21,12 +21,12 @@ module.exports = function(client){
         await outputChannel.send(`This is the beginning of day ${gameCache.day}.`);
 
         if (!firstDay) {
-            await outputChannel.send(`Day ${gameCache.day}`);
             for (const player of newDeaths){
                 await player.outputDeath(client, guildID, channelID);
             }
 
             let gameEnd = checkGameEnd(client, guildID, channelID);
+            console.log(gameEnd.winningFactions);
             if (gameEnd.gameEnded) return client.emit("endGame", gameEnd.winningFactions, guildID, channelID);
 
             let blackmailedPlayers = gameCache.inGameRoles.filter(player => player.alive && player.blackmailed);

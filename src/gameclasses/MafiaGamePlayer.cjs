@@ -73,7 +73,7 @@ class MafiaGamePlayer extends GamePlayer{
                 outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, choose who you want to disguise and what town member they should be disguised as:`, components: rows}]);
 
             } else if (mafiaMember.role == "Forger"){
-                if (!mafiaMember.limitedUses.uses) return {content: ""};
+                if (!mafiaMember.limitedUses.uses) continue;
                 let townButtons = [];
                 for (const player of aliveTownMembers){
                     townButtons.push(new MessageButton()
@@ -95,7 +95,7 @@ class MafiaGamePlayer extends GamePlayer{
                 if (townButtons.length > 10) rows.push(new MessageActionRow()
                 .addComponents(townButtons.slice(10, townButtons.length)));
 
-                outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, choose whose will you want to forge. To specify the message, use the command /forge "<message you want to replace the will with, delimited using double quotes>:"`,
+                outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, choose whose will you want to forge. To specify the message, use the command /forge "message". (You have ${this.limitedUses.uses} forgeries left.)`,
                         components: rows}]);
                 
             } else if (mafiaMember.role == "Hypnotist"){
@@ -154,7 +154,7 @@ class MafiaGamePlayer extends GamePlayer{
 
                 outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, choose a player to hypnotize, and what message you want to send them:`, components: rows}]);
             } else {
-                if (!mafiaMember.limitedUses.uses) return {content: ""};
+                if (!mafiaMember.limitedUses.uses) continue;
                 let playerButtons = [];
                 for (const player of players){
                     if (!player.alive || player.id == mafiaMember.id) continue;
@@ -177,6 +177,8 @@ class MafiaGamePlayer extends GamePlayer{
                 if (playerButtons.length > 10) rows.push(new MessageActionRow()
                     .addComponents(playerButtons.slice(10, playerButtons.length)));
 
+                let returnContent = `${mafiaMember.tag}, ${actionRoleObject[mafiaMember.role]}`; 
+                if (mafiaMember.role == "Janitor") returnContent = returnContent.concat(` (You have ${mafiaMember.limitedUses.uses} cleanings left.)`);
                 outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, ${actionRoleObject[mafiaMember.role]}`, components: rows}]);
             }
 

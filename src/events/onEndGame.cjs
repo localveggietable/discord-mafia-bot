@@ -21,10 +21,11 @@ module.exports = function(client){
         let defaultChannelObj = {
             ongoing: false,
             started: false,
-            players: 0,
+            players: [],
             inGameRoles: [],
-            day: 0
-    
+            isDaytime: true,
+            day: 0,
+            daysWithoutDeath: 0
         };
 
         const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";
