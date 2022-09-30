@@ -60,7 +60,6 @@ module.exports = function(client){
             await Promise.all(jailorWritePermissions);     
         }
 
-        //next, let's do th mafia channel
         let aliveMafiaPlayerIDs = gameCache.inGameRoles.filter(player => player.faction == "Mafia" && player.alive == true && player != jailedPlayer).map(player => player.id);
         let mafiaWritePermissions = [];
         for (const playerID of aliveMafiaPlayerIDs){
@@ -88,8 +87,6 @@ module.exports = function(client){
             await outputChannel.send("Someone messed with the channel roles needed to run this game :/ . This game will be aborted.");
             return client.emit("onEndGameError", guildID, channelID);
         }
-
-        //make sure all the permissions promises finish before continuing -----------------------------------------------------
 
         //we have to attach a listener to each message
         let collectors = [];
@@ -124,8 +121,6 @@ module.exports = function(client){
                     return interaction.reply(followUpMessage);
                 } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
-                    console.log(player.targets.binary);
-                    console.log(interaction.customId);
                     if (player.role == "Jailor" && interaction.customID == 1) {
                         jailorChannel.send("The jailor has decided to execute you.");
                     } else if (player.role == "Jailor"){
@@ -222,7 +217,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 100) clearInterval(interval);
         }, 60000);
-        await delay(60000);
+        await delay(540000);
 
         collectors.forEach(collector => collector.stop());
         

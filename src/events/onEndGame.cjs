@@ -1,5 +1,6 @@
 module.exports = function(client){
     client.on("endGame", async (winningFactions, guildID, channelID) => {
+        console.log(winningFactions);
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
@@ -21,10 +22,11 @@ module.exports = function(client){
         let defaultChannelObj = {
             ongoing: false,
             started: false,
-            players: 0,
+            players: [],
             inGameRoles: [],
-            day: 0
-    
+            isDaytime: true,
+            day: 0,
+            daysWithoutDeath: 0
         };
 
         const aliveRoleName = channelID ? `Alive Town Member ${channelID}`: "Alive Town Member";

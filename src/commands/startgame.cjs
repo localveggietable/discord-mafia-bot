@@ -7,6 +7,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("startgame")
     .setDescription("Start a game of tos! (By default, the user who runs this command joins the game).")
+    .setDMPermission(false)
     .addBooleanOption(option => 
         option.setName("autojoin")
             .setDescription("Sets whether or not the user invoking this command automatically joins the game")

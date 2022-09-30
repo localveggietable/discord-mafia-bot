@@ -14,8 +14,6 @@ class GamePlayer{
         this.tag = tag;
         //indicates the player's actual role
         this.role = role;
-        //indicates the player's public role (for death purposes only - for instance, implementing the disguiser ability won't be done using this property)
-        this.publicRole = role;
         //this.faction will be initialized inside child classes.
         this.faction = null; 
         //targets refers to nighttime targets. first refers to the first target (player id; snowflake), second refers to the second target (player id; snowflake),
@@ -105,13 +103,45 @@ class GamePlayer{
         return this;
     }
 
-    async outputDeath(client, guildID, channelID, lynched = true){
+    async outputDeath(client, guildID, channelID, reason = false, lynched = true){
         const guild = client.guilds.cache.get(guildID);
         const member = guild.members.cache.get(this.id);
         const outputChannel = channelID ? guild.channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : guild.channels.cache.find((channel) => {return channel.name == "tos-channel"});
 
+        let deathMessage = `${member.user.tag} was killed last night.`;
+
+        switch (reason){
+            case "mafia":
+                deathMessage = deathMessage + " They were killed by a member of the Mafia.";
+                break;
+            case "vigilante":
+                deathMessage = deathMessage + " They were shot by a Vigilante.";
+                break;
+            case "veteran":
+                deathMessage = deathMessage + " They were killed by a Veteran.";
+                break;
+            case "executed":
+                deathMessage = deathMessage + " They were executed by the Jailor.";
+                break;
+            case "guilt":
+                deathMessage = deathMessage + " They died over the guilt of shooting a town member.";
+                break;
+            case "jester":
+                deathMessage = deathMessage + " They died over the guilt of lynching the Jester.";
+                break;
+            case "bodyguard":
+                deathMessage = deathMessage + " They were killed protecting someone.";
+                break;
+            case "defender":
+                deathMessage = deathMessage + " They were killed by a Bodyguard.";
+                break;
+            default:
+                break;
+        }
+
+        await outputChannel.send(deathMessage);
         if (this.cleaned) return outputChannel.send(`${member.user.tag} was cleaned. We could not determine their role or will`);
         
         const will = this.publicWill === "" ? null : new EmbedBuilder()

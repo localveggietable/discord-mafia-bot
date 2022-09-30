@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("forge")
         .setDescription("Forge a player's will")
+        .setDMPermission(false)
         .addStringOption(option => 
             option.setName("forged_will")
                 .setDescription("A string that will replace the forged player's will (default: \"\"))")
@@ -12,6 +13,7 @@ module.exports = {
     
     ,
     execute(client, interaction, params){
+        //Refactor this to be inside the mafia channel only.
         if (!client.gameUsers.get(interaction.user.id)) return interaction.followUp("You can't use this command outside of a game!");
         if (interaction.inGuild()) return interaction.followUp("You should be DM'ing me this command, not sending it through a Discord server!");
 

@@ -21,9 +21,8 @@ module.exports = function(client){
         await outputChannel.send(`This is the beginning of day ${gameCache.day}.`);
 
         if (!firstDay) {
-            await outputChannel.send(`Day ${gameCache.day}`);
-            for (const player of newDeaths){
-                await player.outputDeath(client, guildID, channelID);
+            for (const [player, reason] of newDeaths){
+                await player.outputDeath(client, guildID, channelID, reason);
             }
 
             let gameEnd = checkGameEnd(client, guildID, channelID);
@@ -71,7 +70,7 @@ async function handleSetInterval(time, outputChannel, client, guildID, channelID
         await outputChannel.send("The discussion phase ends now!");
         if (firstDay) return client.emit("gameNighttime", guildID, channelID);
         return client.emit("lynchPhase", 360, 3, guildID, channelID);
-    } else if (!(time % 15)){
-        await outputChannel.send(`The discussion phase ends in ${time} seconds`);
+    } else if (time == 15){
+        await outputChannel.send("The discussion phase ends in 15 seconds!");
     }
 }

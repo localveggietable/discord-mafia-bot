@@ -7,6 +7,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("teststartgame")
     .setDescription("For testing purposes.")
+    .setDMPermission(false)
     ,
     async execute(client, interaction){
 
