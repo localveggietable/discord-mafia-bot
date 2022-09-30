@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("forge")
         .setDescription("Forge a player's will")
+        .setDMPermission(false)
         .addStringOption(option => 
             option.setName("forged_will")
                 .setDescription("A string that will replace the forged player's will (default: \"\"))")

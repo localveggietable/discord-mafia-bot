@@ -95,7 +95,7 @@ class MafiaGamePlayer extends GamePlayer{
                 if (townButtons.length > 10) rows.push(new MessageActionRow()
                 .addComponents(townButtons.slice(10, townButtons.length)));
 
-                outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, choose whose will you want to forge. To specify the message, use the command /forge "message". (You have ${this.limitedUses.uses} forgeries left.)`,
+                outputMessages.push([mafiaMember, {content: `${mafiaMember.tag}, choose whose will you want to forge. To specify the message, use the command /forge "message". (You have ${mafiaMember.limitedUses.uses} forgeries left.)`,
                         components: rows}]);
                 
             } else if (mafiaMember.role == "Hypnotist"){
@@ -235,6 +235,8 @@ class MafiaGamePlayer extends GamePlayer{
             const aliveSupportMafiaPlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Mafia");
             if (!aliveSupportMafiaPlayer)  return toReturn;
             aliveSupportMafiaPlayer.role = "Mafioso";
+            aliveSupportMafiaPlayer.limitedUses = {limited: false, uses: Infinity}; 
+            aliveSupportMafiaPlayer.priority = 3;
             await mafiaChannel.send(`${aliveSupportMafiaPlayer.tag} has now become a Mafioso!`); 
         }
 

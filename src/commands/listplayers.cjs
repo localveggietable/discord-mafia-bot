@@ -3,7 +3,8 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("listplayers")
-        .setDescription("List all the players in a game."),
+        .setDescription("List all the players in a game.")
+        .setDMPermission(false),
     async execute(client, interaction){
         //do a regex match of interaction.channel.name
         const channelName = interaction.channel.name;

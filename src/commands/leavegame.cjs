@@ -4,7 +4,8 @@ const removePlayerFromGame = require("../util/removePlayerFromGame.cjs");
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("leavegame")
-    .setDescription("Leave a game of tos."),
+    .setDescription("Leave a game of tos.")
+    .setDMPermission(false),
     async execute(client, interaction){
         const channelName = interaction.channel.name;
         if (!(new RegExp("^tos-channel(-[1-9])?$").test(channelName))){

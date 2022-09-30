@@ -64,24 +64,24 @@ module.exports = function(client){
 
             const {value} = countMax(votes);
             playerKilled = Array.isArray(value) ? false : (value == 1 ? false : true);
-            const promises = [];
+            let toSend = "Time is up! Here are the results of the vote:"
             for (const [index, element] of votes.entries()){
                 if (index >= gameCache.inGameRoles.length) break;
                 const votingPlayer = gameCache.inGameRoles[index];
                 if (!votingPlayer.alive) continue;
                 switch (element){
                     case 0:
-                        promises.push(outputChannel.send(`${votingPlayer.tag} **abstained**.`));
+                        toSend = toSend + `\n${votingPlayer.tag} **abstained&&.`;
                         break;
                     case 1:
-                        promises.push(outputChannel.send(`${votingPlayer.tag} voted **not guilty**.`));
+                        toSend = toSend + `\n${votingPlayer.tag} voted **not guilty**`;
                         break;
                     case 2:
-                        promises.push(outputChannel.send(`${votingPlayer.tag} voted **guilty**`));
+                        toSend = toSend + `\n${votingPlayer.tag} voted **guilty**`;
                         break; 
                 } 
             }
-            await Promise.all(promises);
+            await outputChannel.send(toSend);
             if (playerKilled) return client.emit("deathPhase", playerID, guildID, channelID);
             else return client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
             }, 150000);
