@@ -272,14 +272,12 @@ module.exports = function(client){
                 }
                 case "Veteran": {
                     if (player.targets.binary){
-                        console.log("yep");
                         --player.limitedUses.uses;
                     }
                     break;
                 }
                 case "Vigilante": {
                     if (player.limitedUses.uses == -1){
-                        console.log("vigilante should die");
                         findGuiltyVigilante = true;
                     } 
                     if (!player.targets.first) break; 
@@ -544,7 +542,7 @@ module.exports = function(client){
                                     publicAPIMap.get(visitingPlayerID).get("messages").push("You were killed by a Bodyguard!");
                                     publicAPIMap.get(visitingPlayerID).get("statusCodes").push(11); 
 
-                                    newDeaths.push(actionTracker.find([player => player.id == visitingPlayerID, "defender"]));
+                                    newDeaths.push([actionTracker.find(player => player.id == visitingPlayerID), "defender"]);
                                 }
                             } else if (player.defense) {
                                 if (player.role == "Witch") player.defense = 0;
@@ -830,11 +828,8 @@ module.exports = function(client){
 
         }
 
-        newDeaths = newDeaths.map(death => [death[0].handleDeath(client, guildID, channelID), death[1]]);
+        newDeaths.forEach(async death => await death[0].handleDeath(client, guildID, channelID));
         await Promise.all(allPlayerMessages);
-        for (const death of newDeaths){
-            await Promise.all(death);
-        }
 
         //Reset temporary state
         for (const player of gameCache.inGameRoles.filter(player => player.alive)){

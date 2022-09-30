@@ -145,9 +145,9 @@ class TownGamePlayer extends GamePlayer{
         for (const target of players.filter(target => target.alive)){
             if (target.id == this.id) continue;
             targetButtons.push(new MessageButton()
-                .setCustomId(`target${target.id}`))
-                .setLabel(`${target.tag}`)
-                .setStyle("PRIMARY");
+            .setCustomId(`target${target.id}`)
+            .setLabel(`${target.tag}`)
+            .setStyle("PRIMARY"));
         }
 
         targetButtons.push(new MessageButton()

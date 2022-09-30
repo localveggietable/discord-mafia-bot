@@ -71,12 +71,12 @@ module.exports = function(client){
                 if (!votingPlayer.alive) continue;
                 switch (element){
                     case 0:
-                        toSend = toSend + `\n${votingPlayer.tag} **abstained&&.`;
+                        toSend = toSend + `\n${votingPlayer.tag} **abstained**.`;
                         break;
-                    case 1:
+                    case "1":
                         toSend = toSend + `\n${votingPlayer.tag} voted **not guilty**`;
                         break;
-                    case 2:
+                    case "2":
                         toSend = toSend + `\n${votingPlayer.tag} voted **guilty**`;
                         break; 
                 } 

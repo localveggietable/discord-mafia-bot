@@ -108,7 +108,8 @@ module.exports = function(client){
 
         let messages = [];
         for (const player of gameCache.inGameRoles) {
-            const msgToSend = player.faction == "Executioner" ? `Welcome to tos! Your role is ${player.role} \nYour target this game is ${gameCache.inGameRoles.find(target => target.id == player.targetID).tag}` : `Welcome to tos! Your role is ${player.role}`;
+            let msgToSend = player.faction == "Executioner" ? `Welcome to tos! Your role is ${player.role} \nYour target this game is ${gameCache.inGameRoles.find(target => target.id == player.targetID).tag}.` : `Welcome to tos! Your role is ${player.role}.`;
+            if (player.faction == "Mafia") msgToSend = msgToSend + "\nYou are a mafia member this game! This means that you have access to a mafia-only chat wherein you will be able to communicate with your fellow mafia members at night. You will also choose your nightly targets in that channel.";
             messages.push(client.users.cache.get(player.id).send(msgToSend));
         }
 

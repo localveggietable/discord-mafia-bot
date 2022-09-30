@@ -26,7 +26,6 @@ module.exports = function(client){
             }
 
             let gameEnd = checkGameEnd(client, guildID, channelID);
-            console.log(gameEnd.winningFactions);
             if (gameEnd.gameEnded) return client.emit("endGame", gameEnd.winningFactions, guildID, channelID);
 
             let blackmailedPlayers = gameCache.inGameRoles.filter(player => player.alive && player.blackmailed);
@@ -70,7 +69,7 @@ async function handleSetInterval(time, outputChannel, client, guildID, channelID
     if (!time){
         await outputChannel.send("The discussion phase ends now!");
         if (firstDay) return client.emit("gameNighttime", guildID, channelID);
-        return client.emit("lynchPhase", 20, 3, guildID, channelID);
+        return client.emit("lynchPhase", 360, 3, guildID, channelID);
     } else if (time == 15){
         await outputChannel.send("The discussion phase ends in 15 seconds!");
     }
