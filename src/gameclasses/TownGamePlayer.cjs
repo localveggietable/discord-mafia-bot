@@ -94,7 +94,7 @@ class TownGamePlayer extends GamePlayer{
             .addComponents(playerButtons.slice(15, playerButtons.length)));
 
         let returnContent = actionRoleObject[this.role].default ?  actionRoleObject[this.role].default : actionRoleObject[this.role];
-        if (this.role == "Vigilante") returnContent = returnContent.concat(` (You have ${this.limitedUses.uses} bullets left.)`);
+        if (this.role == "Vigilante") returnContent = returnContent.concat(` (You have ${this.limitedUses.uses} bullet(s) left.)`);
         return {content: returnContent, components: rows};
     }
 
@@ -124,7 +124,7 @@ class TownGamePlayer extends GamePlayer{
                 .setStyle("PRIMARY")
             )];
 
-        const message = this.role == "Jailor" ? `${actionRoleObject[this.role].default} (You have ${this.limitedUses.uses} executions left.)` : `${actionRoleObject[this.role]} (You have ${this.limitedUses.uses} alerts left.)`;
+        const message = this.role == "Jailor" ? `${actionRoleObject[this.role].default} (You have ${this.limitedUses.uses} execution(s) left.)` : `${actionRoleObject[this.role]} (You have ${this.limitedUses.uses} alert(s) left.)`;
         
         return {content: message, components: row};
     }
@@ -137,7 +137,7 @@ class TownGamePlayer extends GamePlayer{
             playerButtons.push(new MessageButton()
             .setCustomId(player.id)
             .setLabel(`${player.tag} (${player.role})`)
-            .setStyle("PRIMARY")); 
+            .setStyle("SUCCESS")); 
         }
 
         if (!playerButtons.length) return;

@@ -132,11 +132,11 @@ module.exports = function(client){
                     let buttonID = clickedTarget ? interaction.customId.slice(6) : interaction.customId;
 
                     if (clickedTarget){
-                        player.targets.second == buttonID;
-                        return interaction.reply("Your decision has been recorded");
+                        player.targets.second = buttonID;
+                        return interaction.reply("Your decision has been recorded.");
                     } else {
-                        player.targets.first == buttonID;
-                        return interaction.reply("Your decision has been recorded");
+                        player.targets.first = buttonID;
+                        return interaction.reply("Your decision has been recorded.");
                     }
 
                 } else {
@@ -171,7 +171,7 @@ module.exports = function(client){
             let mafiosoPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Mafioso"); 
             let godfatherPlayer = mainMafiaRoleActionMessageContent[0].find(player => player.role == "Godfather");  
 
-            if (godfatherPlayer?.targets.first){
+            if (godfatherPlayer?.targets.first && mafiosoPlayer){
                 mafiosoPlayer.targets.first = godfatherPlayer.targets.first;
             }
         });
@@ -217,7 +217,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 100) clearInterval(interval);
         }, 60000);
-        await delay(540000);
+        await delay(360000);
 
         collectors.forEach(collector => collector.stop());
         
