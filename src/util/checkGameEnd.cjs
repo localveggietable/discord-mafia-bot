@@ -18,8 +18,8 @@ module.exports.checkGameEnd = function(client, guildID, channelID){
     let winningFactions = exeHasWon ? ["Executioner"] : [];
 
     if (!townCount || !mafCount){
-        if (!townCount.length && !mafCount.length){
-            return {gameEnded: true, winningFactions: []};
+        if (!townCount && !mafCount){
+            return {gameEnded: true, winningFactions};
         } else if (!townCount){
             if (aliveWitch){
                 winningFactions.push("Mafia", "Witch");

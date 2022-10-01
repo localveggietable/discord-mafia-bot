@@ -47,7 +47,7 @@ class GamePlayer{
                 this.limitedUses = {limited: false, uses: Infinity};
                 break;
         }
-        //0 indicates no defense, 1 indicates basic defense, 2 indicates powerful defense, 3 indicates immovable defense.
+        //0 indicates no defense, 1 indicates defense 
         this.defense = ["Godfather", "Executioner", "Witch"].includes(role) ? 1 : 0;
 
         //indicates whether or not retributionist can use the ability.

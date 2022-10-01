@@ -1,6 +1,5 @@
 module.exports = function(client){
     client.on("endGame", async (winningFactions, guildID, channelID) => {
-        console.log(winningFactions);
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
@@ -41,6 +40,7 @@ module.exports = function(client){
         client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == deadRoleName))]);
 
         await Promise.all([client.guilds.cache.get(guildID).channels.delete(mafiaChannel), client.guilds.cache.get(guildID).channels.delete(jailorChannel), client.guilds.cache.get(guildID).channels.delete(deadChannel)]);
+        
 
         await outputChannel.send(`The game ended! Players ${winningUsers.join(" ")} won!`);
 

@@ -98,10 +98,15 @@ module.exports = function(client){
                     if (!(player.targets.first && player.targets.second)) break;
                     const ressurectTarget = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first);
                     const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.second);
-                    if (targetMap.get(target.id).get(ressurectTarget.role.toLowerCase())){
-                        targetMap.get(target.id).get(ressurectTarget.role.toLowerCase()).push(player.id); 
+
+                    ressurectTarget.retributionistCanUse = false;
+
+                    const role = ressurectTarget.role == "Vigilante" ? "killing" : ressurectTarget.role.toLowerCase(); 
+
+                    if (targetMap.get(target.id).get(role)){
+                        targetMap.get(target.id).get(role).push(player.id); 
                     } else {
-                        targetMap.get(target.id).set(ressurectTarget.role.toLowerCase(), [player.id]);
+                        targetMap.get(target.id).set(role, [player.id]);
                     }
 
                     if (targetMap.get(target.id).get("all")){
@@ -437,7 +442,7 @@ module.exports = function(client){
                 switch (visitedByRole){
                     case "executed": {
                             newDeaths.push([player, "executed"]);
-                            publicAPIMap.get(player.id).get("messages").push("You were executed by the Jailor. You have died!");
+                            publicAPIMap.get(player.id).get("messages").push("You were executed by the Jailor.");
                             break;
                     }
                     case "investigator":
@@ -569,11 +574,15 @@ module.exports = function(client){
                                         vigilantePlayer.limitedUses.uses = -1;
                                     }
                                     newDeaths.push([player, "vigilante"]);
-                                    publicAPIMap.get(player.id).get("messages").push("You were shot by a Vigilante! You have died!");
+                                    publicAPIMap.get(player.id).get("messages").push("You were shot by a Vigilante!");
                                     publicAPIMap.get(player.id).get("statusCodes").push(6);
+                                } else if (gameCache.inGameRoles.find(player => player.id == visitingPlayerID).role == "Retributionist"){
+                                    newDeaths.push([player, "vigilante"]);
+                                    publicAPIMap.get(player.id).get("messages").push("You were shot by a Vigilante!");
+                                    publicAPIMap.get(player.id).get("statusCodes").push(6); 
                                 } else {
                                     newDeaths.push([player, "mafia"]);
-                                    publicAPIMap.get(player.id).get("messages").push("You were attacked by a member of the Mafia! You have died!");
+                                    publicAPIMap.get(player.id).get("messages").push("You were attacked by a member of the Mafia!");
                                     publicAPIMap.get(player.id).get("statusCodes").push(5);
                                 }
                             }
@@ -698,7 +707,7 @@ module.exports = function(client){
                                     } else {
                                         newDeaths.push([gameCache.inGameRoles.find(player => player.id == ambushedPlayerID), "mafia"]);
                                         publicAPIMap.get(visitingPlayerID).get("messages").push("You ambushed someone who visited your target last night!");
-                                        publicAPIMap.get(ambushedPlayerID).get("messages").push("You were attacked by a member of the Mafia! You have died!");
+                                        publicAPIMap.get(ambushedPlayerID).get("messages").push("You were attacked by a member of the Mafia!");
                                         publicAPIMap.get(ambushedPlayerID).get("statusCodes").push(5);
                                     }
                                 } else {
@@ -781,7 +790,7 @@ module.exports = function(client){
         const jesterPlayer = gameCache.inGameRoles.find(player => player.jester && player.targets.first);
         if (jesterPlayer){
             const hauntedPlayerID = jesterPlayer.targets.first;
-            publicAPIMap.get(hauntedPlayerID).get("messages").push("You were haunted by the Jester. You committed suicide over the guilt!");
+            publicAPIMap.get(hauntedPlayerID).get("messages").push("You were haunted by the Jester.");
             publicAPIMap.get(hauntedPlayerID).get("statusCodes").push(16);
             newDeaths.push([gameCache.inGameRoles.find(player => player.id == hauntedPlayerID), "jester"]);
 
@@ -795,6 +804,7 @@ module.exports = function(client){
         else gameCache.daysWithoutDeath = 0;
         
         for (const [player, _] of newDeaths){ //eslint-disable-line
+            publicAPIMap.get(player.id).get("messages").push("You have died!");
             if (!player.cleaned) continue;
             for (const cleaningPlayer of player.cleaned){
                 publicAPIMap.get(cleaningPlayer.id).get("messages").push(`You secretly know that your target's role was ${player.role}.`);
