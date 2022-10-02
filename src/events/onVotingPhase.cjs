@@ -31,7 +31,6 @@ module.exports = function(client){
         let votes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], playerKilled;
         const collector = voteMessage.createMessageComponentCollector({componentType: "BUTTON"});
 
-
         collector.on("collect", async (interaction) => {
             let playerExists = gameCache.inGameRoles.find((player) => {
                 return player.alive && (player.id == interaction.user.id);
@@ -63,6 +62,8 @@ module.exports = function(client){
 
             const {value} = countMax(votes);
             playerKilled = Array.isArray(value) ? false : (value == 1 ? false : true);
+
+            let jesterKilled = playerKilled ? gameCache.inGameRoles.find(player => player.id == playerID).jester : false;
             let toSend = "Time is up! Here are the results of the vote:"
             for (const [index, element] of votes.entries()){
                 if (index >= gameCache.inGameRoles.length) break;
@@ -71,12 +72,18 @@ module.exports = function(client){
                 switch (element){
                     case 0:
                         toSend = toSend + `\n${votingPlayer.tag} **abstained**.`;
+                        if (jesterKilled){
+                            votingPlayer.validRevengeTarget = true;
+                        }
                         break;
                     case "1":
                         toSend = toSend + `\n${votingPlayer.tag} voted **not guilty**`;
                         break;
                     case "2":
                         toSend = toSend + `\n${votingPlayer.tag} voted **guilty**`;
+                        if (jesterKilled){
+                            votingPlayer.validRevengeTarget = true;
+                        }
                         break; 
                 } 
             }

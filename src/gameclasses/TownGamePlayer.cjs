@@ -116,12 +116,12 @@ class TownGamePlayer extends GamePlayer{
                 new MessageButton()
                 .setCustomId(1 + "")
                 .setLabel("Do it")
-                .setStyle("PRIMARY"),
+                .setStyle("SUCCESS"),
 
                 new MessageButton()
                 .setCustomId( 0 + "")
                 .setLabel("Don't")
-                .setStyle("PRIMARY")
+                .setStyle("DANGER")
             )];
 
         const message = this.role == "Jailor" ? `${actionRoleObject[this.role].default} (You have ${this.limitedUses.uses} execution(s) left.)` : `${actionRoleObject[this.role]} (You have ${this.limitedUses.uses} alert(s) left.)`;

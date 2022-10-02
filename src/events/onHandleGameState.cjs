@@ -114,6 +114,18 @@ module.exports = function(client){
                     } else {
                         targetMap.get(target.id).set("all", [player.id]);
                     }
+
+                    if (ressurectTarget.role == "Escort"){
+                        if (target.priority <= ressurectTarget.priority || target.jailed) break; 
+
+                        const godfatherPlayer = gameCache.inGameRoles.find(player => player.role == "Godfather" && player.alive);
+                        if (target.role == "Mafioso" && godfatherPlayer){
+                            godfatherPlayer.targets = target.targets;
+                        }
+
+                        target.targets = {first: false, second: false, binary: false, options: false};                    
+                    }
+
                     break;
                 }
                 case "Transporter": {
@@ -163,7 +175,7 @@ module.exports = function(client){
                         targetMap.get(target.id).set("all", [player.id]);
                     }
 
-                    if (target.priority < player.priority || player.jailed || player.role == "Transporter" || (player.limitedUses.limited && player.limitedUses.uses <= 0)) break; 
+                    if (target.priority < player.priority || target.jailed || target.role == "Transporter" || (target.limitedUses.limited && target.limitedUses.uses <= 0)) break; 
 
                     if (target.role == "Godfather"){
                         const mafiosoPlayer = actionTracker.find(player => player.role == "Mafioso");
@@ -192,7 +204,7 @@ module.exports = function(client){
                         targetMap.get(target.id).set("all", [player.id]);
                     }
 
-                    if (target.priority <= player.priority || target.jailed || player.role == "Transporter") break; 
+                    if (target.priority <= player.priority || target.jailed) break; 
 
                     const godfatherPlayer = gameCache.inGameRoles.find(player => player.role == "Godfather" && player.alive);
                     if (target.role == "Mafioso" && godfatherPlayer){
@@ -261,7 +273,7 @@ module.exports = function(client){
                 }
                 case "Jailor": {
                     if (!player.targets.first) break;
-                    const executed = player.targets.binary;
+                    const executed = player.targets.binary == 1 ? true : false;
                     const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first);
                     targetMap.get(target.id).set("jailed", [player.id]);
                     if (executed) {
@@ -765,7 +777,7 @@ module.exports = function(client){
                     case "witch": {
                         let visitingPlayerID = playerIDs[0];
                         if (player.jailed){ 
-                            publicAPIMap.get(visitingPlayerID).get("messages").push("Your target was in jail so you could not control them.");
+                            publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                         } else if (player.priority < 2){
                             publicAPIMap.get(player.id).get("messages").push("A Witch tried to control you but you are immune.");
                             publicAPIMap.get(visitingPlayerID).get("messages").push(messageOptions[`role_${player.role.toLowerCase()}`]);

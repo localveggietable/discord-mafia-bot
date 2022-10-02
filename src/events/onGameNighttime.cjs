@@ -46,10 +46,10 @@ module.exports = function(client){
         let jailedPlayer = (jailor.alive && jailor.targets.first) ? gameCache.inGameRoles.find(player => player.id == jailor.targets.first) : null;
 
         if (jailedPlayer?.faction == "Mafia") {
-            await jailorChannel.send(`${jailedPlayer.tag} was hauled off to jail!`);
+            await mafiaChannel.send(`${jailedPlayer.tag} was hauled off to jail!`);
         }
         
-        if (jailor.alive && jailor.targets.first) {
+        if (jailedPlayer) {
             let jailorWritePermissions = [];
             jailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.id, {
                 VIEW_CHANNEL: true,
@@ -61,7 +61,7 @@ module.exports = function(client){
                 SEND_MESSAGES: true
             }));
 
-            await Promise.all(jailorWritePermissions);     
+            await Promise.all(jailorWritePermissions);    
         }
 
         let aliveMafiaPlayerIDs = gameCache.inGameRoles.filter(player => player.faction == "Mafia" && player.alive == true && player != jailedPlayer).map(player => player.id);
@@ -101,7 +101,12 @@ module.exports = function(client){
             else {
                 let msgValue = player.resolveNighttimeOptions?.(gameCache.inGameRoles, firstNight);
                 if (!msgValue) continue;
-                let msgRef = await client.users.cache.get(player.id).send(msgValue);
+                let msgRef;
+                if (player.role == "Jailor" && jailedPlayer && !firstNight && jailedPlayer.limitedUses.uses > 0){
+                    msgRef = await jailorChannel.send(msgValue);
+                } else {
+                    msgRef = await client.users.cache.get(player.id).send(msgValue);
+                }
                 roleActionMessages.push([player, msgRef]);
             }
         }
@@ -125,10 +130,10 @@ module.exports = function(client){
                     return interaction.reply(followUpMessage);
                 } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
-                    if (player.role == "Jailor" && interaction.customID == 1) {
-                        jailorChannel.send("The jailor has decided to execute you.");
+                    if (player.role == "Jailor" && interaction.customId == 1) {
+                        return interaction.reply(`The jailor has decided to execute you, ${jailedPlayer.tag}.`);
                     } else if (player.role == "Jailor"){
-                        jailorChannel.send("The jailor has decided to spare you.");
+                        return interaction.reply(`The jailor has decided to spare you, ${jailedPlayer.tag}.`);
                     }
                     return interaction.reply("Your decision has been recorded.");
                 } else if (player.role == "Retributionist"){
@@ -221,7 +226,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 100) clearInterval(interval);
         }, 60000);
-        await delay(360000);
+        await delay(80000);
 
         collectors.forEach(collector => collector.stop());
         
@@ -240,13 +245,13 @@ module.exports = function(client){
         }
 
         if (jailor.alive && jailor.targets.first) {
-            denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
-                VIEW_CHANNEL: true,
+            denyJailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.id, {
+                VIEW_CHANNEL: false,
                 SEND_MESSAGES: false
             }));
     
-            denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
-                VIEW_CHANNEL: true,
+            denyJailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.targets.first, {
+                VIEW_CHANNEL: false,
                 SEND_MESSAGES: false
             })); 
 

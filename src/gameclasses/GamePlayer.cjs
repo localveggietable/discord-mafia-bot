@@ -57,6 +57,8 @@ class GamePlayer{
 
         this.seanced = false;
 
+        this.validRevengeTarget = false;
+
         //see https://town-of-salem.fandom.com/wiki/Ability
 
     }
@@ -150,7 +152,7 @@ class GamePlayer{
             .addFields({value: this.publicWill});
 
         //Let's put this in the events folder
-        await outputChannel.send(`${member.user.tag}'s role was **${this.role}**`);
+        await outputChannel.send(`${member.user.tag}'s role was **${this.role}**.`);
         let toWrite = this.publicWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send({content: `We found a will next to their body.`, embeds: [will]});
         await toWrite;
         if (this.jester && lynched) await outputChannel.send("The jester will get its revenge from the grave!"); 

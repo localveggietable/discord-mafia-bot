@@ -72,8 +72,6 @@ module.exports = function(client){
         }
 
         rtRole3 = rtRoles[Math.floor(Math.random() * (rtRoles.length - 1))];
-        
-        rtRole3 = "Retributionist";
 
         let shufflePlayers = shuffleArray([...gameCache.players]);
         let mafiaPlayerIDs = shufflePlayers.slice(9, 13);
