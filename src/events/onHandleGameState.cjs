@@ -59,7 +59,7 @@ const statusCodes = {
     13: "Someone tried to roleblock your target but they were immune!",
     14: "Your target was controlled by a witch!",
     15: "A Witch tried to control your target but they were immune.",
-    16: "Your target was haunted by the Jester and committed suicide!",
+    16: "Your target was haunted by the Jester and died!",
     17: "Your target was attacked but their bulletproof vest saved them!",
     18: "Someone tried to attack your alert target and failed!",
     19: "Your target shot themselves over the guilt of killing a town member!"
@@ -74,7 +74,7 @@ module.exports = function(client){
         let publicAPIMap = createPublicAPIMap(client, guildID, channelID);
         let publicPlayerInformationMap = createPublicPlayerInformationMap(client, guildID, channelID);
         
-        let actionTracker = gameCache.inGameRoles.filter(player => player.alive && !player.jailed && player.priority).sort((a, b) => a.priority - b.priority);
+        let actionTracker = gameCache.inGameRoles.filter(player => (player.alive && !player.jailed && player.priority) || player.canRevenge).sort((a, b) => a.priority - b.priority);
 
         /*
         Get a list of what happens to every single player.
@@ -94,6 +94,18 @@ module.exports = function(client){
         let findGuiltyVigilante = false;
         for (let player of actionTracker){
             switch (player.role){
+                case "Executioner": {
+                    player.canRevenge = false;
+                    if (!player.targets.first) break;
+
+                    const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first); 
+
+                    targetMap.get(target.id).set("jester", [player.id]); 
+
+                    player.targets.first = false;
+
+                    break;
+                }
                 case "Retributionist": {
                     if (!(player.targets.first && player.targets.second)) break;
                     const ressurectTarget = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first);
@@ -452,6 +464,12 @@ module.exports = function(client){
                     continue;
                 }
                 switch (visitedByRole){
+                    case "jester": {
+                        publicAPIMap.get(player.id).get("messages").push("You were haunted by the Jester. You died over the guilt!");
+                        publicAPIMap.get(player.id).get("statusCodes").push(16);
+                        newDeaths.push([player, "jester"]);
+                        break;
+                    }
                     case "executed": {
                             newDeaths.push([player, "executed"]);
                             publicAPIMap.get(player.id).get("messages").push("You were executed by the Jailor.");
@@ -480,8 +498,8 @@ module.exports = function(client){
                                 for (const allVisitorID of targetMap.get(player.id).get("all")){
                                     if (allVisitorID == visitingPlayerID) continue;
                                     let publicPlayer = gameCache.inGameRoles.find(player => player.id == publicPlayerInformationMap.get(allVisitorID).get("publicID"));
-                                    publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by ${publicPlayer.tag}`);
-                                    publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target was visited by ${publicPlayer.tag}.`);
+                                    publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by ${publicPlayer.displayName}`);
+                                    publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target was visited by ${publicPlayer.displayName}.`);
                                 }
                             }
                         }
@@ -516,7 +534,7 @@ module.exports = function(client){
                         for (const [index, visitingPlayerID] of playerIDs.entries()){
                             if (["Mafioso", "Godfather"].includes(gameCache.inGameRoles.find(player => player.id == visitingPlayerID).role)){
                                 for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                    publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
+                                    publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
                                 }
                             }
                             if (player.jailed){
@@ -640,7 +658,7 @@ module.exports = function(client){
                     case "disguiser": case "forger": case "framer":
                         for (const visitingPlayerID of playerIDs){
                             for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
                             }
                             if (player.jailed) publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                             else if (visitedByRole == "forger"){
@@ -651,7 +669,7 @@ module.exports = function(client){
                     case "hypnotist":
                         for (const visitingPlayerID of playerIDs){
                             for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
                             }
                             if (player.jailed) {
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -663,7 +681,7 @@ module.exports = function(client){
                    case "janitor":
                         for (const visitingPlayerID of playerIDs){
                             for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
                             }
                             if (player.jailed){
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -679,7 +697,7 @@ module.exports = function(client){
                     case "ambusher": {
                         const visitingPlayerID = playerIDs[0];
                         for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                            publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
+                            publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
                         }
                         if (player.jailed) {
                             publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!"); 
@@ -723,7 +741,7 @@ module.exports = function(client){
                                         publicAPIMap.get(ambushedPlayerID).get("statusCodes").push(5);
                                     }
                                 } else {
-                                    publicAPIMap.get(ambushedPlayerID).get("messages").push(`You saw ${gameCache.inGameRoles.find(player => player.id == visitingPlayerID).tag} prepare an ambush while visiting your target.`);
+                                    publicAPIMap.get(ambushedPlayerID).get("messages").push(`You saw ${gameCache.inGameRoles.find(player => player.id == visitingPlayerID).displayName} prepare an ambush while visiting your target.`);
                                 }
                             }
                         }
@@ -732,7 +750,7 @@ module.exports = function(client){
                     case "blackmailer": {
                         for (const visitingPlayerID of playerIDs){
                             for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
                             }
                             if (player.jailed){ 
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -748,7 +766,7 @@ module.exports = function(client){
                     case "consigliere": {
                         for (const visitingPlayerID of playerIDs){
                             for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
                             }
                             if (player.jailed){ 
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -761,7 +779,7 @@ module.exports = function(client){
                     case "consort":
                         for (const visitingPlayerID of playerIDs){
                             for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.tag} last night.`);
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
                             }
                             if (player.jailed){ 
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -796,18 +814,6 @@ module.exports = function(client){
                         break;
                 }
             }
-        }
-
-        //Jester
-        const jesterPlayer = gameCache.inGameRoles.find(player => player.jester && player.targets.first);
-        if (jesterPlayer){
-            const hauntedPlayerID = jesterPlayer.targets.first;
-            publicAPIMap.get(hauntedPlayerID).get("messages").push("You were haunted by the Jester.");
-            publicAPIMap.get(hauntedPlayerID).get("statusCodes").push(16);
-            newDeaths.push([gameCache.inGameRoles.find(player => player.id == hauntedPlayerID), "jester"]);
-
-            jesterPlayer.canRevenge = false;
-            jesterPlayer.targets.first = false;
         }
 
         uniqWith(newDeaths, isEqual);

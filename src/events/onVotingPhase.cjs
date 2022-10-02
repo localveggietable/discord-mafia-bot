@@ -44,10 +44,10 @@ module.exports = function(client){
             else votes[playerNumber] = interaction.customId;
 
             if (!temp){
-                return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has voted.`)
+                return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has voted.`)
             } else{
-                if (temp == interaction.customId) return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has rescinded their vote.`);
-                else return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has changed their vote.`);
+                if (temp == interaction.customId) return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has rescinded their vote.`);
+                else return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has changed their vote.`);
             }
         });
 
@@ -71,16 +71,16 @@ module.exports = function(client){
                 if (!votingPlayer.alive) continue;
                 switch (element){
                     case 0:
-                        toSend = toSend + `\n${votingPlayer.tag} **abstained**.`;
+                        toSend = toSend + `\n${votingPlayer.displayName} **abstained**.`;
                         if (jesterKilled){
                             votingPlayer.validRevengeTarget = true;
                         }
                         break;
                     case "1":
-                        toSend = toSend + `\n${votingPlayer.tag} voted **not guilty**`;
+                        toSend = toSend + `\n${votingPlayer.displayName} voted **not guilty**`;
                         break;
                     case "2":
-                        toSend = toSend + `\n${votingPlayer.tag} voted **guilty**`;
+                        toSend = toSend + `\n${votingPlayer.displayName} voted **guilty**`;
                         if (jesterKilled){
                             votingPlayer.validRevengeTarget = true;
                         }

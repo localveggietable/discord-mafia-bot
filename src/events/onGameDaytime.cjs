@@ -51,7 +51,7 @@ module.exports = function(client){
         } else {
             let message = '';
             gameCache.inGameRoles.filter(player => player.faction == "Mafia").forEach((player) => {
-                message += `${player.tag} is a ${player.role} \n`;
+                message += `${player.displayName} is a ${player.role} \n`;
             });
             await mafiaChannel.send(message.trim());
         }

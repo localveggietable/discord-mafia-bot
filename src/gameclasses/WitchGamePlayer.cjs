@@ -2,8 +2,8 @@ const { MessageButton, MessageActionRow } = require("discord.js");
 const GamePlayer = require("./GamePlayer.cjs");
 
 class WitchGamePlayer extends GamePlayer{
-    constructor(id, tag){
-        super("Witch", id, tag);
+    constructor(id, tag, displayName){
+        super("Witch", id, tag, displayName);
         this.priority = 2;
         this.faction = "Witch";
     }

@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("@discordjs/builders");
 
 class GamePlayer{
-    constructor(role, id, tag){
+    constructor(role, id, tag, displayName){
 
         if (Object.getPrototypeOf(this) === GamePlayer.prototype){
             throw new Error("Cannot create an instance of the abstract class GamePlayer.");
@@ -12,6 +12,7 @@ class GamePlayer{
         this.publicWill = "";
         this.id = id;
         this.tag = tag;
+        this.displayName = displayName;
         //indicates the player's actual role
         this.role = role;
         //this.faction will be initialized inside child classes.

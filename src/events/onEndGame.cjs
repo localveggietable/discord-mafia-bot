@@ -32,7 +32,7 @@ module.exports = function(client){
         const deadRoleName = channelID ? `Dead Town Member ${channelID}`: "Dead Town Member";
         for (let player of gameCache.inGameRoles){
             await outputChannel.permissionOverwrites.delete(player.id);
-            if (winningFactions.includes(player.faction)) winningUsers.push(player.tag);
+            if (winningFactions.includes(player.faction)) winningUsers.push(player.displayName);
             client.gameUsers.delete(player.id);
         }
 

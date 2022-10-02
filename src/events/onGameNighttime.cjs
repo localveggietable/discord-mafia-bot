@@ -46,7 +46,7 @@ module.exports = function(client){
         let jailedPlayer = (jailor.alive && jailor.targets.first) ? gameCache.inGameRoles.find(player => player.id == jailor.targets.first) : null;
 
         if (jailedPlayer?.faction == "Mafia") {
-            await mafiaChannel.send(`${jailedPlayer.tag} was hauled off to jail!`);
+            await mafiaChannel.send(`${jailedPlayer.displayName} was hauled off to jail!`);
         }
         
         if (jailedPlayer) {
@@ -122,18 +122,18 @@ module.exports = function(client){
                 if (["Witch", "Transporter"].includes(player.role)){
                     if (!player.targets.first) {
                         player.targets.first = interaction.customId;
-                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${client.users.cache.get(interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(interaction.customId).tag} tonight.`;
+                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${gameCache.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.find(player => player.id == interaction.customId).displayName} tonight.`;
                         return interaction.reply(followUpMessage);
                     }
                     player.targets.second = interaction.customId;
-                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${client.users.cache.get(interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(interaction.customId).tag} tonight.`;
+                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${gameCache.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.find(player => player.id == interaction.customId).displayName} tonight.`;
                     return interaction.reply(followUpMessage);
                 } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
                     if (player.role == "Jailor" && interaction.customId == 1) {
-                        return interaction.reply(`The jailor has decided to execute you, ${jailedPlayer.tag}.`);
+                        return interaction.reply(`The jailor has decided to execute you, ${jailedPlayer.displayName}.`);
                     } else if (player.role == "Jailor"){
-                        return interaction.reply(`The jailor has decided to spare you, ${jailedPlayer.tag}.`);
+                        return interaction.reply(`The jailor has decided to spare you, ${jailedPlayer.displayName}.`);
                     }
                     return interaction.reply("Your decision has been recorded.");
                 } else if (player.role == "Retributionist"){
@@ -147,7 +147,6 @@ module.exports = function(client){
                         player.targets.first = buttonID;
                         return interaction.reply("Your decision has been recorded.");
                     }
-
                 } else {
                     player.targets.first = interaction.customId;
                     return interaction.reply("Your decision has been recorded.");

@@ -22,8 +22,8 @@ var actionRoleObject = {
 };
 
 class TownGamePlayer extends GamePlayer{
-    constructor(role, id, tag){
-        super(role, id, tag);
+    constructor(role, id, tag, displayName){
+        super(role, id, tag, displayName);
         this.faction = "Town";
        // this.retributionistCanUse = ["Jailor", "Veteran", "Mayor", "Medium", "Veteran"].indexOf(this.role) == -1 ? false : true;
        //do the above in handle death

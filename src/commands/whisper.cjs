@@ -49,6 +49,6 @@ module.exports = {
         if (targetPlayer.revealed) return interaction.followUp("You can't whisper to a revealed Mayor!");
 
         await interaction.followUp(`You have successfully whispered to ${params[0]}.`);
-        return user.send(`${interaction.user.tag} whispered to you: ${params[1]}`);
+        return user.send(`${gameCache.find(player => player.id == interaction.user.id).displayName} whispered to you: ${params[1]}`);
     }
 }

@@ -11,8 +11,8 @@ var actionRoleObject = {
 };
 
 class MafiaGamePlayer extends GamePlayer{ 
-    constructor(role, id, tag){
-        super(role, id, tag);
+    constructor(role, id, tag, displayName){
+        super(role, id, tag, displayName);
         //For disguiser.
         this.faction = "Mafia";
         if (this.role == "Ambusher"){
