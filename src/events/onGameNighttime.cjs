@@ -44,15 +44,19 @@ module.exports = function(client){
 
         let jailor = gameCache.inGameRoles.find(player => player.role == "Jailor");
         let jailedPlayer = (jailor.alive && jailor.targets.first) ? gameCache.inGameRoles.find(player => player.id == jailor.targets.first) : null;
+
+        if (jailedPlayer?.faction == "Mafia") {
+            await jailorChannel.send(`${jailedPlayer.tag} was hauled off to jail!`);
+        }
         
         if (jailor.alive && jailor.targets.first) {
             let jailorWritePermissions = [];
-            jailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
+            jailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.id, {
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true
             }));
 
-            jailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
+            jailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.targets.first, {
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true
             }));
@@ -248,6 +252,8 @@ module.exports = function(client){
 
             await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));
         }
+
+        gameCache.isDaytime = true;
 
         let deleted;
         do {

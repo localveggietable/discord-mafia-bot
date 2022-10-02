@@ -137,7 +137,7 @@ async function handleSetInterval(outputChannel, gameCache, client, guildID, chan
                 //For everyone in the server
                 {
                     id: guildID,
-                    deny: [Permissions.FLAGS.VIEW_CHANNEL]
+                    deny: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
                 },
                 {
                     id: mafiaPlayerIDs[0],

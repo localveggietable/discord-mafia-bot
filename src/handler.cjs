@@ -14,7 +14,6 @@ Creates roles. Deploys all the commands to the guild. Imports and listens for th
 */
 
 module.exports = async function(client){
-
     var commands = [];
     const [eventFiles, commandsFiles] = await Promise.all([glob(`${__dirname}/events/**/*.cjs`), glob(`${__dirname}/commands/**/*.cjs`)]);
     /* Sets up all the event listeners (interactionCreate, etc.) */
@@ -49,7 +48,7 @@ module.exports = async function(client){
             const rest = new REST({ version: '10' }).setToken(botToken);
 
             await rest.put(
-            Routes.applicationGuildCommands(clientID, guildID),
+            Routes.applicationCommands(clientID),
             { body: commands },
             );
     
