@@ -1,4 +1,4 @@
-const { checkGameEnd } = require("../util/checkGameEnd.cjs");
+const { checkGameEnd } = require("../util/checkGameEnd.js");
 
 module.exports = function(client){
     client.on("gameDaytime", async (firstDay, guildID, channelID, newDeaths) => {
@@ -70,7 +70,7 @@ async function handleSetInterval(time, outputChannel, client, guildID, channelID
     if (!time){
         await outputChannel.send("The discussion phase ends now!");
         if (firstDay) return client.emit("gameNighttime", guildID, channelID);
-        return client.emit("lynchPhase", 180, 3, guildID, channelID);
+        return client.emit("lynchPhase", 210, 3, guildID, channelID);
     } else if (time == 15){
         await outputChannel.send("The discussion phase ends in 15 seconds!");
     }

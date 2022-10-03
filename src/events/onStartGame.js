@@ -1,9 +1,9 @@
-const {shuffleArray} = require( "../util/shuffleArray.cjs");
+const {shuffleArray} = require( "../util/shuffleArray.js");
 const {Permissions} = require("discord.js");
-const WitchGamePlayer = require("../gameclasses/WitchGamePlayer.cjs");
-const ExeGamePlayer = require("../gameclasses/ExeGamePlayer.cjs");
-const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.cjs");
-const TownGamePlayer = require("../gameclasses/TownGamePlayer.cjs");
+const WitchGamePlayer = require("../gameclasses/WitchGamePlayer.js");
+const ExeGamePlayer = require("../gameclasses/ExeGamePlayer.js");
+const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.js");
+const TownGamePlayer = require("../gameclasses/TownGamePlayer.js");
 
 module.exports = function(client){
     client.on("startGame", async function(guildID, channelID){
@@ -92,13 +92,18 @@ module.exports = function(client){
         new MafiaGamePlayer(rmRole1, shufflePlayers[11], client.users.cache.get(shufflePlayers[11]).tag, membersCache.get(shufflePlayers[11]).displayName),
         new MafiaGamePlayer(rmRole2, shufflePlayers[12], client.users.cache.get(shufflePlayers[12]).tag, membersCache.get(shufflePlayers[12]).displayName), 
         new ExeGamePlayer(shufflePlayers[13], client.users.cache.get(shufflePlayers[13]).tag, membersCache.get(shufflePlayers[13]).displayName, shufflePlayers[Math.floor(Math.random() * 9)]), 
-        new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag), membersCache.get(shufflePlayers[14]).displayName]);
+        new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag, membersCache.get(shufflePlayers[14]).displayName)]);
 
+        console.log(gameCache.inGameRoles.length);
         let displayNameMap = new Map();
         for (const player of gameCache.inGameRoles){
             console.log(`${player.tag}: ${player.role} \n`);
-            if (displayNameMap.get(player.displayName)) player.displayName = player.tag;
-            else displayNameMap.set(player.displayName, true);
+            if (displayNameMap.get(player.displayName)) {
+                let original = gameCache.inGameRoles.find(original => original.id == displayNameMap.get(player.displayName)); 
+                player.displayName = player.tag;
+                original.displayName = original.tag;
+            }
+            else displayNameMap.set(player.displayName, player.id);
         }
 
         //Set default permissions.
@@ -190,5 +195,5 @@ async function handleSetInterval(outputChannel, gameCache, client, guildID, chan
 
         return client.emit("gameDaytime", true, guildID, channelID); 
     }
-    if (!(time % 5)) await outputChannel.send({content: `The game starts in ${time} seconds`});
+    if (!(time % 5)) await outputChannel.send({content: `The game starts in ${time} seconds.`});
 }

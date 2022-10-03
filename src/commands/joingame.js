@@ -1,5 +1,5 @@
 const {SlashCommandBuilder, inlineCode} = require("@discordjs/builders");
-const {addPlayerToGame} = require("../util/addPlayerToGame.cjs");
+const {addPlayerToGame} = require("../util/addPlayerToGame.js");
 
 module.exports = {
     data: new SlashCommandBuilder()

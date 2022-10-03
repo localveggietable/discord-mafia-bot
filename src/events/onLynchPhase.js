@@ -1,5 +1,5 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
-const { countMax } = require("../util/countMax.cjs");
+const { countMax } = require("../util/countMax.js");
 
 module.exports = function(client){
     client.on("lynchPhase", async (remainingTime = 360, remainingLynches = 3, guildID, channelID ) => {

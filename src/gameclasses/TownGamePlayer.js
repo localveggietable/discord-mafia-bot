@@ -1,5 +1,5 @@
 const { MessageButton, MessageActionRow } = require("discord.js");
-const GamePlayer = require("./GamePlayer.cjs");
+const GamePlayer = require("./GamePlayer.js");
 
 var actionRoleObject = {
     Investigator: "Choose who you want to investigate:",
@@ -73,7 +73,7 @@ class TownGamePlayer extends GamePlayer{
             }
             playerButtons.push(new MessageButton()
                 .setCustomId(player.id)
-                .setLabel(player.tag)
+                .setLabel(player.displayName)
                 .setStyle("PRIMARY"));
         }
 
@@ -136,7 +136,7 @@ class TownGamePlayer extends GamePlayer{
             if (!player.retributionistCanUse) continue;
             playerButtons.push(new MessageButton()
             .setCustomId(player.id)
-            .setLabel(`${player.tag} (${player.role})`)
+            .setLabel(`${player.displayName} (${player.role})`)
             .setStyle("SUCCESS")); 
         }
 
@@ -146,7 +146,7 @@ class TownGamePlayer extends GamePlayer{
             if (target.id == this.id) continue;
             targetButtons.push(new MessageButton()
             .setCustomId(`target${target.id}`)
-            .setLabel(`${target.tag}`)
+            .setLabel(`${target.displayName}`)
             .setStyle("PRIMARY"));
         }
 

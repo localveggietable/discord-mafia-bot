@@ -1,6 +1,6 @@
-import { MessageActionRow, MessageButton } from "discord.js";
+const { MessageActionRow, MessageButton } = require("discord.js");
 
-const GamePlayer = require("./GamePlayer.cjs");
+const GamePlayer = require("./GamePlayer.js");
 
 class ExeGamePlayer extends GamePlayer{
     constructor(id, tag, displayName, targetID){
@@ -20,7 +20,7 @@ class ExeGamePlayer extends GamePlayer{
             if (!player.alive || !player.validRevengeTarget) continue;
             playerButtons.push(new MessageButton()
                 .setCustomId(player.id)
-                .setLabel(player.tag)
+                .setLabel(player.displayName)
                 .setStyle("PRIMARY"));
         }
 

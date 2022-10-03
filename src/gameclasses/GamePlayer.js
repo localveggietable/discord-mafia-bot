@@ -1,5 +1,3 @@
-const { EmbedBuilder } = require("@discordjs/builders");
-
 class GamePlayer{
     constructor(role, id, tag, displayName){
 
@@ -9,7 +7,7 @@ class GamePlayer{
 
         this.alive = true;
         this.will = "";
-        this.publicWill = "";
+        this.publicWill = false;
         this.id = id;
         this.tag = tag;
         this.displayName = displayName;
@@ -60,6 +58,8 @@ class GamePlayer{
 
         this.validRevengeTarget = false;
 
+        this.overrideWill = false;
+
         //see https://town-of-salem.fandom.com/wiki/Ability
 
     }
@@ -108,12 +108,13 @@ class GamePlayer{
 
     async outputDeath(client, guildID, channelID, reason = false, lynched = true){
         const guild = client.guilds.cache.get(guildID);
-        const member = guild.members.cache.get(this.id);
+        const gameCache = client.games.get(guildID).get(channelID);
+        const displayName = gameCache.inGameRoles.find(player => player.id == this.id).displayName;
         const outputChannel = channelID ? guild.channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : guild.channels.cache.find((channel) => {return channel.name == "tos-channel"});
 
-        let deathMessage = `${member.user.tag} was killed last night.`;
+        let deathMessage = `${displayName} was killed last night.`;
 
         switch (reason){
             case "mafia":
@@ -145,16 +146,12 @@ class GamePlayer{
         }
 
         await outputChannel.send(deathMessage);
-        if (this.cleaned) return outputChannel.send(`${member.user.tag} was cleaned. We could not determine their role or will`);
-        
-        const will = this.publicWill === "" ? null : new EmbedBuilder()
-            .setColor(10070709)
-            .setTitle(`${member.user.tag}'s Will`)
-            .addFields({value: this.publicWill});
+        if (this.cleaned) return outputChannel.send(`${displayName} was cleaned. We could not determine their role or will`);
 
         //Let's put this in the events folder
-        await outputChannel.send(`${member.user.tag}'s role was **${this.role}**.`);
-        let toWrite = this.publicWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send({content: `We found a will next to their body.`, embeds: [will]});
+        await outputChannel.send(`${displayName}'s role was _*${this.role}*_.`);
+        let sentWill = this.overrideWill ? this.publicWill : this.will;
+        let toWrite = sentWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send(`We found a will next to their body:\n\`\`\`${sentWill}\`\`\``);
         await toWrite;
         if (this.jester && lynched) await outputChannel.send("The jester will get its revenge from the grave!"); 
         return; 

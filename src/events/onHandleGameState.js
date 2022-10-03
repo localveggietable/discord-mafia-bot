@@ -282,8 +282,7 @@ module.exports = function(client){
                     publicPlayerInformationMap.get(target.id).set("publicInnocent", false);
 
                     break;
-                }
-                case "Jailor": {
+                } case "Jailor": {
                     if (!player.targets.first) break;
                     const executed = player.targets.binary == 1 ? true : false;
                     const target = gameCache.inGameRoles.find(targetPlayer => targetPlayer.id == player.targets.first);
@@ -498,7 +497,7 @@ module.exports = function(client){
                                 for (const allVisitorID of targetMap.get(player.id).get("all")){
                                     if (allVisitorID == visitingPlayerID) continue;
                                     let publicPlayer = gameCache.inGameRoles.find(player => player.id == publicPlayerInformationMap.get(allVisitorID).get("publicID"));
-                                    publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by ${publicPlayer.displayName}`);
+                                    publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by ${publicPlayer.displayName}.`);
                                     publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target was visited by ${publicPlayer.displayName}.`);
                                 }
                             }
@@ -655,7 +654,7 @@ module.exports = function(client){
                             }
                         }
                         break;
-                    case "disguiser": case "forger": case "framer":
+                    case "disguiser": case "framer":
                         for (const visitingPlayerID of playerIDs){
                             for (const spy of actionTracker.filter(player => player.role == "Spy")){
                                 publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
@@ -665,6 +664,20 @@ module.exports = function(client){
                                 --gameCache.inGameRoles.find(player => player.id == visitingPlayerID).limitedUses.uses; 
                             }
                         }  
+                        break;
+                    case "forger":
+                        for (const visitingPlayerID of playerIDs){
+                            for (const spy of actionTracker.filter(player => player.role == "Spy")){
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                            }
+                            if (player.jailed) publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
+                            else {
+                                player.overrideWill = true;
+                                --gameCache.inGameRoles.find(player => player.id == visitingPlayerID).limitedUses.uses;
+                                if (player.publicWill === "") break;
+                                else player.publicWill = gameCache.inGameRoles.find(player => player.id == visitingPlayerID).targets.options;
+                            }
+                        }   
                         break;
                     case "hypnotist":
                         for (const visitingPlayerID of playerIDs){
@@ -690,6 +703,7 @@ module.exports = function(client){
                                 else player.cleaned = [gameCache.inGameRoles.find(player => player.id == visitingPlayerID)];
 
                                 player.publicWill = "";
+                                player.overrideWill = true;
                                 --gameCache.inGameRoles.find(player => player.id == visitingPlayerID).limitedUses.uses;
                             }
                         }   
@@ -869,7 +883,8 @@ module.exports = function(client){
             }
             player.jailed = false;
             player.cleaned = false;
-            player.publicWill = player.will;
+            player.publicWill = false;
+            player.overrideWill = false;
 
             if (["Bodyguard", "Doctor"].includes(player.role)) player.defense = 0;
         }

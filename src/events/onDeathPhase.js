@@ -1,4 +1,4 @@
-const { checkGameEnd } = require("../util/checkGameEnd.cjs");
+const { checkGameEnd } = require("../util/checkGameEnd.js");
 const { promisify } = require("util");
 
 const delay = promisify(setTimeout);

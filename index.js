@@ -23,5 +23,5 @@ bot.games = new Collection();
 
 bot.login(process.env.DISCORD_TOKEN);
 
-(require("./src/handler.cjs"))(bot);
+(require("./src/handler.js"))(bot);
 

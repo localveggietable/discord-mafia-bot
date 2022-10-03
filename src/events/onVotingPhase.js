@@ -1,5 +1,5 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
-const { countMax } = require("../util/countMax.cjs");
+const { countMax } = require("../util/countMax.js");
 
 
 module.exports = function(client){
@@ -90,7 +90,7 @@ module.exports = function(client){
             await outputChannel.send(toSend);
             if (playerKilled) return client.emit("deathPhase", playerID, guildID, channelID);
             else return client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
-            }, 45000);
+            }, 180000);
 
        
 

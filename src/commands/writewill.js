@@ -9,7 +9,7 @@ module.exports = {
                 .setDescription("A string that will be appended to or replace your will.")
                 .setRequired(true))
         .addBooleanOption(option =>
-            option.setName("append?")
+            option.setName("append")
             .setDescription("Sets whether will_content is appended or replaced to your existing will (default true)")
             .setRequired(false))
     ,
@@ -31,6 +31,6 @@ module.exports = {
         } else {
             player.will += params[0];
         }
-        return interaction.followUp("Your choice has been recorded. If your target dies by lynching, you will have to repick another target.");
+        return interaction.followUp("You have successfully written your will.");
     }
 }

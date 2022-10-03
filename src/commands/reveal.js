@@ -8,11 +8,11 @@ module.exports = {
         if (!client.gameUsers.get(interaction.user.id)) return interaction.followUp("You can't use this command outside of a game!");
         if (interaction.inGuild()) return interaction.followUp("You should be DM'ing me this command, not sending it through a Discord server!");
 
+
+        let [guildID, channelID] = client.gameUsers.get(interaction.user.id);
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
             return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
-
-        let [guildID, channelID] = client.gameUsers.get(interaction.user.id);
         const gameCache = client.games.get(guildID)?.get(channelID);
 
         if (!gameCache) throw new Error("User's internals were not cleared from the custom gameUsers cache.");

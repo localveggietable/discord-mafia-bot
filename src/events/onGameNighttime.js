@@ -1,5 +1,5 @@
 const {promisify} = require("util");
-const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.cjs");
+const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.js");
 
 const delay = promisify(setTimeout);
 
@@ -60,6 +60,8 @@ module.exports = function(client){
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true
             }));
+
+            await client.users.cache.get(jailedPlayer.id).send("You were hauled off to jail! This means you won't be able to take your night action.");
 
             await Promise.all(jailorWritePermissions);    
         }
@@ -122,11 +124,11 @@ module.exports = function(client){
                 if (["Witch", "Transporter"].includes(player.role)){
                     if (!player.targets.first) {
                         player.targets.first = interaction.customId;
-                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${gameCache.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.find(player => player.id == interaction.customId).displayName} tonight.`;
+                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.`;
                         return interaction.reply(followUpMessage);
                     }
                     player.targets.second = interaction.customId;
-                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${gameCache.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.find(player => player.id == interaction.customId).displayName} tonight.`;
+                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.`;
                     return interaction.reply(followUpMessage);
                 } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
@@ -165,7 +167,7 @@ module.exports = function(client){
 
         mainMafiaCollector.on("collect", (interaction) => {
             let player = mainMafiaRoleActionMessageContent[0].find(player => player.id == interaction.user.id);
-            if (!player) return interaction.reply({content: "You can't click this button!", ephemeral: true});
+            if (!player || player.jailed) return interaction.reply({content: "You can't click this button!", ephemeral: true});
             
             if (interaction.customId == "clear"){
                 player.targets = {first: false, second: false, binary: false, options: false}; 
@@ -225,7 +227,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 100) clearInterval(interval);
         }, 60000);
-        await delay(80000);
+        await delay(60000);
 
         collectors.forEach(collector => collector.stop());
         

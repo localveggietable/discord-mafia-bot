@@ -1,12 +1,11 @@
 {
   "name": "discord-tos-bot",
-  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "index.cjs",
   "scripts": {
-    "start": "node index.cjs",
-    "dev": "nodemon index.cjs",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "log": "git log --all --decorate > project.log",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

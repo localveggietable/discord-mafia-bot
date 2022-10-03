@@ -1,5 +1,5 @@
 const { MessageButton, MessageActionRow } = require("discord.js");
-const GamePlayer = require("./GamePlayer.cjs");
+const GamePlayer = require("./GamePlayer.js");
 
 class WitchGamePlayer extends GamePlayer{
     constructor(id, tag, displayName){
