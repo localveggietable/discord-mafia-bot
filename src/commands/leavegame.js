@@ -1,5 +1,5 @@
 const {SlashCommandBuilder} = require("@discordjs/builders");
-const removePlayerFromGame = require("../util/removePlayerFromGame.cjs");
+const removePlayerFromGame = require("../util/removePlayerFromGame.js");
 
 module.exports = {
     data: new SlashCommandBuilder()

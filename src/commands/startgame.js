@@ -1,6 +1,6 @@
 const {SlashCommandBuilder} = require("@discordjs/builders");
-const {setupGuild} = require("../util/setupGuild.cjs");
-const {addPlayerToGame} = require("../util/addPlayerToGame.cjs");
+const {setupGuild} = require("../util/setupGuild.js");
+const {addPlayerToGame} = require("../util/addPlayerToGame.js");
 
 
 module.exports = {

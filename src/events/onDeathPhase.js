@@ -1,4 +1,4 @@
-const { checkGameEnd } = require("../util/checkGameEnd.cjs");
+const { checkGameEnd } = require("../util/checkGameEnd.js");
 const { promisify } = require("util");
 
 const delay = promisify(setTimeout);
@@ -14,7 +14,7 @@ module.exports = function(client){
         let jailorPlayer = gameCache.inGameRoles.find(player => player.role == "Jailor");
         if (jailorPlayer.alive && jailorPlayer.targets.first == playerID) jailorPlayer.targets.first = false;
 
-        await outputChannel.send(`The town has decided to lynch you, ${player.tag}. Do you have any last words?`);
+        await outputChannel.send(`The town has decided to lynch you, ${player.displayName}. Do you have any last words?`);
 
         await delay(7000);
 

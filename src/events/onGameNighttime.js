@@ -1,5 +1,5 @@
 const {promisify} = require("util");
-const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.cjs");
+const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.js");
 
 const delay = promisify(setTimeout);
 
@@ -44,20 +44,26 @@ module.exports = function(client){
 
         let jailor = gameCache.inGameRoles.find(player => player.role == "Jailor");
         let jailedPlayer = (jailor.alive && jailor.targets.first) ? gameCache.inGameRoles.find(player => player.id == jailor.targets.first) : null;
+
+        if (jailedPlayer?.faction == "Mafia") {
+            await mafiaChannel.send(`${jailedPlayer.displayName} was hauled off to jail!`);
+        }
         
-        if (jailor.alive && jailor.targets.first) {
+        if (jailedPlayer) {
             let jailorWritePermissions = [];
-            jailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
+            jailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.id, {
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true
             }));
 
-            jailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
+            jailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.targets.first, {
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true
             }));
 
-            await Promise.all(jailorWritePermissions);     
+            await client.users.cache.get(jailedPlayer.id).send("You were hauled off to jail! This means you won't be able to take your night action.");
+
+            await Promise.all(jailorWritePermissions);    
         }
 
         let aliveMafiaPlayerIDs = gameCache.inGameRoles.filter(player => player.faction == "Mafia" && player.alive == true && player != jailedPlayer).map(player => player.id);
@@ -97,7 +103,12 @@ module.exports = function(client){
             else {
                 let msgValue = player.resolveNighttimeOptions?.(gameCache.inGameRoles, firstNight);
                 if (!msgValue) continue;
-                let msgRef = await client.users.cache.get(player.id).send(msgValue);
+                let msgRef;
+                if (player.role == "Jailor" && jailedPlayer && !firstNight && jailedPlayer.limitedUses.uses > 0){
+                    msgRef = await jailorChannel.send(msgValue);
+                } else {
+                    msgRef = await client.users.cache.get(player.id).send(msgValue);
+                }
                 roleActionMessages.push([player, msgRef]);
             }
         }
@@ -113,18 +124,18 @@ module.exports = function(client){
                 if (["Witch", "Transporter"].includes(player.role)){
                     if (!player.targets.first) {
                         player.targets.first = interaction.customId;
-                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${client.users.cache.get(interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(interaction.customId).tag} tonight.`;
+                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.`;
                         return interaction.reply(followUpMessage);
                     }
                     player.targets.second = interaction.customId;
-                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${client.users.cache.get(interaction.customId).tag} tonight.` : `You have decided to transport ${client.users.cache.get(interaction.customId).tag} tonight.`;
+                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.`;
                     return interaction.reply(followUpMessage);
                 } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
-                    if (player.role == "Jailor" && interaction.customID == 1) {
-                        jailorChannel.send("The jailor has decided to execute you.");
+                    if (player.role == "Jailor" && interaction.customId == 1) {
+                        return interaction.reply(`The jailor has decided to execute you, ${jailedPlayer.displayName}.`);
                     } else if (player.role == "Jailor"){
-                        jailorChannel.send("The jailor has decided to spare you.");
+                        return interaction.reply(`The jailor has decided to spare you, ${jailedPlayer.displayName}.`);
                     }
                     return interaction.reply("Your decision has been recorded.");
                 } else if (player.role == "Retributionist"){
@@ -138,7 +149,6 @@ module.exports = function(client){
                         player.targets.first = buttonID;
                         return interaction.reply("Your decision has been recorded.");
                     }
-
                 } else {
                     player.targets.first = interaction.customId;
                     return interaction.reply("Your decision has been recorded.");
@@ -157,7 +167,7 @@ module.exports = function(client){
 
         mainMafiaCollector.on("collect", (interaction) => {
             let player = mainMafiaRoleActionMessageContent[0].find(player => player.id == interaction.user.id);
-            if (!player) return interaction.reply({content: "You can't click this button!", ephemeral: true});
+            if (!player || player.jailed) return interaction.reply({content: "You can't click this button!", ephemeral: true});
             
             if (interaction.customId == "clear"){
                 player.targets = {first: false, second: false, binary: false, options: false}; 
@@ -217,7 +227,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 100) clearInterval(interval);
         }, 60000);
-        await delay(360000);
+        await delay(60000);
 
         collectors.forEach(collector => collector.stop());
         
@@ -236,18 +246,20 @@ module.exports = function(client){
         }
 
         if (jailor.alive && jailor.targets.first) {
-            denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.id, {
-                VIEW_CHANNEL: true,
+            denyJailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.id, {
+                VIEW_CHANNEL: false,
                 SEND_MESSAGES: false
             }));
     
-            denyJailorWritePermissions.push(mafiaChannel.permissionOverwrites.edit(jailor.targets.first, {
-                VIEW_CHANNEL: true,
+            denyJailorWritePermissions.push(jailorChannel.permissionOverwrites.edit(jailor.targets.first, {
+                VIEW_CHANNEL: false,
                 SEND_MESSAGES: false
             })); 
 
             await Promise.all(denyMafiaWritePermissions.concat(denyMafiaWritePermissions, denyJailorWritePermissions));
         }
+
+        gameCache.isDaytime = true;
 
         let deleted;
         do {

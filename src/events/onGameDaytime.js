@@ -1,4 +1,4 @@
-const { checkGameEnd } = require("../util/checkGameEnd.cjs");
+const { checkGameEnd } = require("../util/checkGameEnd.js");
 
 module.exports = function(client){
     client.on("gameDaytime", async (firstDay, guildID, channelID, newDeaths) => {
@@ -16,7 +16,7 @@ module.exports = function(client){
 
         gameCache.day = firstDay ? 1 : ++gameCache.day;
         gameCache.isDaytime = true;
-        let time = firstDay ? 15 : 100;
+        let time = firstDay ? 15 : 135;
 
         await outputChannel.send(`This is the beginning of day ${gameCache.day}.`);
 
@@ -51,7 +51,7 @@ module.exports = function(client){
         } else {
             let message = '';
             gameCache.inGameRoles.filter(player => player.faction == "Mafia").forEach((player) => {
-                message += `${player.tag} is a ${player.role} \n`;
+                message += `${player.displayName} is a ${player.role} \n`;
             });
             await mafiaChannel.send(message.trim());
         }
@@ -70,7 +70,7 @@ async function handleSetInterval(time, outputChannel, client, guildID, channelID
     if (!time){
         await outputChannel.send("The discussion phase ends now!");
         if (firstDay) return client.emit("gameNighttime", guildID, channelID);
-        return client.emit("lynchPhase", 120, 3, guildID, channelID);
+        return client.emit("lynchPhase", 210, 3, guildID, channelID);
     } else if (time == 15){
         await outputChannel.send("The discussion phase ends in 15 seconds!");
     }

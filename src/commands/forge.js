@@ -7,7 +7,7 @@ module.exports = {
         .setDMPermission(false)
         .addStringOption(option => 
             option.setName("forged_will")
-                .setDescription("A string that will replace the forged player's will (default: \"\"))")
+                .setDescription("A string that will replace the forged player's will")
                 .setRequired(true)
         )
     

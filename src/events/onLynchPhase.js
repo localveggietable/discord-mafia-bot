@@ -1,5 +1,5 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
-const { countMax } = require("../util/countMax.cjs");
+const { countMax } = require("../util/countMax.js");
 
 module.exports = function(client){
     client.on("lynchPhase", async (remainingTime = 360, remainingLynches = 3, guildID, channelID ) => {
@@ -16,7 +16,7 @@ module.exports = function(client){
             if (!player.alive) continue;
             lynchButtons.push(new MessageButton()
                 .setCustomId(player.id)
-                .setLabel(client.users.cache.get(player.id).tag)
+                .setLabel(player.displayName)
                 .setStyle("PRIMARY"));
         }
 
@@ -54,10 +54,10 @@ module.exports = function(client){
             if (votes[playerNumber] == interaction.customId){
                 if (playerExists.revealed){
                     votes[playerNumber] = votes[15] = votes[16] = 0;
-                    interaction.reply(`${client.users.cache.get(playerExists.id).tag} cancelled their vote!`);
+                    interaction.reply(`${playerExists.displayName} cancelled their vote!`);
                 } else {
                     votes[playerNumber] = 0;
-                    interaction.reply(`${client.users.cache.get(playerExists.id).tag} cancelled their vote!`);
+                    interaction.reply(`${playerExists.displayName} cancelled their vote!`);
                 }
             } else {
                 if (playerExists.revealed){
@@ -74,7 +74,7 @@ module.exports = function(client){
 
                 const pluralVote = numVotesNeeded != 1 ? "votes" : "vote";
 
-                interaction.reply(`${client.users.cache.get(playerExists.id).tag} voted for ${client.users.cache.get(interaction.customId).tag}. ${numVotesNeeded} ${pluralVote} are still needed to bring this player to trial!`);
+                interaction.reply(`${playerExists.displayName} voted for ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName}. ${numVotesNeeded} ${pluralVote} are still needed to bring this player to trial!`);
 
                 let maxVoted = countMax(votes);
 

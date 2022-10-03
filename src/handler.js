@@ -2,7 +2,7 @@ require("dotenv").config();
 const {REST} = require("@discordjs/rest");
 const {Routes} = require("discord-api-types/v10");
 const glob = require("fast-glob");
-const [guildID, clientID, botToken] = [process.env.GUILD_ID, process.env.CLIENT_ID, process.env.DISCORD_TOKEN];
+const [clientID, botToken] = [process.env.CLIENT_ID, process.env.DISCORD_TOKEN];
 
 
 
@@ -14,9 +14,8 @@ Creates roles. Deploys all the commands to the guild. Imports and listens for th
 */
 
 module.exports = async function(client){
-
     var commands = [];
-    const [eventFiles, commandsFiles] = await Promise.all([glob(`${__dirname}/events/**/*.cjs`), glob(`${__dirname}/commands/**/*.cjs`)]);
+    const [eventFiles, commandsFiles] = await Promise.all([glob(`${__dirname}/events/**/*.js`), glob(`${__dirname}/commands/**/*.js`)]);
     /* Sets up all the event listeners (interactionCreate, etc.) */
     for (const file of eventFiles){
         (require(file))(client);
@@ -49,7 +48,7 @@ module.exports = async function(client){
             const rest = new REST({ version: '10' }).setToken(botToken);
 
             await rest.put(
-            Routes.applicationGuildCommands(clientID, guildID),
+            Routes.applicationCommands(clientID),
             { body: commands },
             );
     

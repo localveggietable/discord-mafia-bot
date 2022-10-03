@@ -1,4 +1,4 @@
-const { countAlivePlayers } = require("./countAlivePlayers.cjs");
+const { countAlivePlayers } = require("./countAlivePlayers.js");
 
 //Returns an object with a boolean indicating whether or not the game has ended, and an array of strings to indicate which factions have won.
 

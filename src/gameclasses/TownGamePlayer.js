@@ -1,5 +1,5 @@
 const { MessageButton, MessageActionRow } = require("discord.js");
-const GamePlayer = require("./GamePlayer.cjs");
+const GamePlayer = require("./GamePlayer.js");
 
 var actionRoleObject = {
     Investigator: "Choose who you want to investigate:",
@@ -22,8 +22,8 @@ var actionRoleObject = {
 };
 
 class TownGamePlayer extends GamePlayer{
-    constructor(role, id, tag){
-        super(role, id, tag);
+    constructor(role, id, tag, displayName){
+        super(role, id, tag, displayName);
         this.faction = "Town";
        // this.retributionistCanUse = ["Jailor", "Veteran", "Mayor", "Medium", "Veteran"].indexOf(this.role) == -1 ? false : true;
        //do the above in handle death
@@ -73,7 +73,7 @@ class TownGamePlayer extends GamePlayer{
             }
             playerButtons.push(new MessageButton()
                 .setCustomId(player.id)
-                .setLabel(player.tag)
+                .setLabel(player.displayName)
                 .setStyle("PRIMARY"));
         }
 
@@ -116,12 +116,12 @@ class TownGamePlayer extends GamePlayer{
                 new MessageButton()
                 .setCustomId(1 + "")
                 .setLabel("Do it")
-                .setStyle("PRIMARY"),
+                .setStyle("SUCCESS"),
 
                 new MessageButton()
                 .setCustomId( 0 + "")
                 .setLabel("Don't")
-                .setStyle("PRIMARY")
+                .setStyle("DANGER")
             )];
 
         const message = this.role == "Jailor" ? `${actionRoleObject[this.role].default} (You have ${this.limitedUses.uses} execution(s) left.)` : `${actionRoleObject[this.role]} (You have ${this.limitedUses.uses} alert(s) left.)`;
@@ -136,7 +136,7 @@ class TownGamePlayer extends GamePlayer{
             if (!player.retributionistCanUse) continue;
             playerButtons.push(new MessageButton()
             .setCustomId(player.id)
-            .setLabel(`${player.tag} (${player.role})`)
+            .setLabel(`${player.displayName} (${player.role})`)
             .setStyle("SUCCESS")); 
         }
 
@@ -146,7 +146,7 @@ class TownGamePlayer extends GamePlayer{
             if (target.id == this.id) continue;
             targetButtons.push(new MessageButton()
             .setCustomId(`target${target.id}`)
-            .setLabel(`${target.tag}`)
+            .setLabel(`${target.displayName}`)
             .setStyle("PRIMARY"));
         }
 

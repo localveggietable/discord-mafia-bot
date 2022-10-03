@@ -1,5 +1,5 @@
 const { MessageActionRow, MessageButton } = require("discord.js");
-const { countMax } = require("../util/countMax.cjs");
+const { countMax } = require("../util/countMax.js");
 
 
 module.exports = function(client){
@@ -31,7 +31,6 @@ module.exports = function(client){
         let votes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], playerKilled;
         const collector = voteMessage.createMessageComponentCollector({componentType: "BUTTON"});
 
-
         collector.on("collect", async (interaction) => {
             let playerExists = gameCache.inGameRoles.find((player) => {
                 return player.alive && (player.id == interaction.user.id);
@@ -45,10 +44,10 @@ module.exports = function(client){
             else votes[playerNumber] = interaction.customId;
 
             if (!temp){
-                return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has voted.`)
+                return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has voted.`)
             } else{
-                if (temp == interaction.customId) return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has rescinded their vote.`);
-                else return interaction.reply(`${client.users.cache.get(playerExists.id).tag} has changed their vote.`);
+                if (temp == interaction.customId) return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has rescinded their vote.`);
+                else return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has changed their vote.`);
             }
         });
 
@@ -63,6 +62,8 @@ module.exports = function(client){
 
             const {value} = countMax(votes);
             playerKilled = Array.isArray(value) ? false : (value == 1 ? false : true);
+
+            let jesterKilled = playerKilled ? gameCache.inGameRoles.find(player => player.id == playerID).jester : false;
             let toSend = "Time is up! Here are the results of the vote:"
             for (const [index, element] of votes.entries()){
                 if (index >= gameCache.inGameRoles.length) break;
@@ -70,20 +71,26 @@ module.exports = function(client){
                 if (!votingPlayer.alive) continue;
                 switch (element){
                     case 0:
-                        toSend = toSend + `\n${votingPlayer.tag} **abstained**.`;
+                        toSend = toSend + `\n${votingPlayer.displayName} **abstained**.`;
+                        if (jesterKilled){
+                            votingPlayer.validRevengeTarget = true;
+                        }
                         break;
                     case "1":
-                        toSend = toSend + `\n${votingPlayer.tag} voted **not guilty**`;
+                        toSend = toSend + `\n${votingPlayer.displayName} voted **not guilty**`;
                         break;
                     case "2":
-                        toSend = toSend + `\n${votingPlayer.tag} voted **guilty**`;
+                        toSend = toSend + `\n${votingPlayer.displayName} voted **guilty**`;
+                        if (jesterKilled){
+                            votingPlayer.validRevengeTarget = true;
+                        }
                         break; 
                 } 
             }
             await outputChannel.send(toSend);
             if (playerKilled) return client.emit("deathPhase", playerID, guildID, channelID);
             else return client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
-            }, 45000);
+            }, 180000);
 
        
 
