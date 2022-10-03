@@ -84,6 +84,8 @@ class GamePlayer{
         if (exePlayer && exePlayer.targetID == this.id) {
             if (lynched){
                 exePlayer.won = true;
+
+                await client.users.cache.get(exePlayer.id).send("Your target has been lynched! Your objective is complete and you have won the game."); 
             } else {
                 //make executioner a jester
                 exePlayer.jester = true;

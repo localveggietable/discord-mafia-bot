@@ -227,7 +227,7 @@ module.exports = function(client){
             ++minute;
             if (minute == 100) clearInterval(interval);
         }, 60000);
-        await delay(60000);
+        await delay(420000);
 
         collectors.forEach(collector => collector.stop());
         
