@@ -1,4 +1,3 @@
-require("dotenv").config();
 const {Client, Collection} = require("discord.js");
 
 const bot = new Client({ intents: 32767 });
