@@ -2,7 +2,7 @@ const { MessageActionRow, MessageButton } = require("discord.js");
 const { countMax } = require("../util/countMax.js");
 
 module.exports = function(client){
-    client.on("lynchPhase", async (remainingTime = 360, remainingLynches = 3, guildID, channelID ) => {
+    client.on("lynchPhase", async (remainingTime = 30, remainingLynches = 3, guildID, channelID ) => {
         const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
         return channel.name.split("-")[2] == channelID
         }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});

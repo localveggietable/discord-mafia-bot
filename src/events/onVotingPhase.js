@@ -90,7 +90,7 @@ module.exports = function(client){
             await outputChannel.send(toSend);
             if (playerKilled) return client.emit("deathPhase", playerID, guildID, channelID);
             else return client.emit("lynchPhase", timeLeft, lynchesLeft, guildID, channelID);
-            }, 180000);
+            }, 20000);
 
        
 
