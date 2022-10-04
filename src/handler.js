@@ -1,4 +1,3 @@
-require("dotenv").config();
 const {REST} = require("@discordjs/rest");
 const {Routes} = require("discord-api-types/v10");
 const glob = require("fast-glob");
