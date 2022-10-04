@@ -78,8 +78,6 @@ module.exports = function(client){
 
                 let maxVoted = countMax(votes);
 
-                console.log(maxVoted.count);
-
                 if (maxVoted.count >= votesRequired){
                     playerIsLynched = true;
                     collector.stop();

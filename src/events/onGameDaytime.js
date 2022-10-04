@@ -26,7 +26,7 @@ module.exports = function(client){
             }
 
             let gameEnd = checkGameEnd(client, guildID, channelID);
-            console.log(gameEnd);
+
             if (gameEnd.gameEnded) return client.emit("endGame", gameEnd.winningFactions, guildID, channelID);
 
             let blackmailedPlayers = gameCache.inGameRoles.filter(player => player.alive && player.blackmailed);

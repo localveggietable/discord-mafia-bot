@@ -262,7 +262,6 @@ module.exports = function(client){
 
         let displayNameMap = new Map();
         for (const player of gameCache.inGameRoles){
-            console.log(`${player.tag}: ${player.role} \n`);
             if (displayNameMap.get(player.displayName)) {
                 let original = gameCache.inGameRoles.find(original => original.id == displayNameMap.get(player.displayName)); 
                 player.displayName = player.tag;

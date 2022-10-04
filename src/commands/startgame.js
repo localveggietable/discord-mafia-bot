@@ -43,8 +43,6 @@ module.exports = {
         if(!client.games.get(interaction.guildId)) setupGuild(client, interaction.guildId);
         client.games.get(interaction.guildId).get(channelNumber).ongoing = true;
 
-        console.log(interaction.member.id);
-    
         if (params[0] === false) return interaction.followUp("A game has successfully been started.");
         addPlayerToGame(client, interaction.guildId, channelNumber, interaction.member.id);
 

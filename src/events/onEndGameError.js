@@ -35,15 +35,11 @@ module.exports = function(client){
             client.gameUsers.delete(player.id);
         }
 
-        console.log("hi");
-
         try {
             await client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == aliveRoleName)) 
         } catch(ignore){
             //Alive Role Deleted
         }
-
-        console.log("halfway there");
 
         try {
             await client.guilds.cache.get(guildID).roles.delete(client.guilds.cache.get(guildID).roles.cache.find(r => r.name == deadRoleName)) 
@@ -51,15 +47,13 @@ module.exports = function(client){
             //Dead Role Deleted
         }
 
-        console.log("Roles deleted");
-
         try {
             await Promise.all([client.guilds.cache.get(guildID).channels.delete(mafiaChannel), client.guilds.cache.get(guildID).channels.delete(jailorChannel), client.guilds.cache.get(guildID).channels.delete(deadChannel)]);
         } catch(ignore){
             //Channels have not been made yet.
         }
 
-        if (!intentional) await outputChannel.send("Someone messed with the roles needed to run this game :/ . This game will be aborted.");
+        if (!intentional) await outputChannel.send("Someone messed with the roles needed to run this game. This game will be aborted.");
 
         await outputChannel.permissionOverwrites.delete(guildID);
 

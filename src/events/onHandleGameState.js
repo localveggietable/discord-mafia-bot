@@ -855,13 +855,11 @@ module.exports = function(client){
             let outputMessage = "Here's what happened in the game tonight:";
             const messages = publicAPIMap.get(player.id).get("messages");
 
-            console.log(messages);
             for (const message of messages){
                 if (typeof message == "string"){
                     outputMessage = outputMessage.concat("\n", message);
                 } else {
                     for (const statusCode of message){
-                        console.log(typeof statusCode);
                         if (typeof statusCode == "string") outputMessage = outputMessage.concat("\n", statusCode);
                         else {outputMessage = outputMessage.concat("\n", statusCodes[statusCode]);}
 
