@@ -17,20 +17,20 @@ module.exports = function(client){
                 SEND_MESSAGES: true
             })]);
             
-            await outputChannel.send(`${gameCache.find(player => player.id == playerID).displayName}, you are being suspected of being a traitor to the town. What is your defense?`);
+            await outputChannel.send(`\`${gameCache.inGameRoles.find(player => player.id == playerID).displayName}\`, you are being suspected of being a traitor to the town. What is your defense?`);
         } else {
             await Promise.all([outputChannel.permissionOverwrites.edit(aliveRole, {
                 SEND_MESSAGES: false
             })]);
             
-            await outputChannel.send(`${gameCache.find(player => player.id == playerID).displayName} is blackmailed! They cannot give a defense.`); 
+            await outputChannel.send(`\`${gameCache.inGameRoles.find(player => player.id == playerID).displayName}\` is blackmailed! They cannot give a defense.`); 
         }
 
         setTimeout(async () => {
             await outputChannel.permissionOverwrites.edit(aliveRole, {
                 SEND_MESSAGES: true
             });
-            await Promise.all([outputChannel.send(`It's judgement time! Decide whether or not ${gameCache.find(player => player.id == playerID).displayName} is guilty.`), outputChannel.permissionOverwrites.edit(aliveRole, {SEND_MESSAGES: true})]);
+            await Promise.all([outputChannel.send(`It's judgement time! Decide whether or not \`${gameCache.inGameRoles.find(player => player.id == playerID).displayName}\` is guilty.`), outputChannel.permissionOverwrites.edit(aliveRole, {SEND_MESSAGES: true})]);
             client.emit("votingPhase", playerID, lynchesLeft, timeLeft, guildID, channelID); 
         },20000)
     });

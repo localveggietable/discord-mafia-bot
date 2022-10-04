@@ -41,8 +41,14 @@ module.exports = function(client){
 
         await Promise.all([client.guilds.cache.get(guildID).channels.delete(mafiaChannel), client.guilds.cache.get(guildID).channels.delete(jailorChannel), client.guilds.cache.get(guildID).channels.delete(deadChannel)]);
         
-
-        await outputChannel.send(`The game ended! Players ${winningUsers.join(" ")} won!`);
+        let msg = "__The game ended__! (*The winning players are listed below:*)\n```";
+        for (let userName of winningUsers){
+            msg += `${userName}\n`;
+        }
+        msg = msg.trim();
+        msg += "```";
+        
+        await outputChannel.send(msg);
 
         await outputChannel.permissionOverwrites.delete(guildID);
         

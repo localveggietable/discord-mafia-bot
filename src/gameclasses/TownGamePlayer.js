@@ -40,6 +40,7 @@ class TownGamePlayer extends GamePlayer{
         }
         //Whether or not the mayor has revealed themselves.
         this.revealed = this.role == "Mayor" ? false : undefined;
+        this.noSpyMessages = false;
     }
 
     //Returns a reference to the message to be sent to a player at the start of the gameNighttime event.

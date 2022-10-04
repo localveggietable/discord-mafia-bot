@@ -223,6 +223,10 @@ module.exports = function(client){
                         godfatherPlayer.targets = target.targets;
                     }
 
+                    if (target.role == "Spy"){
+                        target.noSpyMessages = true;
+                    }
+
                     target.targets = {first: false, second: false, binary: false, options: false};
 
                     break;
@@ -497,8 +501,8 @@ module.exports = function(client){
                                 for (const allVisitorID of targetMap.get(player.id).get("all")){
                                     if (allVisitorID == visitingPlayerID) continue;
                                     let publicPlayer = gameCache.inGameRoles.find(player => player.id == publicPlayerInformationMap.get(allVisitorID).get("publicID"));
-                                    publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by ${publicPlayer.displayName}.`);
-                                    publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target was visited by ${publicPlayer.displayName}.`);
+                                    publicAPIMap.get(visitingPlayerID).get("messages").push(`Your target was visited by \`${publicPlayer.displayName}\`.`);
+                                    publicAPIMap.get(visitingPlayerID).get("investigativeMessages").push(`The player you witched found their target was visited by \`${publicPlayer.displayName}\`.`);
                                 }
                             }
                         }
@@ -532,8 +536,8 @@ module.exports = function(client){
                     case "killing":
                         for (const [index, visitingPlayerID] of playerIDs.entries()){
                             if (["Mafioso", "Godfather"].includes(gameCache.inGameRoles.find(player => player.id == visitingPlayerID).role)){
-                                for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                    publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                                for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                                    publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                                 }
                             }
                             if (player.jailed){
@@ -656,8 +660,8 @@ module.exports = function(client){
                         break;
                     case "disguiser": case "framer":
                         for (const visitingPlayerID of playerIDs){
-                            for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                            for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                             }
                             if (player.jailed) publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                             else if (visitedByRole == "forger"){
@@ -667,8 +671,8 @@ module.exports = function(client){
                         break;
                     case "forger":
                         for (const visitingPlayerID of playerIDs){
-                            for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                            for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                             }
                             if (player.jailed) publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
                             else {
@@ -681,8 +685,8 @@ module.exports = function(client){
                         break;
                     case "hypnotist":
                         for (const visitingPlayerID of playerIDs){
-                            for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                            for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                             }
                             if (player.jailed) {
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -693,8 +697,8 @@ module.exports = function(client){
                         break;
                    case "janitor":
                         for (const visitingPlayerID of playerIDs){
-                            for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                            for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                             }
                             if (player.jailed){
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -710,8 +714,8 @@ module.exports = function(client){
                         break;
                     case "ambusher": {
                         const visitingPlayerID = playerIDs[0];
-                        for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                            publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                        for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                            publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                         }
                         if (player.jailed) {
                             publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!"); 
@@ -755,7 +759,7 @@ module.exports = function(client){
                                         publicAPIMap.get(ambushedPlayerID).get("statusCodes").push(5);
                                     }
                                 } else {
-                                    publicAPIMap.get(ambushedPlayerID).get("messages").push(`You saw ${gameCache.inGameRoles.find(player => player.id == visitingPlayerID).displayName} prepare an ambush while visiting your target.`);
+                                    publicAPIMap.get(ambushedPlayerID).get("messages").push(`You saw \`${gameCache.inGameRoles.find(player => player.id == visitingPlayerID).displayName}\` prepare an ambush while visiting your target.`);
                                 }
                             }
                         }
@@ -763,8 +767,8 @@ module.exports = function(client){
                     }
                     case "blackmailer": {
                         for (const visitingPlayerID of playerIDs){
-                            for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                            for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                             }
                             if (player.jailed){ 
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -779,8 +783,8 @@ module.exports = function(client){
                     }
                     case "consigliere": {
                         for (const visitingPlayerID of playerIDs){
-                            for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                            for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                             }
                             if (player.jailed){ 
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -792,8 +796,8 @@ module.exports = function(client){
                     }
                     case "consort":
                         for (const visitingPlayerID of playerIDs){
-                            for (const spy of actionTracker.filter(player => player.role == "Spy")){
-                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited ${player.displayName} last night.`);
+                            for (const spy of actionTracker.filter(player => player.role == "Spy" && !player.noSpyMessages)){
+                                publicAPIMap.get(spy.id).get("messages").push(`A member of the Mafia visited \`${player.displayName}\` last night.`);
                             }
                             if (player.jailed){ 
                                 publicAPIMap.get(visitingPlayerID).get("messages").push("Your ability failed because your target was in jail!");
@@ -840,7 +844,7 @@ module.exports = function(client){
             if (!player.cleaned) continue;
             for (const cleaningPlayer of player.cleaned){
                 publicAPIMap.get(cleaningPlayer.id).get("messages").push(`You secretly know that your target's role was ${player.role}.`);
-                publicAPIMap.get(cleaningPlayer.id).get("messages").push(player.will ? `You secretly know that your target's will was ${player.will}.` : `You secretly know that your target did not have a will.`); 
+                publicAPIMap.get(cleaningPlayer.id).get("messages").push(player.will ? `You secretly know that your target's will was\n \`\`\`${player.will}\`\`\`.` : `You secretly know that your target did not have a will.`); 
             }
         }
 
@@ -851,13 +855,11 @@ module.exports = function(client){
             let outputMessage = "Here's what happened in the game tonight:";
             const messages = publicAPIMap.get(player.id).get("messages");
 
-            console.log(messages);
             for (const message of messages){
                 if (typeof message == "string"){
                     outputMessage = outputMessage.concat("\n", message);
                 } else {
                     for (const statusCode of message){
-                        console.log(typeof statusCode);
                         if (typeof statusCode == "string") outputMessage = outputMessage.concat("\n", statusCode);
                         else {outputMessage = outputMessage.concat("\n", statusCodes[statusCode]);}
 
@@ -885,6 +887,7 @@ module.exports = function(client){
             player.cleaned = false;
             player.publicWill = false;
             player.overrideWill = false;
+            player.noSpyMessages = false;
 
             if (["Bodyguard", "Doctor"].includes(player.role)) player.defense = 0;
         }

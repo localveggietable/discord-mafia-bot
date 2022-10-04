@@ -14,6 +14,7 @@ module.exports = {
             .setRequired(false))
     ,
     async execute(client, interaction, params){
+        if (["*", "_", "`", "\\"].some(char => interaction.member.displayName.includes(char))) return interaction.followUp("Sorry! You can't create a game if your nickname includes the characters ( * ), ( _ ), ( ` ), and/or ( / ). (*Please change your nickname before creating a game!*)");
 
         //do a regex match of interaction.channel.name
         const channelName = interaction.channel.name;
@@ -42,8 +43,6 @@ module.exports = {
         if(!client.games.get(interaction.guildId)) setupGuild(client, interaction.guildId);
         client.games.get(interaction.guildId).get(channelNumber).ongoing = true;
 
-        console.log(interaction.member.id);
-    
         if (params[0] === false) return interaction.followUp("A game has successfully been started.");
         addPlayerToGame(client, interaction.guildId, channelNumber, interaction.member.id);
 

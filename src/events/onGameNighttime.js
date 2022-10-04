@@ -31,6 +31,9 @@ module.exports = function(client){
         //Tell the game cache that it is now nighttime.
         gameCache.isDaytime = false;
 
+        await outputChannel.send(`__Night ${gameCache.day}__. (*It is now night time. It will be day time again in 85 seconds*)`);
+        await mafiaChannel.send(`__Night ${gameCache.day}__`);
+
         //Reset blackmailed players' permissions
 
         let blackmailedPlayers = gameCache.inGameRoles.filter(player => player.alive && player.blackmailed);
@@ -46,7 +49,7 @@ module.exports = function(client){
         let jailedPlayer = (jailor.alive && jailor.targets.first) ? gameCache.inGameRoles.find(player => player.id == jailor.targets.first) : null;
 
         if (jailedPlayer?.faction == "Mafia") {
-            await mafiaChannel.send(`${jailedPlayer.displayName} was hauled off to jail!`);
+            await mafiaChannel.send(`\`${jailedPlayer.displayName}\` was hauled off to jail!`);
         }
         
         if (jailedPlayer) {
@@ -124,18 +127,18 @@ module.exports = function(client){
                 if (["Witch", "Transporter"].includes(player.role)){
                     if (!player.targets.first) {
                         player.targets.first = interaction.customId;
-                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.`;
+                        let followUpMessage = player.role == "Witch" ? `You have decided to take control of \`${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName}\` tonight.` : `You have decided to transport \`${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName}\` tonight.`;
                         return interaction.reply(followUpMessage);
                     }
                     player.targets.second = interaction.customId;
-                    let followUpMessage = player.role == "Witch" ? `You have decided to target ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.` : `You have decided to transport ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName} tonight.`;
+                    let followUpMessage = player.role == "Witch" ? `You have decided to target \`${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName}\` tonight.` : `You have decided to transport \`${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName}\` tonight.`;
                     return interaction.reply(followUpMessage);
                 } else if (["Veteran" , "Jailor"].includes(player.role)){
                     player.targets.binary = interaction.customId == 1 ? true : false;
                     if (player.role == "Jailor" && interaction.customId == 1) {
-                        return interaction.reply(`The jailor has decided to execute you, ${jailedPlayer.displayName}.`);
+                        return interaction.reply(`The jailor has decided to execute you, \`${jailedPlayer.displayName}\`.`);
                     } else if (player.role == "Jailor"){
-                        return interaction.reply(`The jailor has decided to spare you, ${jailedPlayer.displayName}.`);
+                        return interaction.reply(`The jailor has decided to spare you, \`${jailedPlayer.displayName}\`.`);
                     }
                     return interaction.reply("Your decision has been recorded.");
                 } else if (player.role == "Retributionist"){
@@ -221,13 +224,7 @@ module.exports = function(client){
             collectors.push(collector);
         }
 
-        let minute = 0;
-        let interval = setInterval(() => {
-            console.log(`${minute} minute(s) have passed!`);
-            ++minute;
-            if (minute == 100) clearInterval(interval);
-        }, 60000);
-        await delay(60000);
+        await delay(85000);
 
         collectors.forEach(collector => collector.stop());
         

@@ -21,6 +21,10 @@ module.exports = {
         let [guildID, channelID] = client.gameUsers.get(interaction.user.id);
         const gameCache = client.games.get(guildID)?.get(channelID);
 
+        const outputChannel = channelID ? client.guilds.cache.get(guildID).channels.cache.find((channel) => {
+            return channel.name.split("-")[2] == channelID
+        }) : client.guilds.cache.get(guildID).channels.cache.find((channel) => {return channel.name == "tos-channel"});
+
         if (!gameCache) throw new Error("User's internals were not cleared from the custom gameUsers cache.");
 
         let usingUsername = params[0][params[0].length - 5] == "#" ? false : true;
@@ -47,7 +51,9 @@ module.exports = {
         if (!targetPlayer.alive) return interaction.followUp("You can't whisper to a dead player!");
         if (targetPlayer.revealed) return interaction.followUp("You can't whisper to a revealed Mayor!");
 
+        await Promise.all([user.send(`${gameCache.inGameRoles.find(player => player.id == interaction.user.id).displayName} whispered to you: ${params[1]}`), outputChannel.send(`__${sourcePlayer.displayName}__ whispered something to __${targetPlayer.displayName}__.`)]);
         await interaction.followUp(`You have successfully whispered to ${params[0]}.`);
+
         return user.send(`${gameCache.inGameRoles.find(player => player.id == interaction.user.id).displayName} whispered to you: ${params[1]}`);
     }
 }

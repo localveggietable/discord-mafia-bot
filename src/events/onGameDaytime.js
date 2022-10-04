@@ -16,9 +16,9 @@ module.exports = function(client){
 
         gameCache.day = firstDay ? 1 : ++gameCache.day;
         gameCache.isDaytime = true;
-        let time = firstDay ? 15 : 135;
+        let time = firstDay ? 15 : 60;
 
-        await outputChannel.send(`This is the beginning of day ${gameCache.day}.`);
+        await outputChannel.send(`__Day ${gameCache.day}__. (*It is now day time. The discussion period will last for ${time} seconds.*)`);
 
         if (!firstDay) {
             for (const [player, reason] of newDeaths){
@@ -26,7 +26,7 @@ module.exports = function(client){
             }
 
             let gameEnd = checkGameEnd(client, guildID, channelID);
-            console.log(gameEnd);
+
             if (gameEnd.gameEnded) return client.emit("endGame", gameEnd.winningFactions, guildID, channelID);
 
             let blackmailedPlayers = gameCache.inGameRoles.filter(player => player.alive && player.blackmailed);
@@ -45,14 +45,16 @@ module.exports = function(client){
                     SEND_MESSAGES: true
                 });
             } catch (e) {
-                await outputChannel.send("Someone messed with the channel roles needed to run this game :/ . This game will be aborted.");
+                await outputChannel.send("Someone messed with the channel roles needed to run this game. This game will be aborted.");
                 return client.emit("onEndGameError", guildID, channelID);
             }      
         } else {
-            let message = '';
+            let message = "This is the mafia-exclusive channel where you can chat with your fellow evil-doers every night. (*It is also where you will be where you take your nightly actions*).\nThe roles of the Mafia members are listed below:\n```";
             gameCache.inGameRoles.filter(player => player.faction == "Mafia").forEach((player) => {
-                message += `${player.displayName} is a ${player.role} \n`;
+                message += `${player.displayName}: ${player.role}\n`;
             });
+            message = message.trim();
+            message += "```";
             await mafiaChannel.send(message.trim());
         }
 
