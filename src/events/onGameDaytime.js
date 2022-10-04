@@ -16,7 +16,7 @@ module.exports = function(client){
 
         gameCache.day = firstDay ? 1 : ++gameCache.day;
         gameCache.isDaytime = true;
-        let time = firstDay ? 15 : 60;
+        let time = firstDay ? 15 : 50;
 
         await outputChannel.send(`__Day ${gameCache.day}__. (*It is now day time. The discussion period will last for ${time} seconds.*)`);
 
@@ -72,8 +72,8 @@ async function handleSetInterval(time, outputChannel, client, guildID, channelID
     if (!time){
         await outputChannel.send("The discussion phase ends now!");
         if (firstDay) return client.emit("gameNighttime", guildID, channelID);
-        return client.emit("lynchPhase", 210, 3, guildID, channelID);
+        return client.emit("lynchPhase", 30, 3, guildID, channelID);
     } else if (time == 15){
-        await outputChannel.send("The discussion phase ends in 15 seconds!");
+        await outputChannel.send("The discussion phase is almost over! (*It ends in 15 seconds!*)");
     }
 }
