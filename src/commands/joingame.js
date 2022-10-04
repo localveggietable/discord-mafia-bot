@@ -7,9 +7,11 @@ module.exports = {
     .setDescription("Join an existing game of tos.")
     .setDMPermission(false),
     async execute(client, interaction){
+        //Protection against injection attacks.
+        if (["*", "_", "`", "\\"].some(char => interaction.member.displayName.includes(char))) return interaction.followUp("Sorry! You can't join a game if your nickname includes the characters ( * ), ( _ ), ( ` ), and/or ( / ). (*Please change your nickname before joining!*)");
         const channelName = interaction.channel.name;
         if (!(new RegExp("^tos-channel(-[1-9])?$").test(channelName))){
-            return interaction.followUp({content: "A game can only be played on a channel with a name matching the format \"tos-channel\" or \"tos-channel-[n]\", where n is a positive integer between 1 and 9."});
+            return interaction.followUp({content: "A game can only be played on a channel with a name matching the format \"tos-channel\" or \"tos-channel-[*n*]\", where *n* is a positive integer between 1 and 9."});
         }
         const channelNumber = channelName.split("-").length == 2 ? 0 : +channelName.split("-")[2]; 
     
@@ -27,7 +29,7 @@ module.exports = {
     
         addPlayerToGame(client, interaction.guildId, channelNumber, interaction.member.id);
         if(client.games.get(interaction.guildId).get(channelNumber).players.length == 15){
-            await interaction.followUp("Enough players have joined! The game will start automatically in 15 seconds.");
+            await interaction.followUp("Enough players have joined! (*The game will start automatically in 15 seconds.*)");
             return client.emit("startGame", interaction.guildId, channelNumber);
         }
 

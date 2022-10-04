@@ -70,7 +70,7 @@ class MafiaGamePlayer extends GamePlayer{
                         .setLabel("Clear Selection")
                         .setStyle("SECONDARY")));
                 
-                outputMessages.push([mafiaMember, {content: `${mafiaMember.displayName}, choose who you want to disguise and what town member they should be disguised as:`, components: rows}]);
+                outputMessages.push([mafiaMember, {content: `\`${mafiaMember.displayName}\`, choose who you want to disguise and what town member they should be disguised as:`, components: rows}]);
 
             } else if (mafiaMember.role == "Forger"){
                 if (!mafiaMember.limitedUses.uses) continue;
@@ -95,7 +95,7 @@ class MafiaGamePlayer extends GamePlayer{
                 if (townButtons.length > 10) rows.push(new MessageActionRow()
                 .addComponents(townButtons.slice(10, townButtons.length)));
 
-                outputMessages.push([mafiaMember, {content: `${mafiaMember.displayName}, choose whose will you want to forge. To specify the message, use the command /forge "message". (You have ${mafiaMember.limitedUses.uses} forgeries/forgery left.)`,
+                outputMessages.push([mafiaMember, {content: `\`${mafiaMember.displayName}\`, choose whose will you want to forge. To specify the message, use the command /forge "message". (You have ${mafiaMember.limitedUses.uses} forgeries/forgery left.)`,
                         components: rows}]);
                 
             } else if (mafiaMember.role == "Hypnotist"){
@@ -152,7 +152,7 @@ class MafiaGamePlayer extends GamePlayer{
                             .setStyle("SECONDARY")
                     ));
 
-                outputMessages.push([mafiaMember, {content: `${mafiaMember.displayName}, choose a player to hypnotize, and what message you want to send them:`, components: rows}]);
+                outputMessages.push([mafiaMember, {content: `\`${mafiaMember.displayName}\`, choose a player to hypnotize, and what message you want to send them:`, components: rows}]);
             } else {
                 if (!mafiaMember.limitedUses.uses) continue;
                 let playerButtons = [];
@@ -177,7 +177,7 @@ class MafiaGamePlayer extends GamePlayer{
                 if (playerButtons.length > 10) rows.push(new MessageActionRow()
                     .addComponents(playerButtons.slice(10, playerButtons.length)));
 
-                let returnContent = `${mafiaMember.displayName}, ${actionRoleObject[mafiaMember.role]}`; 
+                let returnContent = `\`${mafiaMember.displayName}\`, ${actionRoleObject[mafiaMember.role]}`; 
                 if (mafiaMember.role == "Janitor") returnContent = returnContent.concat(` (You have ${mafiaMember.limitedUses.uses} cleaning(s) left.)`);
                 outputMessages.push([mafiaMember, {content: returnContent, components: rows}]);
             }
@@ -223,14 +223,14 @@ class MafiaGamePlayer extends GamePlayer{
             if (aliveMafiaPlayer) {
                 aliveMafiaPlayer.role = "Godfather";
                 aliveMafiaPlayer.defense = 1;
-                await mafiaChannel.send(`${aliveMafiaPlayer.displayName} has now been promoted to Godfather!`);
+                await mafiaChannel.send(`\`${aliveMafiaPlayer.displayName}\` has now been promoted to Godfather!`);
             } else {
                 const aliveSupportMafiaPlayer = gameCache.inGameRoles.find(player => player.alive && player.faction == "Mafia");
                 if (!aliveSupportMafiaPlayer) return toReturn;
                 aliveSupportMafiaPlayer.role = "Mafioso";
                 aliveSupportMafiaPlayer.limitedUses = {limited: false, uses: Infinity}; 
                 aliveSupportMafiaPlayer.priority = 3; 
-                await mafiaChannel.send(`${aliveSupportMafiaPlayer.displayName} has now become a Mafioso!`);
+                await mafiaChannel.send(`\`${aliveSupportMafiaPlayer.displayName}\` has now become a Mafioso!`);
             }
         } else if (this.role == "Mafioso"){
             const aliveGodfatherPlayer = gameCache.inGameRoles.find(player => player.alive && player.role == "Godfather");
@@ -240,7 +240,7 @@ class MafiaGamePlayer extends GamePlayer{
             aliveSupportMafiaPlayer.role = "Mafioso";
             aliveSupportMafiaPlayer.limitedUses = {limited: false, uses: Infinity}; 
             aliveSupportMafiaPlayer.priority = 3;
-            await mafiaChannel.send(`${aliveSupportMafiaPlayer.displayName} has now become a Mafioso!`); 
+            await mafiaChannel.send(`\`${aliveSupportMafiaPlayer.displayName}\` has now become a Mafioso!`); 
         }
 
         return toReturn;

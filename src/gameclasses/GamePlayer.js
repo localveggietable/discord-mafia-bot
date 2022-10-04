@@ -91,7 +91,7 @@ class GamePlayer{
                 exePlayer.jester = true;
                 exePlayer.role = "Jester";
 
-                await client.users.cache.get(exePlayer.id).send("Your target has been killed at night, so you have now become a Jester! Your objective is to get yourself lynched.");
+                await client.users.cache.get(exePlayer.id).send(`Your target has been killed at night, so you have now become a Jester!\nThe following is a description of your role:\n\`\`\`__Jester Description__\nSummary: You are a crazed lunatic whose life goal is to be publicly executed.\nAbilities: Trick the Town into voting against you.\nAttributes: If you are lynched you will attack one of your guilty or abstaining voters the following night with an Unstoppable Attack.\nGoal: Get yourself lynched by any means necessary.\`\`\``);
             }
         } else if (this.jester && lynched){ 
             this.won = true;
@@ -116,7 +116,7 @@ class GamePlayer{
             return channel.name.split("-")[2] == channelID
         }) : guild.channels.cache.find((channel) => {return channel.name == "tos-channel"});
 
-        let deathMessage = `${displayName} was killed last night.`;
+        let deathMessage = `\`${displayName}\` was killed last night.`;
 
         switch (reason){
             case "mafia":
@@ -148,10 +148,10 @@ class GamePlayer{
         }
 
         await outputChannel.send(deathMessage);
-        if (this.cleaned) return outputChannel.send(`${displayName} was cleaned. We could not determine their role or will`);
+        if (this.cleaned) return outputChannel.send(`\`${displayName}\` was cleaned. We could not determine their role or will`);
 
         //Let's put this in the events folder
-        await outputChannel.send(`${displayName}'s role was _*${this.role}*_.`);
+        await outputChannel.send(`\`${displayName}\`'s role was __*${this.role}*__.`);
         let sentWill = this.overrideWill ? this.publicWill : this.will;
         let toWrite = sentWill === "" ? outputChannel.send("We could not find a last will.") : outputChannel.send(`We found a will next to their body:\n\`\`\`${sentWill}\`\`\``);
         await toWrite;

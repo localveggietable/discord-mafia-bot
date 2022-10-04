@@ -54,10 +54,10 @@ module.exports = function(client){
             if (votes[playerNumber] == interaction.customId){
                 if (playerExists.revealed){
                     votes[playerNumber] = votes[15] = votes[16] = 0;
-                    interaction.reply(`${playerExists.displayName} cancelled their vote!`);
+                    interaction.reply(`\`${playerExists.displayName}\` cancelled their vote!`);
                 } else {
                     votes[playerNumber] = 0;
-                    interaction.reply(`${playerExists.displayName} cancelled their vote!`);
+                    interaction.reply(`\`${playerExists.displayName}\` cancelled their vote!`);
                 }
             } else {
                 if (playerExists.revealed){
@@ -74,7 +74,7 @@ module.exports = function(client){
 
                 const pluralVote = numVotesNeeded != 1 ? "votes" : "vote";
 
-                interaction.reply(`${playerExists.displayName} voted for ${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName}. ${numVotesNeeded} ${pluralVote} are still needed to bring this player to trial!`);
+                interaction.reply(`\`${playerExists.displayName}\` voted for \`${gameCache.inGameRoles.find(player => player.id == interaction.customId).displayName}\`. ${numVotesNeeded} ${pluralVote} are still needed to bring this player to trial!`);
 
                 let maxVoted = countMax(votes);
 
@@ -99,7 +99,7 @@ module.exports = function(client){
 
 
         collector.on("end", () => {
-            if (!playerIsLynched) outputChannel.send("It is now too late to continue voting.");
+            if (!playerIsLynched) outputChannel.send("It is now too late to continue voting. (*The voting phase is now over!*)");
         });
 
         const interval = setInterval(() => {

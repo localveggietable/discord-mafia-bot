@@ -5,6 +5,9 @@ const ExeGamePlayer = require("../gameclasses/ExeGamePlayer.js");
 const MafiaGamePlayer = require("../gameclasses/MafiaGamePlayer.js");
 const TownGamePlayer = require("../gameclasses/TownGamePlayer.js");
 
+const {promisify} = require("util");
+const delay = promisify(setTimeout);
+
 const roleDescriptions = {
     Investigator: {
         summary: "You are a private eye who secretly gathers information.",
@@ -162,12 +165,6 @@ const roleDescriptions = {
         attributes: "If your target is killed at night you will become a Jester.",
         goal: "Get your target lynched at any cost."
     },
-    Jester: {
-        summary: "You are a crazed lunatic whose life goal is to be publicly executed.",
-        abilities: "Trick the Town into voting against you.",
-        attributes: "If you are lynched you will attack one of your guilty or abstaining voters the following night with an Unstoppable attack.",
-        goal: "Get yourself lynched by any means necessary."
-    },
     Witch: {
         summary: "You are a voodoo master who can control other peoples actions.",
         abilities: "Control someone each night.",
@@ -205,9 +202,6 @@ module.exports = function(client){
         await gameCache.players.map((playerID) => client.guilds.cache.get(guildID).members.cache.get(playerID)).forEach(member => member.roles.add(aliveRole).catch(console.error));
 
         //
-
-        let time = 15;
-        
 
         //Algo for assigning roles:
         //
@@ -266,7 +260,6 @@ module.exports = function(client){
         new ExeGamePlayer(shufflePlayers[13], client.users.cache.get(shufflePlayers[13]).tag, membersCache.get(shufflePlayers[13]).displayName, shufflePlayers[Math.floor(Math.random() * 9)]), 
         new WitchGamePlayer(shufflePlayers[14], client.users.cache.get(shufflePlayers[14]).tag, membersCache.get(shufflePlayers[14]).displayName)]);
 
-        console.log(gameCache.inGameRoles.length);
         let displayNameMap = new Map();
         for (const player of gameCache.inGameRoles){
             console.log(`${player.tag}: ${player.role} \n`);
@@ -297,27 +290,19 @@ module.exports = function(client){
 
         let messages = [];
         for (const player of gameCache.inGameRoles) {
-            let msgToSend = player.faction == "Executioner" ? `Welcome to Mafia! Your role is ${player.role} this game.\nYour target this game is ${gameCache.inGameRoles.find(target => target.id == player.targetID).displayName}.` : `Welcome to Mafia! Your role is ${player.role} this game.`;
+            let msgToSend = player.faction == "Executioner" ? `Welcome to Mafia! Your role is ${player.role} this game.\nYour target this game is \`${gameCache.inGameRoles.find(target => target.id == player.targetID).displayName}\`.` : `Welcome to Mafia! Your role is ${player.role} this game.`;
             if (player.faction == "Mafia") msgToSend += "\nYou are a mafia member this game! This means that you have access to a mafia-only chat wherein you will be able to communicate with your fellow mafia members at night. You will also choose your nightly targets in that channel.";
-            msgToSend += `\nThe following is a description of your role:\n\`\`\`${player.role}:\nSummary: ${roleDescriptions[player.role].summary}\nAbilities: ${roleDescriptions[player.role].abilities}\nAttributes: ${roleDescriptions[player.role].attributes}\nGoal: ${roleDescriptions[player.role].goal}\`\`\``;
+            msgToSend += `\nThe following is a description of your role:\n\`\`\`__${player.role} Description__\nSummary: ${roleDescriptions[player.role].summary}\nAbilities: ${roleDescriptions[player.role].abilities}\nAttributes: ${roleDescriptions[player.role].attributes}\nGoal: ${roleDescriptions[player.role].goal}\`\`\``;
             messages.push(client.users.cache.get(player.id).send(msgToSend));
         }
 
         await Promise.all(messages);
 
-        let interval = setInterval(() => {
-            handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time--, mafiaPlayerIDs, deadRoleName);
-            if (time < 0){
-                clearInterval(interval);
-            }
-        }, 1000);
-    });
-}
+        await delay(15000);
 
-//this ensures that gameDaytime is emitted only after the channel has been notified.
-async function handleSetInterval(outputChannel, gameCache, client, guildID, channelID, time, mafiaPlayerIDs, deadRoleName){
-    if (!time){
         gameCache.started = true;
+
+        await outputChannel.send("__Welcome to Mafia, the *social deception* game in which you have to lie your way out of getting lynched!__ (*The game is beginning now!*)");
 
         await Promise.all([client.guilds.cache.get(guildID).channels.create(`mafia-${outputChannel.name}`, {
             type: "GUILD_TEXT",
@@ -367,6 +352,6 @@ async function handleSetInterval(outputChannel, gameCache, client, guildID, chan
         })]);
 
         return client.emit("gameDaytime", true, guildID, channelID); 
-    }
-    if (!(time % 5)) await outputChannel.send({content: `The game starts in ${time} seconds.`});
+
+    });
 }

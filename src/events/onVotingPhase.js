@@ -15,12 +15,12 @@ module.exports = function(client){
                 new MessageButton()
                 .setCustomId(1 + "")
                 .setLabel("Not Guilty")
-                .setStyle("PRIMARY"),
+                .setStyle("SUCCESS"),
 
                 new MessageButton()
                 .setCustomId(2 + "")
                 .setLabel("Guilty")
-                .setStyle("PRIMARY")
+                .setStyle("DANGER")
 
             ])];
 
@@ -44,10 +44,10 @@ module.exports = function(client){
             else votes[playerNumber] = interaction.customId;
 
             if (!temp){
-                return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has voted.`)
+                return interaction.reply(`\`${playerExists.displayName}\` has voted.`)
             } else{
-                if (temp == interaction.customId) return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has rescinded their vote.`);
-                else return interaction.reply(`${client.users.cache.get(playerExists.id).displayName} has changed their vote.`);
+                if (temp == interaction.customId) return interaction.reply(`\`${playerExists.displayName}\` has rescinded their vote.`);
+                else return interaction.reply(`\`${playerExists.displayName}\` has changed their vote.`);
             }
         });
 
@@ -71,16 +71,16 @@ module.exports = function(client){
                 if (!votingPlayer.alive) continue;
                 switch (element){
                     case 0:
-                        toSend = toSend + `\n${votingPlayer.displayName} **abstained**.`;
+                        toSend = toSend + `\nThe player \`${votingPlayer.displayName}\` __*abstained*__.`;
                         if (jesterKilled){
                             votingPlayer.validRevengeTarget = true;
                         }
                         break;
                     case "1":
-                        toSend = toSend + `\n${votingPlayer.displayName} voted **not guilty**`;
+                        toSend = toSend + `\nThe player \`${votingPlayer.displayName}\` voted __*not guilty*__`;
                         break;
                     case "2":
-                        toSend = toSend + `\n${votingPlayer.displayName} voted **guilty**`;
+                        toSend = toSend + `\nThe player \`${votingPlayer.displayName}\` voted __*guilty*__`;
                         if (jesterKilled){
                             votingPlayer.validRevengeTarget = true;
                         }
